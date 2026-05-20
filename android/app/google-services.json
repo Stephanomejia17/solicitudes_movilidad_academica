@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "616121433233",
+    "project_id": "xchange-5783f",
+    "storage_bucket": "xchange-5783f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:616121433233:android:05745b8c35eeb3eee29330",
+        "android_client_info": {
+          "package_name": "com.example.solicitudes_movilidad_academica"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQfPHlkC_LSNt70oELypNpp4gyfGe4L48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
