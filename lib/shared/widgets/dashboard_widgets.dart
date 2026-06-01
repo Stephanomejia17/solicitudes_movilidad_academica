@@ -1,4 +1,4 @@
-part of '../main.dart';
+part of '../../main.dart';
 
 class _WelcomeBanner extends StatelessWidget {
   const _WelcomeBanner({required this.user, required this.onCreateRequest});

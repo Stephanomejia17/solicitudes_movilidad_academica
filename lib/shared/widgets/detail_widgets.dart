@@ -1,4 +1,4 @@
-part of '../main.dart';
+part of '../../main.dart';
 
 class _DetailSection extends StatelessWidget {
   const _DetailSection({required this.title, required this.rows});

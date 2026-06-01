@@ -3,19 +3,22 @@ library;
 import 'package:flutter/material.dart';
 import 'package:solicitudes_movilidad_academica/data/app_database.dart';
 import 'package:solicitudes_movilidad_academica/model/record_model.dart';
+import 'package:solicitudes_movilidad_academica/shared/services/access_policy.dart';
+import 'package:solicitudes_movilidad_academica/shared/services/request_workflow_service.dart';
 
-part 'pages/admin_pages.dart';
-part 'pages/application_form_page.dart';
-part 'pages/auth_pages.dart';
-part 'pages/student_pages.dart';
-part 'services/app_theme.dart';
-part 'services/form_utils.dart';
-part 'widgets/auth_widgets.dart';
-part 'widgets/dashboard_widgets.dart';
-part 'widgets/detail_widgets.dart';
-part 'widgets/feedback_widgets.dart';
-part 'widgets/form_widgets.dart';
-part 'widgets/request_widgets.dart';
+part 'features/admin/pages/admin_pages.dart';
+part 'features/auth/pages/auth_pages.dart';
+part 'features/auth/widgets/auth_widgets.dart';
+part 'features/coordinator/pages/coordinator_pages.dart';
+part 'features/student/pages/application_form_page.dart';
+part 'features/student/pages/student_pages.dart';
+part 'shared/services/app_theme.dart';
+part 'shared/services/form_utils.dart';
+part 'shared/widgets/dashboard_widgets.dart';
+part 'shared/widgets/detail_widgets.dart';
+part 'shared/widgets/feedback_widgets.dart';
+part 'shared/widgets/form_widgets.dart';
+part 'shared/widgets/request_widgets.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,8 +60,13 @@ class RootView extends StatelessWidget {
       return const AuthShell();
     }
 
-    return user.role == UserRole.admin
-        ? const AdminHomePage()
-        : const StudentHomePage();
+    const accessPolicy = AccessPolicy();
+    if (accessPolicy.canOpenAdminArea(user)) {
+      return const AdminHomePage();
+    }
+    if (accessPolicy.canOpenCoordinatorArea(user)) {
+      return const CoordinatorHomePage();
+    }
+    return const StudentHomePage();
   }
 }

@@ -1,28 +1,28 @@
-part of '../main.dart';
+part of '../../../main.dart';
 
-class AdminHomePage extends StatefulWidget {
-  const AdminHomePage({super.key});
+class CoordinatorHomePage extends StatefulWidget {
+  const CoordinatorHomePage({super.key});
 
   @override
-  State<AdminHomePage> createState() => _AdminHomePageState();
+  State<CoordinatorHomePage> createState() => _CoordinatorHomePageState();
 }
 
-class _AdminHomePageState extends State<AdminHomePage> {
+class _CoordinatorHomePageState extends State<CoordinatorHomePage> {
   int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final state = AppStateScope.of(context);
     final pages = const [
-      AdminDashboard(),
-      AdminRequestsList(status: ApplicationStatus.pending),
-      AdminRequestsList(status: ApplicationStatus.approved),
-      AdminRequestsList(status: ApplicationStatus.rejected),
+      CoordinatorDashboard(),
+      CoordinatorRequestsList(status: RequestStatus.submitted),
+      CoordinatorRequestsList(status: RequestStatus.approved),
+      CoordinatorRequestsList(status: RequestStatus.rejected),
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Panel administrativo'),
+        title: const Text('Panel coordinador'),
         actions: [
           IconButton(
             tooltip: 'Cerrar sesion',
@@ -62,8 +62,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 }
 
-class AdminDashboard extends StatelessWidget {
-  const AdminDashboard({super.key});
+class CoordinatorDashboard extends StatelessWidget {
+  const CoordinatorDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +72,7 @@ class AdminDashboard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       children: [
         Text(
-          'Estadisticas de solicitudes',
+          'Revision de movilidad',
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
@@ -89,17 +89,17 @@ class AdminDashboard extends StatelessWidget {
             ),
             _InfoCard(
               title: 'Pendientes',
-              value: '${state.countByStatus(ApplicationStatus.pending)}',
+              value: '${state.countByStatus(RequestStatus.submitted)}',
               icon: Icons.pending_actions_outlined,
             ),
             _InfoCard(
               title: 'Aprobadas',
-              value: '${state.countByStatus(ApplicationStatus.approved)}',
+              value: '${state.countByStatus(RequestStatus.approved)}',
               icon: Icons.check_circle_outline_rounded,
             ),
             _InfoCard(
               title: 'Rechazadas',
-              value: '${state.countByStatus(ApplicationStatus.rejected)}',
+              value: '${state.countByStatus(RequestStatus.rejected)}',
               icon: Icons.highlight_off_rounded,
             ),
           ],
@@ -120,15 +120,9 @@ class AdminDashboard extends StatelessWidget {
                 const SizedBox(height: 20),
                 _StatusChart(
                   values: {
-                    'Pendientes': state.countByStatus(
-                      ApplicationStatus.pending,
-                    ),
-                    'Aprobadas': state.countByStatus(
-                      ApplicationStatus.approved,
-                    ),
-                    'Rechazadas': state.countByStatus(
-                      ApplicationStatus.rejected,
-                    ),
+                    'Pendientes': state.countByStatus(RequestStatus.submitted),
+                    'Aprobadas': state.countByStatus(RequestStatus.approved),
+                    'Rechazadas': state.countByStatus(RequestStatus.rejected),
                   },
                 ),
               ],
@@ -140,10 +134,10 @@ class AdminDashboard extends StatelessWidget {
   }
 }
 
-class AdminRequestsList extends StatelessWidget {
-  const AdminRequestsList({super.key, required this.status});
+class CoordinatorRequestsList extends StatelessWidget {
+  const CoordinatorRequestsList({super.key, required this.status});
 
-  final ApplicationStatus status;
+  final RequestStatus status;
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +174,7 @@ class AdminRequestsList extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => AdminApplicationDetailPage(
+                      builder: (_) => CoordinatorRequestReviewPage(
                         applicationId: application.id,
                       ),
                     ),
@@ -194,18 +188,18 @@ class AdminRequestsList extends StatelessWidget {
   }
 }
 
-class AdminApplicationDetailPage extends StatefulWidget {
-  const AdminApplicationDetailPage({super.key, required this.applicationId});
+class CoordinatorRequestReviewPage extends StatefulWidget {
+  const CoordinatorRequestReviewPage({super.key, required this.applicationId});
 
   final String applicationId;
 
   @override
-  State<AdminApplicationDetailPage> createState() =>
-      _AdminApplicationDetailPageState();
+  State<CoordinatorRequestReviewPage> createState() =>
+      _CoordinatorRequestReviewPageState();
 }
 
-class _AdminApplicationDetailPageState
-    extends State<AdminApplicationDetailPage> {
+class _CoordinatorRequestReviewPageState
+    extends State<CoordinatorRequestReviewPage> {
   final _commentController = TextEditingController();
   final _reasonController = TextEditingController();
 
@@ -219,6 +213,7 @@ class _AdminApplicationDetailPageState
   @override
   Widget build(BuildContext context) {
     final state = AppStateScope.of(context);
+    final user = state.currentUser!;
     final application = state.applications.firstWhere(
       (item) => item.id == widget.applicationId,
     );
@@ -283,7 +278,7 @@ class _AdminApplicationDetailPageState
                     controller: _commentController,
                     maxLines: 3,
                     decoration: const InputDecoration(
-                      labelText: 'Comentario administrativo',
+                      labelText: 'Comentario del coordinador',
                       alignLabelWithHint: true,
                     ),
                   ),
@@ -302,6 +297,10 @@ class _AdminApplicationDetailPageState
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          RequestHistorySection(
+            entries: state.historyForRequest(application.id),
+          ),
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -310,10 +309,13 @@ class _AdminApplicationDetailPageState
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () => _review(
-                  status: ApplicationStatus.rejected,
-                  requireReason: true,
-                ),
+                onPressed:
+                    const RequestWorkflowService().canReview(user, application)
+                    ? () => _review(
+                        status: RequestStatus.rejected,
+                        requireReason: true,
+                      )
+                    : null,
                 icon: const Icon(Icons.close_rounded),
                 label: const Text('Rechazar'),
               ),
@@ -321,10 +323,13 @@ class _AdminApplicationDetailPageState
             const SizedBox(width: 12),
             Expanded(
               child: FilledButton.icon(
-                onPressed: () => _review(
-                  status: ApplicationStatus.approved,
-                  requireReason: false,
-                ),
+                onPressed:
+                    const RequestWorkflowService().canReview(user, application)
+                    ? () => _review(
+                        status: RequestStatus.approved,
+                        requireReason: false,
+                      )
+                    : null,
                 icon: const Icon(Icons.check_rounded),
                 label: const Text('Aprobar'),
               ),
@@ -336,7 +341,7 @@ class _AdminApplicationDetailPageState
   }
 
   Future<void> _review({
-    required ApplicationStatus status,
+    required RequestStatus status,
     required bool requireReason,
   }) async {
     final state = AppStateScope.of(context);
@@ -359,9 +364,7 @@ class _AdminApplicationDetailPageState
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Solicitud ${status.label.toLowerCase()} correctamente.'),
-      ),
+      SnackBar(content: Text('Solicitud revisada correctamente.')),
     );
     Navigator.of(context).pop();
   }

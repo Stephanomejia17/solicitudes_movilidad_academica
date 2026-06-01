@@ -1,4 +1,4 @@
-part of '../main.dart';
+part of '../../main.dart';
 
 ThemeData _buildTheme() {
   const seed = Color(0xFF0E7490);

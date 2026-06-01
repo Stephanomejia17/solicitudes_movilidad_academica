@@ -1,4 +1,4 @@
-part of '../main.dart';
+part of '../../main.dart';
 
 MapEntry<String, String> _detailRow(String label, String value) =>
     MapEntry<String, String>(label, value);

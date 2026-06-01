@@ -1,4 +1,4 @@
-part of '../main.dart';
+part of '../../main.dart';
 
 class RequestSummaryCard extends StatelessWidget {
   const RequestSummaryCard({
@@ -127,7 +127,7 @@ class _StatusHeader extends StatelessWidget {
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.status});
 
-  final ApplicationStatus status;
+  final RequestStatus status;
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +163,55 @@ class _MiniDataPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [Icon(icon, size: 18), const SizedBox(width: 8), Text(label)],
+      ),
+    );
+  }
+}
+
+class RequestHistorySection extends StatelessWidget {
+  const RequestHistorySection({super.key, required this.entries});
+
+  final List<RequestHistoryEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Historial',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 12),
+            if (entries.isEmpty)
+              Text(
+                'Aun no hay cambios de estado registrados.',
+                style: TextStyle(color: Colors.grey.shade700),
+              )
+            else
+              ...entries.map(
+                (entry) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.history_rounded),
+                  title: Text(
+                    '${entry.from?.label ?? 'Inicio'} -> ${entry.to.label}',
+                  ),
+                  subtitle: Text(
+                    [
+                      formatDate(entry.createdAt),
+                      entry.actorId,
+                      if (entry.comment.isNotEmpty) entry.comment,
+                    ].join(' · '),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

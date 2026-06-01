@@ -1,4 +1,4 @@
-part of '../main.dart';
+part of '../../../main.dart';
 
 class StudentHomePage extends StatefulWidget {
   const StudentHomePage({super.key});
@@ -102,15 +102,15 @@ class StudentDashboard extends StatelessWidget {
               icon: Icons.folder_copy_outlined,
             ),
             _InfoCard(
-              title: 'Pendientes',
+              title: 'Borradores',
               value:
-                  '${requests.where((e) => e.status == ApplicationStatus.pending).length}',
-              icon: Icons.schedule_rounded,
+                  '${requests.where((e) => e.status == RequestStatus.draft).length}',
+              icon: Icons.edit_document,
             ),
             _InfoCard(
               title: 'Aprobadas',
               value:
-                  '${requests.where((e) => e.status == ApplicationStatus.approved).length}',
+                  '${requests.where((e) => e.status == RequestStatus.approved).length}',
               icon: Icons.check_circle_outline_rounded,
             ),
           ],
@@ -270,6 +270,10 @@ class StudentApplicationDetailPage extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          RequestHistorySection(
+            entries: state.historyForRequest(application.id),
+          ),
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -278,7 +282,8 @@ class StudentApplicationDetailPage extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: application.status == ApplicationStatus.pending
+                onPressed:
+                    const RequestWorkflowService().canEdit(user, application)
                     ? () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
@@ -296,41 +301,22 @@ class StudentApplicationDetailPage extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: FilledButton.tonalIcon(
-                onPressed: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('Eliminar solicitud'),
-                      content: const Text(
-                        'Esta accion no se puede deshacer. ¿Deseas continuar?',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('Cancelar'),
-                        ),
-                        FilledButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('Eliminar'),
-                        ),
-                      ],
-                    ),
-                  );
-
-                  if (confirmed == true && context.mounted) {
-                    await state.deleteApplication(application.id);
-                    if (!context.mounted) {
-                      return;
-                    }
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Solicitud eliminada.')),
-                    );
-                    Navigator.of(context).pop();
-                  }
-                },
-                icon: const Icon(Icons.delete_outline_rounded),
-                label: const Text('Eliminar'),
+              child: FilledButton.icon(
+                onPressed:
+                    const RequestWorkflowService().canSubmit(user, application)
+                    ? () async {
+                        await state.submitApplication(application.id, user);
+                        if (!context.mounted) {
+                          return;
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Solicitud enviada.')),
+                        );
+                        Navigator.of(context).pop();
+                      }
+                    : null,
+                icon: const Icon(Icons.send_rounded),
+                label: const Text('Enviar'),
               ),
             ),
           ],

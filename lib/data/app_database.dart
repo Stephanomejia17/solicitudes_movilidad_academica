@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show ChangeNotifier;
 import 'package:flutter/widgets.dart' show BuildContext, InheritedNotifier;
 import 'package:path_provider/path_provider.dart';
 import 'package:solicitudes_movilidad_academica/model/record_model.dart';
+import 'package:solicitudes_movilidad_academica/shared/services/request_workflow_service.dart';
 
 part 'app_database.g.dart';
 
@@ -47,7 +48,7 @@ class MobilityApplicationRecords extends Table {
   TextColumn get exchangeSemester => text()();
   DateTimeColumn get travelDate => dateTime()();
   DateTimeColumn get returnDate => dateTime()();
-  TextColumn get status => text().withDefault(const Constant('pending'))();
+  TextColumn get status => text().withDefault(const Constant('draft'))();
   TextColumn get adminComment => text().withDefault(const Constant(''))();
   TextColumn get rejectionReason => text().withDefault(const Constant(''))();
 
@@ -80,11 +81,14 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
 
   final List<AppUser> _usersCache = [];
   final List<MobilityApplication> _applicationsCache = [];
+  final List<RequestHistoryEntry> _historyCache = [];
+  final Set<String> _inactiveUserEmails = {};
 
   AppUser? currentUser;
   bool isBusy = false;
   String? authError;
   int _sequence = 4;
+  final RequestWorkflowService _workflow = const RequestWorkflowService();
 
   List<MobilityApplication> get applications => List.unmodifiable(
     [..._applicationsCache]..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
@@ -95,8 +99,12 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
 
   int get totalApplications => _applicationsCache.length;
 
-  int countByStatus(ApplicationStatus status) =>
+  int countByStatus(RequestStatus status) =>
       _applicationsCache.where((item) => item.status == status).length;
+
+  List<RequestHistoryEntry> historyForRequest(String requestId) =>
+      _historyCache.where((entry) => entry.requestId == requestId).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
   Stream<List<MobilityApplication>> watchApplications() {
     final query = select(mobilityApplicationRecords)
@@ -164,9 +172,13 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     final normalizedEmail = email.trim().toLowerCase();
 
     try {
-      currentUser = _usersCache.firstWhere(
-        (user) => user.email == normalizedEmail && user.password == password,
+      final authenticated = _usersCache.firstWhere(
+        (user) =>
+            user.email == normalizedEmail &&
+            user.password == password &&
+            user.isActive,
       );
+      currentUser = await getUserByEmail(authenticated.email);
       isBusy = false;
       notifyListeners();
       return true;
@@ -199,6 +211,12 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
 
   Future<void> updateApplication(MobilityApplication application) async {
     await _simulateAction();
+    final persisted = _applicationsCache.firstWhere(
+      (item) => item.id == application.id,
+    );
+    if (persisted.status.isLocked || persisted.status != RequestStatus.draft) {
+      throw StateError('Solo las solicitudes en borrador pueden editarse.');
+    }
 
     await update(mobilityApplicationRecords).replace(
       MobilityApplicationRecord(
@@ -240,6 +258,24 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> submitApplication(String id, AppUser actor) async {
+    await _simulateAction();
+    final application = _applicationsCache.firstWhere((item) => item.id == id);
+    if (!_workflow.canSubmit(actor, application)) {
+      throw StateError('La solicitud no cumple los requisitos de envio.');
+    }
+    final submitted = _workflow.submit(application);
+    _recordStatusChange(
+      application,
+      submitted,
+      actor.email,
+      'Envio estudiante',
+    );
+    await _writeApplication(submitted);
+    await _reloadCache();
+    notifyListeners();
+  }
+
   Future<void> deleteApplication(String id) async {
     await _simulateAction();
 
@@ -253,21 +289,26 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
 
   Future<void> reviewApplication({
     required String id,
-    required ApplicationStatus status,
+    required RequestStatus status,
     required String comment,
     String rejectionReason = '',
   }) async {
     await _simulateAction();
+    final actor = currentUser;
+    final application = _applicationsCache.firstWhere((item) => item.id == id);
+    if (actor == null || !_workflow.canReview(actor, application)) {
+      throw StateError('Solo un coordinador puede revisar esta solicitud.');
+    }
+    final reviewed = status == RequestStatus.approved
+        ? _workflow.approve(application, comment)
+        : _workflow.reject(
+            application,
+            comment: comment,
+            reason: rejectionReason,
+          );
 
-    await (update(
-      mobilityApplicationRecords,
-    )..where((table) => table.id.equals(id))).write(
-      MobilityApplicationRecordsCompanion(
-        status: Value(status.name),
-        adminComment: Value(comment.trim()),
-        rejectionReason: Value(rejectionReason.trim()),
-      ),
-    );
+    _recordStatusChange(application, reviewed, actor.email, comment);
+    await _writeApplication(reviewed);
 
     await _reloadCache();
     notifyListeners();
@@ -276,6 +317,69 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   Future<List<AppUser>> getAllUsers() async {
     final rows = await select(userRecords).get();
     return rows.map(_mapUserRowToModel).toList();
+  }
+
+  Future<AppUser> insertUser(AppUser user) async {
+    await into(userRecords).insert(
+      UserRecordsCompanion.insert(
+        firstName: user.firstName.trim(),
+        lastName: user.lastName.trim(),
+        email: user.email.trim().toLowerCase(),
+        password: user.password,
+        role: user.role.name,
+      ),
+    );
+    await _reloadCache();
+    notifyListeners();
+    return (await getUserByEmail(user.email))!;
+  }
+
+  Future<AppUser?> getUserByCredentials({
+    required String email,
+    required String password,
+  }) async {
+    final user = await getUserByEmail(email);
+    if (user == null || user.password != password || !user.isActive) {
+      return null;
+    }
+    return user;
+  }
+
+  Future<AppUser?> getUserByEmail(String email) async {
+    final normalizedEmail = email.trim().toLowerCase();
+    final row = await (select(
+      userRecords,
+    )..where((table) => table.email.equals(normalizedEmail))).getSingleOrNull();
+    return row == null ? null : _mapUserRowToModel(row);
+  }
+
+  Future<void> updateUser(AppUser user) async {
+    await (update(
+      userRecords,
+    )..where((table) => table.email.equals(user.email))).write(
+      UserRecordsCompanion(
+        firstName: Value(user.firstName.trim()),
+        lastName: Value(user.lastName.trim()),
+        password: Value(user.password),
+        role: Value(user.role.name),
+      ),
+    );
+    await _reloadCache();
+    notifyListeners();
+  }
+
+  Future<void> setUserActive(String email, bool isActive) async {
+    final index = _usersCache.indexWhere((user) => user.email == email);
+    if (index == -1) {
+      return;
+    }
+    if (isActive) {
+      _inactiveUserEmails.remove(email);
+    } else {
+      _inactiveUserEmails.add(email);
+    }
+    _usersCache[index] = _usersCache[index].copyWith(isActive: isActive);
+    notifyListeners();
   }
 
   Future<List<MobilityApplication>> getAllApplications() async {
@@ -319,10 +423,30 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
             lastName: 'Estudiante',
             email: 'user@xchange.edu.co',
             password: 'User12345',
-            role: UserRole.user.name,
+            role: UserRole.student.name,
+          ),
+          UserRecordsCompanion.insert(
+            firstName: 'Carlos',
+            lastName: 'Coordinador',
+            email: 'coordinador@xchange.edu.co',
+            password: 'Coord123',
+            role: UserRole.coordinator.name,
           ),
         ]);
       });
+    }
+
+    final coordinator = await getUserByEmail('coordinador@xchange.edu.co');
+    if (coordinator == null) {
+      await into(userRecords).insert(
+        UserRecordsCompanion.insert(
+          firstName: 'Carlos',
+          lastName: 'Coordinador',
+          email: 'coordinador@xchange.edu.co',
+          password: 'Coord123',
+          role: UserRole.coordinator.name,
+        ),
+      );
     }
 
     final applicationCountExpression = mobilityApplicationRecords.id.count();
@@ -393,7 +517,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
           exchangeSemester: '2026-1',
           travelDate: DateTime.now().subtract(const Duration(days: 40)),
           returnDate: DateTime.now().add(const Duration(days: 45)),
-          status: ApplicationStatus.approved,
+          status: RequestStatus.approved,
           adminComment: 'Documentacion completa y promedio destacado.',
         ),
         MobilityApplication(
@@ -425,7 +549,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
           exchangeSemester: '2025-2',
           travelDate: DateTime.now().subtract(const Duration(days: 90)),
           returnDate: DateTime.now().subtract(const Duration(days: 10)),
-          status: ApplicationStatus.rejected,
+          status: RequestStatus.rejected,
           adminComment: 'Se requiere reforzar el nivel de idioma.',
           rejectionReason: 'El soporte de idioma no cumple el minimo esperado.',
         ),
@@ -479,6 +603,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
       email: row.email,
       password: row.password,
       role: _userRoleFromString(row.role),
+      isActive: !_inactiveUserEmails.contains(row.email),
     );
   }
 
@@ -512,7 +637,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
       exchangeSemester: row.exchangeSemester,
       travelDate: row.travelDate,
       returnDate: row.returnDate,
-      status: _applicationStatusFromString(row.status),
+      status: requestStatusFromString(row.status),
       adminComment: row.adminComment,
       rejectionReason: row.rejectionReason,
     );
@@ -555,6 +680,33 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
       rejectionReason: Value(application.rejectionReason),
     );
   }
+
+  Future<void> _writeApplication(MobilityApplication application) {
+    return (update(mobilityApplicationRecords)
+          ..where((table) => table.id.equals(application.id)))
+        .write(_applicationCompanion(application));
+  }
+
+  void _recordStatusChange(
+    MobilityApplication from,
+    MobilityApplication to,
+    String actorId,
+    String comment,
+  ) {
+    if (from.status == to.status) {
+      return;
+    }
+    _historyCache.add(
+      RequestHistoryEntry(
+        requestId: to.id,
+        actorId: actorId,
+        from: from.status,
+        to: to.status,
+        comment: comment.trim(),
+        createdAt: DateTime.now(),
+      ),
+    );
+  }
 }
 
 class AppStateScope extends InheritedNotifier<AppDatabase> {
@@ -572,15 +724,5 @@ class AppStateScope extends InheritedNotifier<AppDatabase> {
 }
 
 UserRole _userRoleFromString(String value) {
-  return UserRole.values.firstWhere(
-    (role) => role.name == value,
-    orElse: () => UserRole.user,
-  );
-}
-
-ApplicationStatus _applicationStatusFromString(String value) {
-  return ApplicationStatus.values.firstWhere(
-    (status) => status.name == value,
-    orElse: () => ApplicationStatus.pending,
-  );
+  return userRoleFromString(value);
 }

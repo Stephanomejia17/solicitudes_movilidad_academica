@@ -1,4 +1,4 @@
-part of '../main.dart';
+part of '../../../main.dart';
 
 class _AuthHero extends StatelessWidget {
   const _AuthHero({this.compact = false});

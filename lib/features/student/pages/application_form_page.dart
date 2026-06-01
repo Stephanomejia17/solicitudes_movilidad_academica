@@ -1,4 +1,4 @@
-part of '../main.dart';
+part of '../../../main.dart';
 
 class ApplicationFormPage extends StatefulWidget {
   const ApplicationFormPage({
@@ -414,7 +414,7 @@ class _ApplicationFormPageState extends State<ApplicationFormPage> {
       exchangeSemester: _exchangeSemesterController.text.trim(),
       travelDate: _travelDate!,
       returnDate: _returnDate!,
-      status: widget.existing?.status ?? ApplicationStatus.pending,
+      status: widget.existing?.status ?? RequestStatus.draft,
       adminComment: widget.existing?.adminComment ?? '',
       rejectionReason: widget.existing?.rejectionReason ?? '',
     );

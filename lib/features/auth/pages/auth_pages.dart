@@ -1,4 +1,4 @@
-part of '../main.dart';
+part of '../../../main.dart';
 
 class AuthShell extends StatefulWidget {
   const AuthShell({super.key});
@@ -132,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Usa las cuentas demo `admin@xchange.edu.co` / `Admin123` o `user@xchange.edu.co` / `User12345`.',
+            'Demo: admin@xchange.edu.co / Admin123, coordinador@xchange.edu.co / Coord123, user@xchange.edu.co / User12345.',
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade700),
@@ -194,7 +194,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  UserRole _selectedRole = UserRole.user;
+  UserRole _selectedRole = UserRole.student;
 
   @override
   void dispose() {
@@ -231,7 +231,7 @@ class _RegisterPageState extends State<RegisterPage> {
       _emailController.clear();
       _passwordController.clear();
       _confirmPasswordController.clear();
-      setState(() => _selectedRole = UserRole.user);
+      setState(() => _selectedRole = UserRole.student);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cuenta creada. Ahora puedes autenticarte.'),
