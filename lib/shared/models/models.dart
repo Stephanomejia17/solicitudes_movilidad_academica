@@ -1,7 +1,6 @@
-export 'app_user.dart';
-export 'approval.dart';
-export 'destination_university.dart';
-export 'mobility_application.dart';
-export 'request_history_entry.dart';
-export 'request_status.dart';
-export 'user_role.dart';
+export 'aprobacion_model.dart';
+export 'documento_model.dart';
+export 'historial_estado_model.dart';
+export 'solicitud_movilidad_model.dart';
+export 'universidad_destino_model.dart';
+export 'usuario_model.dart';

@@ -1,37 +1,35 @@
 import 'package:solicitudes_movilidad_academica/data/app_database.dart';
-import 'package:solicitudes_movilidad_academica/model/record_model.dart';
 
 class UserRepository {
   UserRepository({required this.localDb});
 
   final AppDatabase localDb;
 
-  Future<AppUser> registerLocal({
-    required String firstName,
-    required String lastName,
+  Future<bool> registerLocal({
+    required String nombre,
+    required String apellido,
     required String email,
-    required String password,
-    required UserRole role,
+    required String passwordHash,
+    required String rol,
   }) {
-    return localDb.insertUser(
-      AppUser(
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: email.trim().toLowerCase(),
-        password: password,
-        role: role,
-      ),
+    return localDb.register(
+      nombre: nombre,
+      apellido: apellido,
+      email: email,
+      passwordHash: passwordHash,
+      rol: rol,
     );
   }
 
-  Future<AppUser?> loginLocal({
+  Future<bool> loginLocal({
     required String email,
     required String password,
   }) {
-    return localDb.getUserByCredentials(email: email, password: password);
+    return localDb.login(email: email, password: password);
   }
 
-  Future<AppUser?> findByEmail(String email) {
-    return localDb.getUserByEmail(email);
+  Future<UsuarioData?> findByEmail(String email) {
+    return localDb.getUsuarioByEmail(email);
   }
 }
+

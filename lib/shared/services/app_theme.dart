@@ -1,6 +1,6 @@
-part of '../../main.dart';
+import 'package:flutter/material.dart';
 
-ThemeData _buildTheme() {
+ThemeData buildAppTheme() {
   const seed = Color(0xFF0E7490);
   final colorScheme = ColorScheme.fromSeed(
     seedColor: seed,
@@ -40,3 +40,4 @@ ThemeData _buildTheme() {
     ),
   );
 }
+

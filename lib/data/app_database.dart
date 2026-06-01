@@ -5,70 +5,146 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter/foundation.dart' show ChangeNotifier;
 import 'package:flutter/widgets.dart' show BuildContext, InheritedNotifier;
 import 'package:path_provider/path_provider.dart';
-import 'package:solicitudes_movilidad_academica/model/record_model.dart';
-import 'package:solicitudes_movilidad_academica/shared/services/request_workflow_service.dart';
+import 'package:uuid/uuid.dart';
+
+import '../shared/services/request_workflow_service.dart';
 
 part 'app_database.g.dart';
 
-class UserRecords extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get firstName => text()();
-  TextColumn get lastName => text()();
-  TextColumn get email => text().unique()();
-  TextColumn get password => text()();
-  TextColumn get role => text()();
-}
-
-class MobilityApplicationRecords extends Table {
+@DataClassName('UsuarioData')
+class Usuarios extends Table {
   TextColumn get id => text()();
-  TextColumn get userEmail => text()();
+  TextColumn get nombre => text()();
+  TextColumn get apellido => text()();
+  TextColumn get email => text().unique()();
+  TextColumn get passwordHash => text()();
+  TextColumn get rol => text()();
+  TextColumn get estado => text().withDefault(const Constant('activo'))();
   DateTimeColumn get createdAt => dateTime()();
-  TextColumn get firstName => text()();
-  TextColumn get lastName => text()();
-  TextColumn get documentType => text()();
-  TextColumn get documentNumber => text()();
-  DateTimeColumn get birthDate => dateTime()();
-  TextColumn get institutionalEmail => text()();
-  TextColumn get personalEmail => text()();
-  TextColumn get phone => text()();
-  TextColumn get emergencyContact => text()();
-  TextColumn get relationship => text()();
-  TextColumn get currentUniversity => text()();
-  TextColumn get faculty => text()();
-  TextColumn get program => text()();
-  IntColumn get currentSemester => integer()();
-  RealColumn get average => real()();
-  TextColumn get languageLevel => text()();
-  TextColumn get languageScore => text()();
-  TextColumn get destinationUniversity => text()();
-  TextColumn get country => text()();
-  TextColumn get city => text()();
-  TextColumn get destinationFaculty => text()();
-  TextColumn get studyArea => text()();
-  TextColumn get exchangeSemester => text()();
-  DateTimeColumn get travelDate => dateTime()();
-  DateTimeColumn get returnDate => dateTime()();
-  TextColumn get status => text().withDefault(const Constant('draft'))();
-  TextColumn get adminComment => text().withDefault(const Constant(''))();
-  TextColumn get rejectionReason => text().withDefault(const Constant(''))();
+  DateTimeColumn get updatedAt => dateTime()();
+  BoolColumn get pendingSync => boolean().withDefault(const Constant(true))();
 
   @override
   Set<Column<Object>>? get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [UserRecords, MobilityApplicationRecords])
-class AppDatabase extends _$AppDatabase with ChangeNotifier {
-  AppDatabase([QueryExecutor? executor])
-    : super(executor ?? _openConnection()) {
-    unawaited(_initialize());
-  }
+@DataClassName('SolicitudMobilidadData')
+class SolicitudMovilidad extends Table {
+  TextColumn get id => text()();
+  TextColumn get estudianteId => text()();
+  TextColumn get tipoMovilidad => text()();
+  DateTimeColumn get fechaNacimiento => dateTime()();
+  TextColumn get emailInstitucional => text()();
+  TextColumn get emailPersonal => text()();
+  TextColumn get telefono => text()();
+  TextColumn get contactoEmergencia => text()();
+  TextColumn get relacionContacto => text()();
+  TextColumn get universidadDestinoId => text()();
+  TextColumn get programaAcademico => text()();
+  IntColumn get semestre => integer()();
+  TextColumn get estado => text().withDefault(const Constant('borrador'))();
+  BoolColumn get bloqueada => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get fechaCreacion => dateTime()();
+  DateTimeColumn get fechaActualizacion => dateTime()();
+  BoolColumn get pendingSync => boolean().withDefault(const Constant(true))();
 
   @override
-  int get schemaVersion => 1;
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DataClassName('UniversidadDestinoData')
+class UniversidadDestino extends Table {
+  TextColumn get id => text()();
+  TextColumn get nombre => text()();
+  TextColumn get pais => text()();
+  TextColumn get ciudad => text()();
+  TextColumn get tipoMovilidad => text()();
+  BoolColumn get convenioActivo => boolean().withDefault(const Constant(true))();
+  BoolColumn get pendingSync => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DataClassName('DocumentoData')
+class Documento extends Table {
+  TextColumn get id => text()();
+  TextColumn get solicitudId => text()();
+  TextColumn get tipoDocumento => text()();
+  TextColumn get nombreArchivo => text()();
+  TextColumn get estado => text().withDefault(const Constant('pendiente'))();
+  DateTimeColumn get fechaSubida => dateTime()();
+  BoolColumn get pendingSync => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DataClassName('AprobacionData')
+class Aprobacion extends Table {
+  TextColumn get id => text()();
+  TextColumn get solicitudId => text()();
+  TextColumn get coordinadorId => text()();
+  TextColumn get usuarioId => text()();
+  TextColumn get decision => text()();
+  TextColumn get comentario => text()();
+  DateTimeColumn get fechaDecision => dateTime()();
+  BoolColumn get pendingSync => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DataClassName('HistorialEstadoData')
+class HistorialEstado extends Table {
+  TextColumn get id => text()();
+  TextColumn get solicitudId => text()();
+  TextColumn get usuarioId => text()();
+  TextColumn get estadoAnterior => text()();
+  TextColumn get estadoNuevo => text()();
+  TextColumn get comentario => text().nullable()();
+  DateTimeColumn get fechaCambio => dateTime()();
+  BoolColumn get pendingSync => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DriftDatabase(
+  tables: [
+    Usuarios,
+    SolicitudMovilidad,
+    UniversidadDestino,
+    Documento,
+    Aprobacion,
+    HistorialEstado,
+  ],
+)
+
+class AppDatabase extends _$AppDatabase with ChangeNotifier {
+  bool _initialized = false;
+
+  AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection()) {
+     if (!_initialized) {
+      _initialized = true;
+      unawaited(_initialize());
+    }
+  }
+
+  static const _uuid = Uuid();
+
+  @override
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async => m.createAll(),
+        onUpgrade: (m, from, to) async => await m.createAll(),
+      );
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
-      name: 'solicitudes_movilidad_db',
+      name: 'solicitudes_movilidad_db_v2',
       native: const DriftNativeOptions(
         databaseDirectory: getApplicationSupportDirectory,
       ),
@@ -79,114 +155,62 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     );
   }
 
-  final List<AppUser> _usersCache = [];
-  final List<MobilityApplication> _applicationsCache = [];
-  final List<RequestHistoryEntry> _historyCache = [];
-  final Set<String> _inactiveUserEmails = {};
-
-  AppUser? currentUser;
+  UsuarioData? currentUser;
   bool isBusy = false;
   String? authError;
-  int _sequence = 4;
   final RequestWorkflowService _workflow = const RequestWorkflowService();
 
-  List<MobilityApplication> get applications => List.unmodifiable(
-    [..._applicationsCache]..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
-  );
-
-  List<MobilityApplication> applicationsForUser(String email) =>
-      applications.where((item) => item.userEmail == email).toList();
-
-  int get totalApplications => _applicationsCache.length;
-
-  int countByStatus(RequestStatus status) =>
-      _applicationsCache.where((item) => item.status == status).length;
-
-  List<RequestHistoryEntry> historyForRequest(String requestId) =>
-      _historyCache.where((entry) => entry.requestId == requestId).toList()
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-  Stream<List<MobilityApplication>> watchApplications() {
-    final query = select(mobilityApplicationRecords)
-      ..orderBy([(table) => OrderingTerm.desc(table.createdAt)]);
-
-    return query.watch().map(
-      (rows) => rows.map(_mapApplicationRowToModel).toList(),
-    );
-  }
-
-  Stream<List<MobilityApplication>> watchApplicationsForUser(String email) {
-    final query = select(mobilityApplicationRecords)
-      ..where((table) => table.userEmail.equals(email))
-      ..orderBy([(table) => OrderingTerm.desc(table.createdAt)]);
-
-    return query.watch().map(
-      (rows) => rows.map(_mapApplicationRowToModel).toList(),
-    );
-  }
-
   Future<bool> register({
-    required String firstName,
-    required String lastName,
+    required String nombre,
+    required String apellido,
     required String email,
-    required String password,
-    required UserRole role,
+    required String passwordHash,
+    required String rol,
   }) async {
-    isBusy = true;
+    _setBusy(true);
     authError = null;
-    notifyListeners();
-    await Future<void>.delayed(const Duration(milliseconds: 900));
+    try {
+      final normalizedEmail = email.trim().toLowerCase();
+      final exists = await getUsuarioByEmail(normalizedEmail);
+      if (exists != null) {
+        authError = 'Ya existe una cuenta registrada con este correo.';
+        return false;
+      }
 
-    final normalizedEmail = email.trim().toLowerCase();
-    final exists = _usersCache.any((user) => user.email == normalizedEmail);
-
-    if (exists) {
-      authError = 'Ya existe una cuenta registrada con este correo.';
-      isBusy = false;
-      notifyListeners();
-      return false;
+      final now = DateTime.now();
+      await into(usuarios).insert(
+        UsuariosCompanion.insert(
+          id: _uuid.v4(),
+          nombre: nombre.trim(),
+          apellido: apellido.trim(),
+          email: normalizedEmail,
+          passwordHash: passwordHash,
+          rol: rol.trim(),
+          estado: const Value('activo'),
+          createdAt: now,
+          updatedAt: now,
+          pendingSync: const Value(true),
+        ),
+      );
+      return true;
+    } finally {
+      _setBusy(false);
     }
-
-    await into(userRecords).insert(
-      UserRecordsCompanion.insert(
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: normalizedEmail,
-        password: password,
-        role: role.name,
-      ),
-    );
-
-    await _reloadCache();
-    isBusy = false;
-    notifyListeners();
-    return true;
   }
 
   Future<bool> login({required String email, required String password}) async {
-    isBusy = true;
+    _setBusy(true);
     authError = null;
-    notifyListeners();
-    await Future<void>.delayed(const Duration(milliseconds: 900));
-
-    final normalizedEmail = email.trim().toLowerCase();
-
     try {
-      final authenticated = _usersCache.firstWhere(
-        (user) =>
-            user.email == normalizedEmail &&
-            user.password == password &&
-            user.isActive,
-      );
-      currentUser = await getUserByEmail(authenticated.email);
-      isBusy = false;
-      notifyListeners();
+      final user = await getUsuarioByEmail(email);
+      if (user == null || user.passwordHash != password || user.estado != 'activo') {
+        authError = 'Correo o contrasena incorrectos.';
+        return false;
+      }
+      currentUser = user;
       return true;
-    } catch (_) {
-      authError = 'Correo o contrasena incorrectos.';
-      isBusy = false;
-      notifyListeners();
-      return false;
+    } finally {
+      _setBusy(false);
     }
   }
 
@@ -196,516 +220,557 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> createApplication(MobilityApplication application) async {
-    await _simulateAction();
-    final newId = 'SOL-${_sequence.toString().padLeft(3, '0')}';
-
-    await into(
-      mobilityApplicationRecords,
-    ).insert(_applicationCompanion(application.copyWith(id: newId)));
-
-    _sequence++;
-    await _reloadCache();
-    notifyListeners();
+  Future<UsuarioData?> getUsuarioByEmail(String email) async {
+    final normalizedEmail = email.trim().toLowerCase();
+    return (select(usuarios)..where((t) => t.email.equals(normalizedEmail)))
+        .getSingleOrNull();
   }
 
-  Future<void> updateApplication(MobilityApplication application) async {
-    await _simulateAction();
-    final persisted = _applicationsCache.firstWhere(
-      (item) => item.id == application.id,
-    );
-    if (persisted.status.isLocked || persisted.status != RequestStatus.draft) {
-      throw StateError('Solo las solicitudes en borrador pueden editarse.');
+  Future<UsuarioData?> getUsuarioById(String id) async {
+    return (select(usuarios)..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
+  Future<List<UsuarioData>> getAllUsuarios() async {
+    return select(usuarios).get();
+  }
+
+  Stream<List<UsuarioData>> watchUsuarios() {
+    return select(usuarios).watch();
+  }
+
+  Future<void> updateUsuario(UsuariosCompanion companion) async {
+    if (!companion.id.present) {
+      throw ArgumentError('El id del usuario es obligatorio para actualizar.');
     }
 
-    await update(mobilityApplicationRecords).replace(
-      MobilityApplicationRecord(
-        id: application.id,
-        userEmail: application.userEmail,
-        createdAt: application.createdAt,
-        firstName: application.firstName,
-        lastName: application.lastName,
-        documentType: application.documentType,
-        documentNumber: application.documentNumber,
-        birthDate: application.birthDate,
-        institutionalEmail: application.institutionalEmail,
-        personalEmail: application.personalEmail,
-        phone: application.phone,
-        emergencyContact: application.emergencyContact,
-        relationship: application.relationship,
-        currentUniversity: application.currentUniversity,
-        faculty: application.faculty,
-        program: application.program,
-        currentSemester: application.currentSemester,
-        average: application.average,
-        languageLevel: application.languageLevel,
-        languageScore: application.languageScore,
-        destinationUniversity: application.destinationUniversity,
-        country: application.country,
-        city: application.city,
-        destinationFaculty: application.destinationFaculty,
-        studyArea: application.studyArea,
-        exchangeSemester: application.exchangeSemester,
-        travelDate: application.travelDate,
-        returnDate: application.returnDate,
-        status: application.status.name,
-        adminComment: application.adminComment,
-        rejectionReason: application.rejectionReason,
-      ),
+    final id = companion.id.value;
+    final existing = await getUsuarioById(id);
+    if (existing == null) {
+      throw StateError('Usuario no encontrado.');
+    }
+
+    final updated = existing.copyWith(
+      nombre: companion.nombre.present ? companion.nombre.value : existing.nombre,
+      apellido:
+          companion.apellido.present ? companion.apellido.value : existing.apellido,
+      email: companion.email.present ? companion.email.value : existing.email,
+      passwordHash: companion.passwordHash.present
+          ? companion.passwordHash.value
+          : existing.passwordHash,
+      rol: companion.rol.present ? companion.rol.value : existing.rol,
+      estado: companion.estado.present ? companion.estado.value : existing.estado,
+      updatedAt: DateTime.now(),
+      pendingSync: companion.pendingSync.present
+          ? companion.pendingSync.value
+          : existing.pendingSync,
     );
 
-    await _reloadCache();
-    notifyListeners();
+    await (update(usuarios)..where((t) => t.id.equals(id))).replace(updated);
   }
 
-  Future<void> submitApplication(String id, AppUser actor) async {
-    await _simulateAction();
-    final application = _applicationsCache.firstWhere((item) => item.id == id);
-    if (!_workflow.canSubmit(actor, application)) {
+  Future<void> setUsuarioEstado(String id, String estado) async {
+    final existing = await getUsuarioById(id);
+    if (existing == null) return;
+
+    await (update(usuarios)..where((t) => t.id.equals(id))).write(
+      UsuariosCompanion(
+        estado: Value(estado),
+        updatedAt: Value(DateTime.now()),
+        pendingSync: const Value(true),
+      ),
+    );
+  }
+
+  Stream<List<SolicitudMobilidadData>> watchSolicitudes() {
+    return (select(solicitudMovilidad)
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)]))
+        .watch();
+  }
+
+  Stream<List<SolicitudMobilidadData>> watchSolicitudesDeEstudiante(
+    String estudianteId,
+  ) {
+    return (select(solicitudMovilidad)
+          ..where((t) => t.estudianteId.equals(estudianteId))
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)]))
+        .watch();
+  }
+
+  Future<List<SolicitudMobilidadData>> getAllSolicitudes() async {
+    return (select(solicitudMovilidad)
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)]))
+        .get();
+  }
+
+  Future<SolicitudMobilidadData?> getSolicitudById(String id) async {
+    return (select(solicitudMovilidad)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+  }
+
+  Future<String> crearSolicitud(SolicitudMovilidadCompanion companion) async {
+    final now = DateTime.now();
+    final id = _uuid.v4();
+    await into(solicitudMovilidad).insert(
+      companion.copyWith(
+        id: Value(id),
+        estado: const Value('borrador'),
+        bloqueada: const Value(false),
+        fechaCreacion: Value(now),
+        fechaActualizacion: Value(now),
+        pendingSync: const Value(true),
+      ),
+    );
+    return id;
+  }
+
+  Future<void> actualizarSolicitud(SolicitudMovilidadCompanion companion) async {
+    final id = companion.id.present ? companion.id.value : null;
+    if (id == null) {
+      throw ArgumentError('El id de la solicitud es obligatorio para actualizar.');
+    }
+
+    final existing = await getSolicitudById(id);
+    if (existing == null) {
+      throw StateError('Solicitud no encontrada.');
+    }
+    if (existing.estado != 'borrador' || existing.bloqueada) {
+      throw StateError('Solo una solicitud en borrador puede editarse.');
+    }
+
+    final updated = existing.copyWith(
+      estudianteId: companion.estudianteId.present
+          ? companion.estudianteId.value
+          : existing.estudianteId,
+      tipoMovilidad: companion.tipoMovilidad.present
+          ? companion.tipoMovilidad.value
+          : existing.tipoMovilidad,
+      fechaNacimiento: companion.fechaNacimiento.present
+          ? companion.fechaNacimiento.value
+          : existing.fechaNacimiento,
+      emailInstitucional: companion.emailInstitucional.present
+          ? companion.emailInstitucional.value
+          : existing.emailInstitucional,
+      emailPersonal: companion.emailPersonal.present
+          ? companion.emailPersonal.value
+          : existing.emailPersonal,
+      telefono:
+          companion.telefono.present ? companion.telefono.value : existing.telefono,
+      contactoEmergencia: companion.contactoEmergencia.present
+          ? companion.contactoEmergencia.value
+          : existing.contactoEmergencia,
+      relacionContacto: companion.relacionContacto.present
+          ? companion.relacionContacto.value
+          : existing.relacionContacto,
+      universidadDestinoId: companion.universidadDestinoId.present
+          ? companion.universidadDestinoId.value
+          : existing.universidadDestinoId,
+      programaAcademico: companion.programaAcademico.present
+          ? companion.programaAcademico.value
+          : existing.programaAcademico,
+      semestre: companion.semestre.present ? companion.semestre.value : existing.semestre,
+      estado: companion.estado.present ? companion.estado.value : existing.estado,
+      bloqueada: companion.bloqueada.present
+          ? companion.bloqueada.value
+          : existing.bloqueada,
+      fechaCreacion: existing.fechaCreacion,
+      fechaActualizacion: DateTime.now(),
+      pendingSync: companion.pendingSync.present
+          ? companion.pendingSync.value
+          : existing.pendingSync,
+    );
+
+    await (update(solicitudMovilidad)..where((t) => t.id.equals(id))).replace(updated);
+  }
+
+  Future<void> enviarSolicitud(
+    String id,
+    UsuarioData actor,
+    List<DocumentoData> documentos,
+  ) async {
+    final solicitud = await getSolicitudById(id);
+    if (solicitud == null) {
+      throw StateError('Solicitud no encontrada.');
+    }
+    if (!_workflow.canSubmit(actor, solicitud, documentos)) {
       throw StateError('La solicitud no cumple los requisitos de envio.');
     }
-    final submitted = _workflow.submit(application);
-    _recordStatusChange(
-      application,
-      submitted,
-      actor.email,
-      'Envio estudiante',
+
+    final updated = solicitud.copyWith(
+      estado: 'enviada',
+      bloqueada: true,
+      fechaActualizacion: DateTime.now(),
+      pendingSync: true,
     );
-    await _writeApplication(submitted);
-    await _reloadCache();
-    notifyListeners();
+
+    await transaction(() async {
+      await (update(solicitudMovilidad)..where((t) => t.id.equals(id)))
+          .replace(updated);
+      await _registrarCambioEstado(
+        solicitudId: id,
+        usuarioId: actor.id,
+        estadoAnterior: solicitud.estado,
+        estadoNuevo: 'enviada',
+        comentario: 'Solicitud enviada por el estudiante.',
+      );
+    });
   }
 
-  Future<void> deleteApplication(String id) async {
-    await _simulateAction();
-
-    await (delete(
-      mobilityApplicationRecords,
-    )..where((table) => table.id.equals(id))).go();
-
-    await _reloadCache();
-    notifyListeners();
-  }
-
-  Future<void> reviewApplication({
+  Future<void> revisarSolicitud({
     required String id,
-    required RequestStatus status,
-    required String comment,
-    String rejectionReason = '',
+    required String decision,
+    required String comentario,
+    required UsuarioData coordinador,
   }) async {
-    await _simulateAction();
-    final actor = currentUser;
-    final application = _applicationsCache.firstWhere((item) => item.id == id);
-    if (actor == null || !_workflow.canReview(actor, application)) {
+    final solicitud = await getSolicitudById(id);
+    if (solicitud == null) {
+      throw StateError('Solicitud no encontrada.');
+    }
+    if (!_workflow.canReview(coordinador, solicitud)) {
       throw StateError('Solo un coordinador puede revisar esta solicitud.');
     }
-    final reviewed = status == RequestStatus.approved
-        ? _workflow.approve(application, comment)
-        : _workflow.reject(
-            application,
-            comment: comment,
-            reason: rejectionReason,
-          );
+    if (decision != 'aprobada' && decision != 'rechazada') {
+      throw ArgumentError('Decision invalida.');
+    }
+    if (decision == 'rechazada' && comentario.trim().isEmpty) {
+      throw ArgumentError('Una solicitud rechazada debe tener comentario.');
+    }
 
-    _recordStatusChange(application, reviewed, actor.email, comment);
-    await _writeApplication(reviewed);
+    await transaction(() async {
+      await into(aprobacion).insert(
+        AprobacionCompanion.insert(
+          id: _uuid.v4(),
+          solicitudId: id,
+          coordinadorId: coordinador.id,
+          usuarioId: solicitud.estudianteId,
+          decision: decision,
+          comentario: comentario.trim(),
+          fechaDecision: DateTime.now(),
+          pendingSync: const Value(true),
+        ),
+      );
 
-    await _reloadCache();
-    notifyListeners();
+      final updated = solicitud.copyWith(
+        estado: decision,
+        bloqueada: true,
+        fechaActualizacion: DateTime.now(),
+        pendingSync: true,
+      );
+
+      await (update(solicitudMovilidad)..where((t) => t.id.equals(id)))
+          .replace(updated);
+      await _registrarCambioEstado(
+        solicitudId: id,
+        usuarioId: coordinador.id,
+        estadoAnterior: solicitud.estado,
+        estadoNuevo: decision,
+        comentario: comentario.trim(),
+      );
+    });
   }
 
-  Future<List<AppUser>> getAllUsers() async {
-    final rows = await select(userRecords).get();
-    return rows.map(_mapUserRowToModel).toList();
+  Future<void> cancelarSolicitud(String id, UsuarioData actor) async {
+    final solicitud = await getSolicitudById(id);
+    if (solicitud == null) return;
+    if (solicitud.estado == 'aprobada') {
+      throw StateError('Una solicitud aprobada no puede cancelarse.');
+    }
+
+    final updated = solicitud.copyWith(
+      estado: 'cancelada',
+      bloqueada: true,
+      fechaActualizacion: DateTime.now(),
+      pendingSync: true,
+    );
+
+    await transaction(() async {
+      await (update(solicitudMovilidad)..where((t) => t.id.equals(id)))
+          .replace(updated);
+      await _registrarCambioEstado(
+        solicitudId: id,
+        usuarioId: actor.id,
+        estadoAnterior: solicitud.estado,
+        estadoNuevo: 'cancelada',
+        comentario: 'Solicitud cancelada.',
+      );
+    });
   }
 
-  Future<AppUser> insertUser(AppUser user) async {
-    await into(userRecords).insert(
-      UserRecordsCompanion.insert(
-        firstName: user.firstName.trim(),
-        lastName: user.lastName.trim(),
-        email: user.email.trim().toLowerCase(),
-        password: user.password,
-        role: user.role.name,
+  Future<void> eliminarSolicitud(String id) async {
+    final solicitud = await getSolicitudById(id);
+    if (solicitud == null) return;
+    if (solicitud.estado != 'borrador') {
+      throw StateError('Solo las solicitudes en borrador pueden eliminarse.');
+    }
+    await (delete(solicitudMovilidad)..where((t) => t.id.equals(id))).go();
+  }
+
+  Future<List<UniversidadDestinoData>> getAllUniversidades() async {
+    return select(universidadDestino).get();
+  }
+
+  Stream<List<UniversidadDestinoData>> watchUniversidades() {
+    return select(universidadDestino).watch();
+  }
+
+  Future<UniversidadDestinoData?> getUniversidadById(String id) async {
+    return (select(universidadDestino)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+  }
+
+  Future<void> insertarUniversidad(UniversidadDestinoCompanion companion) async {
+    await into(universidadDestino).insert(
+      companion.copyWith(
+        id: Value( _uuid.v4()),
+        convenioActivo: companion.convenioActivo.present
+            ? companion.convenioActivo
+            : const Value(true),
+        pendingSync: const Value(true),
       ),
     );
-    await _reloadCache();
-    notifyListeners();
-    return (await getUserByEmail(user.email))!;
   }
 
-  Future<AppUser?> getUserByCredentials({
-    required String email,
-    required String password,
+  Future<void> actualizarUniversidad(UniversidadDestinoCompanion companion) async {
+    final id = companion.id.present ? companion.id.value : null;
+    if (id == null) {
+      throw ArgumentError('El id de la universidad es obligatorio.');
+    }
+    final existing = await getUniversidadById(id);
+    if (existing == null) {
+      throw StateError('Universidad no encontrada.');
+    }
+
+    final updated = existing.copyWith(
+      nombre:
+          companion.nombre.present ? companion.nombre.value : existing.nombre,
+      pais: companion.pais.present ? companion.pais.value : existing.pais,
+      ciudad: companion.ciudad.present ? companion.ciudad.value : existing.ciudad,
+      tipoMovilidad: companion.tipoMovilidad.present
+          ? companion.tipoMovilidad.value
+          : existing.tipoMovilidad,
+      convenioActivo: companion.convenioActivo.present
+          ? companion.convenioActivo.value
+          : existing.convenioActivo,
+      pendingSync: companion.pendingSync.present
+          ? companion.pendingSync.value
+          : existing.pendingSync,
+    );
+
+    await (update(universidadDestino)..where((t) => t.id.equals(id)))
+        .replace(updated);
+  }
+
+  Future<List<DocumentoData>> getDocumentosDeSolicitud(String solicitudId) async {
+    return (select(documento)
+          ..where((t) => t.solicitudId.equals(solicitudId))
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaSubida)]))
+        .get();
+  }
+
+  Stream<List<DocumentoData>> watchDocumentosDeSolicitud(String solicitudId) {
+    return (select(documento)
+          ..where((t) => t.solicitudId.equals(solicitudId))
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaSubida)]))
+        .watch();
+  }
+
+  Future<void> insertarDocumento(DocumentoCompanion companion) async {
+    await into(documento).insert(
+      DocumentoCompanion.insert(
+        id: _uuid.v4(),
+        solicitudId: companion.solicitudId.value,
+        tipoDocumento: companion.tipoDocumento.value,
+        nombreArchivo: companion.nombreArchivo.value,
+        estado: const Value('pendiente'),
+        fechaSubida: companion.fechaSubida.present
+            ? companion.fechaSubida.value
+            : DateTime.now(),
+        pendingSync: const Value(true),
+      ),
+    );
+  }
+
+  Future<void> actualizarDocumento(DocumentoCompanion companion) async {
+    final id = companion.id.present ? companion.id.value : null;
+    if (id == null) {
+      throw ArgumentError('El id del documento es obligatorio.');
+    }
+    final existing = await (select(documento)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+    if (existing == null) {
+      throw StateError('Documento no encontrado.');
+    }
+
+    final updated = existing.copyWith(
+      solicitudId: companion.solicitudId.present
+          ? companion.solicitudId.value
+          : existing.solicitudId,
+      tipoDocumento: companion.tipoDocumento.present
+          ? companion.tipoDocumento.value
+          : existing.tipoDocumento,
+      nombreArchivo: companion.nombreArchivo.present
+          ? companion.nombreArchivo.value
+          : existing.nombreArchivo,
+      estado: companion.estado.present ? companion.estado.value : existing.estado,
+      fechaSubida: companion.fechaSubida.present
+          ? companion.fechaSubida.value
+          : existing.fechaSubida,
+      pendingSync: companion.pendingSync.present
+          ? companion.pendingSync.value
+          : existing.pendingSync,
+    );
+
+    await (update(documento)..where((t) => t.id.equals(id))).replace(updated);
+  }
+
+  Future<void> eliminarDocumento(String id) async {
+    await (delete(documento)..where((t) => t.id.equals(id))).go();
+  }
+
+  Future<List<HistorialEstadoData>> getHistorialDeSolicitud(String solicitudId) async {
+    return (select(historialEstado)
+          ..where((t) => t.solicitudId.equals(solicitudId))
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaCambio)]))
+        .get();
+  }
+
+  Stream<List<HistorialEstadoData>> watchHistorialDeSolicitud(String solicitudId) {
+    return (select(historialEstado)
+          ..where((t) => t.solicitudId.equals(solicitudId))
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaCambio)]))
+        .watch();
+  }
+
+  Future<void> _registrarCambioEstado({
+    required String solicitudId,
+    required String usuarioId,
+    required String estadoAnterior,
+    required String estadoNuevo,
+    String? comentario,
   }) async {
-    final user = await getUserByEmail(email);
-    if (user == null || user.password != password || !user.isActive) {
-      return null;
-    }
-    return user;
-  }
-
-  Future<AppUser?> getUserByEmail(String email) async {
-    final normalizedEmail = email.trim().toLowerCase();
-    final row = await (select(
-      userRecords,
-    )..where((table) => table.email.equals(normalizedEmail))).getSingleOrNull();
-    return row == null ? null : _mapUserRowToModel(row);
-  }
-
-  Future<void> updateUser(AppUser user) async {
-    await (update(
-      userRecords,
-    )..where((table) => table.email.equals(user.email))).write(
-      UserRecordsCompanion(
-        firstName: Value(user.firstName.trim()),
-        lastName: Value(user.lastName.trim()),
-        password: Value(user.password),
-        role: Value(user.role.name),
+    await into(historialEstado).insert(
+      HistorialEstadoCompanion.insert(
+        id: _uuid.v4(),
+        solicitudId: solicitudId,
+        usuarioId: usuarioId,
+        estadoAnterior: estadoAnterior,
+        estadoNuevo: estadoNuevo,
+        comentario: Value(comentario),
+        fechaCambio: DateTime.now(),
+        pendingSync: const Value(true),
       ),
     );
-    await _reloadCache();
-    notifyListeners();
   }
 
-  Future<void> setUserActive(String email, bool isActive) async {
-    final index = _usersCache.indexWhere((user) => user.email == email);
-    if (index == -1) {
-      return;
-    }
-    if (isActive) {
-      _inactiveUserEmails.remove(email);
-    } else {
-      _inactiveUserEmails.add(email);
-    }
-    _usersCache[index] = _usersCache[index].copyWith(isActive: isActive);
-    notifyListeners();
+  Future<List<AprobacionData>> getAprobacionesDeSolicitud(String solicitudId) async {
+    return (select(aprobacion)
+          ..where((t) => t.solicitudId.equals(solicitudId))
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaDecision)]))
+        .get();
   }
 
-  Future<List<MobilityApplication>> getAllApplications() async {
-    final rows = await (select(
-      mobilityApplicationRecords,
-    )..orderBy([(table) => OrderingTerm.desc(table.createdAt)])).get();
-    return rows.map(_mapApplicationRowToModel).toList();
-  }
-
-  Future<void> upsertApplicationFromRemote(MobilityApplication application) {
-    return into(
-      mobilityApplicationRecords,
-    ).insertOnConflictUpdate(_applicationCompanion(application));
+  Future<AprobacionData?> getUltimaAprobacion(String solicitudId) async {
+    return (select(aprobacion)
+          ..where((t) => t.solicitudId.equals(solicitudId))
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaDecision)])
+          ..limit(1))
+        .getSingleOrNull();
   }
 
   Future<void> _initialize() async {
     await _seedDemoDataIfNeeded();
-    await _reloadCache();
     notifyListeners();
   }
 
   Future<void> _seedDemoDataIfNeeded() async {
-    final userCountExpression = userRecords.id.count();
-    final userCountQuery = selectOnly(userRecords)
-      ..addColumns([userCountExpression]);
-    final userCountRow = await userCountQuery.getSingle();
-    final userCount = userCountRow.read(userCountExpression) ?? 0;
-
-    if (userCount == 0) {
+    final hasUsers = await (select(usuarios)..limit(1)).getSingleOrNull();
+    if (hasUsers == null) {
+      final now = DateTime.now();
       await batch((batch) {
-        batch.insertAll(userRecords, [
-          UserRecordsCompanion.insert(
-            firstName: 'Ana',
-            lastName: 'Admin',
-            email: 'admin@xchange.edu.co',
-            password: 'Admin123',
-            role: UserRole.admin.name,
-          ),
-          UserRecordsCompanion.insert(
-            firstName: 'Sara',
-            lastName: 'Estudiante',
-            email: 'user@xchange.edu.co',
-            password: 'User12345',
-            role: UserRole.student.name,
-          ),
-          UserRecordsCompanion.insert(
-            firstName: 'Carlos',
-            lastName: 'Coordinador',
-            email: 'coordinador@xchange.edu.co',
-            password: 'Coord123',
-            role: UserRole.coordinator.name,
-          ),
-        ]);
+        batch.insertAll(
+          usuarios,
+          [
+            UsuariosCompanion.insert(
+              id: _uuid.v4(),
+              nombre: 'Ana',
+              apellido: 'Admin',
+              email: 'admin@xchange.edu.co',
+              passwordHash: 'Admin123',
+              rol: 'administrador',
+              createdAt: now,
+              updatedAt: now,
+              pendingSync: const Value(true),
+            ),
+            UsuariosCompanion.insert(
+              id: _uuid.v4(),
+              nombre: 'Carlos',
+              apellido: 'Coordinador',
+              email: 'coordinador@xchange.edu.co',
+              passwordHash: 'Coord123',
+              rol: 'coordinador',
+              createdAt: now,
+              updatedAt: now,
+              pendingSync: const Value(true),
+            ),
+            UsuariosCompanion.insert(
+              id: _uuid.v4(),
+              nombre: 'Sara',
+              apellido: 'Estudiante',
+              email: 'estudiante@xchange.edu.co',
+              passwordHash: 'User12345',
+              rol: 'estudiante',
+              createdAt: now,
+              updatedAt: now,
+              pendingSync: const Value(true),
+            ),
+          ],
+        );
       });
     }
 
-    final coordinator = await getUserByEmail('coordinador@xchange.edu.co');
-    if (coordinator == null) {
-      await into(userRecords).insert(
-        UserRecordsCompanion.insert(
-          firstName: 'Carlos',
-          lastName: 'Coordinador',
-          email: 'coordinador@xchange.edu.co',
-          password: 'Coord123',
-          role: UserRole.coordinator.name,
-        ),
-      );
-    }
-
-    final applicationCountExpression = mobilityApplicationRecords.id.count();
-    final applicationCountQuery = selectOnly(mobilityApplicationRecords)
-      ..addColumns([applicationCountExpression]);
-    final applicationCountRow = await applicationCountQuery.getSingle();
-    final applicationCount =
-        applicationCountRow.read(applicationCountExpression) ?? 0;
-
-    if (applicationCount == 0) {
-      final demoApplications = [
-        MobilityApplication(
-          id: 'SOL-001',
-          userEmail: 'user@xchange.edu.co',
-          createdAt: DateTime.now().subtract(const Duration(days: 5)),
-          firstName: 'Sara',
-          lastName: 'Estudiante',
-          documentType: 'CC',
-          documentNumber: '1032456789',
-          birthDate: DateTime(2003, 3, 15),
-          institutionalEmail: 'sara@udem.edu.co',
-          personalEmail: 'sara.personal@email.com',
-          phone: '3001234567',
-          emergencyContact: 'Marta Estudiante',
-          relationship: 'Madre',
-          currentUniversity: 'Universidad de Medellin',
-          faculty: 'Ingenieria',
-          program: 'Ingenieria de Software',
-          currentSemester: 7,
-          average: 4.2,
-          languageLevel: 'B2',
-          languageScore: 'TOEFL 90',
-          destinationUniversity: 'Universidad de Valencia',
-          country: 'Espana',
-          city: 'Valencia',
-          destinationFaculty: 'Escuela Tecnica Superior',
-          studyArea: 'Desarrollo de Software',
-          exchangeSemester: '2026-2',
-          travelDate: DateTime.now().add(const Duration(days: 120)),
-          returnDate: DateTime.now().add(const Duration(days: 280)),
-        ),
-        MobilityApplication(
-          id: 'SOL-002',
-          userEmail: 'user@xchange.edu.co',
-          createdAt: DateTime.now().subtract(const Duration(days: 20)),
-          firstName: 'Sara',
-          lastName: 'Estudiante',
-          documentType: 'CC',
-          documentNumber: '1032456789',
-          birthDate: DateTime(2003, 3, 15),
-          institutionalEmail: 'sara@udem.edu.co',
-          personalEmail: 'sara.personal@email.com',
-          phone: '3001234567',
-          emergencyContact: 'Marta Estudiante',
-          relationship: 'Madre',
-          currentUniversity: 'Universidad de Medellin',
-          faculty: 'Ingenieria',
-          program: 'Ingenieria de Software',
-          currentSemester: 7,
-          average: 4.2,
-          languageLevel: 'B2',
-          languageScore: 'IELTS 7.0',
-          destinationUniversity: 'Universidad de Buenos Aires',
-          country: 'Argentina',
-          city: 'Buenos Aires',
-          destinationFaculty: 'Facultad de Ingenieria',
-          studyArea: 'Analitica de Datos',
-          exchangeSemester: '2026-1',
-          travelDate: DateTime.now().subtract(const Duration(days: 40)),
-          returnDate: DateTime.now().add(const Duration(days: 45)),
-          status: RequestStatus.approved,
-          adminComment: 'Documentacion completa y promedio destacado.',
-        ),
-        MobilityApplication(
-          id: 'SOL-003',
-          userEmail: 'user@xchange.edu.co',
-          createdAt: DateTime.now().subtract(const Duration(days: 12)),
-          firstName: 'Sara',
-          lastName: 'Estudiante',
-          documentType: 'CC',
-          documentNumber: '1032456789',
-          birthDate: DateTime(2003, 3, 15),
-          institutionalEmail: 'sara@udem.edu.co',
-          personalEmail: 'sara.personal@email.com',
-          phone: '3001234567',
-          emergencyContact: 'Marta Estudiante',
-          relationship: 'Madre',
-          currentUniversity: 'Universidad de Medellin',
-          faculty: 'Ingenieria',
-          program: 'Ingenieria de Software',
-          currentSemester: 7,
-          average: 3.9,
-          languageLevel: 'B1',
-          languageScore: 'DELF B1',
-          destinationUniversity: 'Universite de Lille',
-          country: 'Francia',
-          city: 'Lille',
-          destinationFaculty: 'Sciences et Technologies',
-          studyArea: 'Sistemas Distribuidos',
-          exchangeSemester: '2025-2',
-          travelDate: DateTime.now().subtract(const Duration(days: 90)),
-          returnDate: DateTime.now().subtract(const Duration(days: 10)),
-          status: RequestStatus.rejected,
-          adminComment: 'Se requiere reforzar el nivel de idioma.',
-          rejectionReason: 'El soporte de idioma no cumple el minimo esperado.',
-        ),
-      ];
-
+    final hasUniversidades = await (select(universidadDestino)
+          ..limit(1))
+        .getSingleOrNull();
+    if (hasUniversidades == null) {
       await batch((batch) {
         batch.insertAll(
-          mobilityApplicationRecords,
-          demoApplications.map(_applicationCompanion).toList(),
+          universidadDestino,
+          [
+            UniversidadDestinoCompanion.insert(
+              id: _uuid.v4(),
+              nombre: 'Universidad de Valencia',
+              pais: 'España',
+              ciudad: 'Valencia',
+              tipoMovilidad: 'internacional',
+              convenioActivo: const Value(true),
+              pendingSync: const Value(true),
+            ),
+            UniversidadDestinoCompanion.insert(
+              id: _uuid.v4(),
+              nombre: 'Universidad de Buenos Aires',
+              pais: 'Argentina',
+              ciudad: 'Buenos Aires',
+              tipoMovilidad: 'internacional',
+              convenioActivo: const Value(true),
+              pendingSync: const Value(true),
+            ),
+            UniversidadDestinoCompanion.insert(
+              id: _uuid.v4(),
+              nombre: 'Universidad Nacional de Colombia',
+              pais: 'Colombia',
+              ciudad: 'Bogotá',
+              tipoMovilidad: 'nacional',
+              convenioActivo: const Value(true),
+              pendingSync: const Value(true),
+            ),
+          ],
         );
       });
     }
   }
 
-  Future<void> _reloadCache() async {
-    final userRows = await select(userRecords).get();
-    final applicationRows = await select(mobilityApplicationRecords).get();
-
-    _usersCache
-      ..clear()
-      ..addAll(userRows.map(_mapUserRowToModel));
-
-    _applicationsCache
-      ..clear()
-      ..addAll(applicationRows.map(_mapApplicationRowToModel));
-
-    _updateSequence();
-  }
-
-  void _updateSequence() {
-    final ids = _applicationsCache
-        .map((application) => application.id)
-        .map((id) => int.tryParse(id.replaceFirst('SOL-', '')) ?? 0);
-
-    final maxId = ids.isEmpty ? 0 : ids.reduce((a, b) => a > b ? a : b);
-    _sequence = maxId + 1;
-  }
-
-  Future<void> _simulateAction() async {
-    isBusy = true;
+  void _setBusy(bool value) {
+    isBusy = value;
     notifyListeners();
-    await Future<void>.delayed(const Duration(milliseconds: 700));
-    isBusy = false;
-    notifyListeners();
-  }
-
-  AppUser _mapUserRowToModel(UserRecord row) {
-    return AppUser(
-      firstName: row.firstName,
-      lastName: row.lastName,
-      email: row.email,
-      password: row.password,
-      role: _userRoleFromString(row.role),
-      isActive: !_inactiveUserEmails.contains(row.email),
-    );
-  }
-
-  MobilityApplication _mapApplicationRowToModel(MobilityApplicationRecord row) {
-    return MobilityApplication(
-      id: row.id,
-      userEmail: row.userEmail,
-      createdAt: row.createdAt,
-      firstName: row.firstName,
-      lastName: row.lastName,
-      documentType: row.documentType,
-      documentNumber: row.documentNumber,
-      birthDate: row.birthDate,
-      institutionalEmail: row.institutionalEmail,
-      personalEmail: row.personalEmail,
-      phone: row.phone,
-      emergencyContact: row.emergencyContact,
-      relationship: row.relationship,
-      currentUniversity: row.currentUniversity,
-      faculty: row.faculty,
-      program: row.program,
-      currentSemester: row.currentSemester,
-      average: row.average,
-      languageLevel: row.languageLevel,
-      languageScore: row.languageScore,
-      destinationUniversity: row.destinationUniversity,
-      country: row.country,
-      city: row.city,
-      destinationFaculty: row.destinationFaculty,
-      studyArea: row.studyArea,
-      exchangeSemester: row.exchangeSemester,
-      travelDate: row.travelDate,
-      returnDate: row.returnDate,
-      status: requestStatusFromString(row.status),
-      adminComment: row.adminComment,
-      rejectionReason: row.rejectionReason,
-    );
-  }
-
-  MobilityApplicationRecordsCompanion _applicationCompanion(
-    MobilityApplication application,
-  ) {
-    return MobilityApplicationRecordsCompanion(
-      id: Value(application.id),
-      userEmail: Value(application.userEmail),
-      createdAt: Value(application.createdAt),
-      firstName: Value(application.firstName),
-      lastName: Value(application.lastName),
-      documentType: Value(application.documentType),
-      documentNumber: Value(application.documentNumber),
-      birthDate: Value(application.birthDate),
-      institutionalEmail: Value(application.institutionalEmail),
-      personalEmail: Value(application.personalEmail),
-      phone: Value(application.phone),
-      emergencyContact: Value(application.emergencyContact),
-      relationship: Value(application.relationship),
-      currentUniversity: Value(application.currentUniversity),
-      faculty: Value(application.faculty),
-      program: Value(application.program),
-      currentSemester: Value(application.currentSemester),
-      average: Value(application.average),
-      languageLevel: Value(application.languageLevel),
-      languageScore: Value(application.languageScore),
-      destinationUniversity: Value(application.destinationUniversity),
-      country: Value(application.country),
-      city: Value(application.city),
-      destinationFaculty: Value(application.destinationFaculty),
-      studyArea: Value(application.studyArea),
-      exchangeSemester: Value(application.exchangeSemester),
-      travelDate: Value(application.travelDate),
-      returnDate: Value(application.returnDate),
-      status: Value(application.status.name),
-      adminComment: Value(application.adminComment),
-      rejectionReason: Value(application.rejectionReason),
-    );
-  }
-
-  Future<void> _writeApplication(MobilityApplication application) {
-    return (update(mobilityApplicationRecords)
-          ..where((table) => table.id.equals(application.id)))
-        .write(_applicationCompanion(application));
-  }
-
-  void _recordStatusChange(
-    MobilityApplication from,
-    MobilityApplication to,
-    String actorId,
-    String comment,
-  ) {
-    if (from.status == to.status) {
-      return;
-    }
-    _historyCache.add(
-      RequestHistoryEntry(
-        requestId: to.id,
-        actorId: actorId,
-        from: from.status,
-        to: to.status,
-        comment: comment.trim(),
-        createdAt: DateTime.now(),
-      ),
-    );
   }
 }
 
@@ -721,8 +786,4 @@ class AppStateScope extends InheritedNotifier<AppDatabase> {
     assert(scope != null, 'AppStateScope no encontrado en el arbol.');
     return scope!.notifier!;
   }
-}
-
-UserRole _userRoleFromString(String value) {
-  return userRoleFromString(value);
 }
