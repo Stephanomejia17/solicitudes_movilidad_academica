@@ -1,13 +1,26 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'data/app_database.dart';
 import 'features/admin/pages/admin_dashboard_page.dart';
 import 'features/auth/pages/auth_page.dart';
 import 'features/coordinator/pages/coordinator_dashboard_page.dart';
 import 'features/student/pages/student_dashboard_page.dart';
+import 'firebase_options.dart';
 import 'shared/services/app_theme.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb ||
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS ||
+      defaultTargetPlatform == TargetPlatform.macOS ||
+      defaultTargetPlatform == TargetPlatform.windows) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
   runApp(const MyApp());
 }
 
@@ -57,4 +70,3 @@ class RootView extends StatelessWidget {
     }
   }
 }
-

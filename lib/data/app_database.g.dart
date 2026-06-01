@@ -650,6 +650,54 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _nombresMeta = const VerificationMeta(
+    'nombres',
+  );
+  @override
+  late final GeneratedColumn<String> nombres = GeneratedColumn<String>(
+    'nombres',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _apellidosMeta = const VerificationMeta(
+    'apellidos',
+  );
+  @override
+  late final GeneratedColumn<String> apellidos = GeneratedColumn<String>(
+    'apellidos',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _tipoDocumentoMeta = const VerificationMeta(
+    'tipoDocumento',
+  );
+  @override
+  late final GeneratedColumn<String> tipoDocumento = GeneratedColumn<String>(
+    'tipo_documento',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('CC'),
+  );
+  static const VerificationMeta _numeroDocumentoMeta = const VerificationMeta(
+    'numeroDocumento',
+  );
+  @override
+  late final GeneratedColumn<String> numeroDocumento = GeneratedColumn<String>(
+    'numero_documento',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _fechaNacimientoMeta = const VerificationMeta(
     'fechaNacimiento',
   );
@@ -717,6 +765,31 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _universidadActualMeta = const VerificationMeta(
+    'universidadActual',
+  );
+  @override
+  late final GeneratedColumn<String> universidadActual =
+      GeneratedColumn<String>(
+        'universidad_actual',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('Universidad de Medellin'),
+      );
+  static const VerificationMeta _facultadMeta = const VerificationMeta(
+    'facultad',
+  );
+  @override
+  late final GeneratedColumn<String> facultad = GeneratedColumn<String>(
+    'facultad',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _universidadDestinoIdMeta =
       const VerificationMeta('universidadDestinoId');
   @override
@@ -728,6 +801,66 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _universidadDestinoNombreMeta =
+      const VerificationMeta('universidadDestinoNombre');
+  @override
+  late final GeneratedColumn<String> universidadDestinoNombre =
+      GeneratedColumn<String>(
+        'universidad_destino_nombre',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _paisDestinoMeta = const VerificationMeta(
+    'paisDestino',
+  );
+  @override
+  late final GeneratedColumn<String> paisDestino = GeneratedColumn<String>(
+    'pais_destino',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _ciudadDestinoMeta = const VerificationMeta(
+    'ciudadDestino',
+  );
+  @override
+  late final GeneratedColumn<String> ciudadDestino = GeneratedColumn<String>(
+    'ciudad_destino',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _facultadDestinoMeta = const VerificationMeta(
+    'facultadDestino',
+  );
+  @override
+  late final GeneratedColumn<String> facultadDestino = GeneratedColumn<String>(
+    'facultad_destino',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _areaEstudioMeta = const VerificationMeta(
+    'areaEstudio',
+  );
+  @override
+  late final GeneratedColumn<String> areaEstudio = GeneratedColumn<String>(
+    'area_estudio',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _programaAcademicoMeta = const VerificationMeta(
     'programaAcademico',
   );
@@ -750,6 +883,77 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _promedioAcumuladoMeta = const VerificationMeta(
+    'promedioAcumulado',
+  );
+  @override
+  late final GeneratedColumn<double> promedioAcumulado =
+      GeneratedColumn<double>(
+        'promedio_acumulado',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0.0),
+      );
+  static const VerificationMeta _nivelIdiomaMeta = const VerificationMeta(
+    'nivelIdioma',
+  );
+  @override
+  late final GeneratedColumn<String> nivelIdioma = GeneratedColumn<String>(
+    'nivel_idioma',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _puntajeIdiomaMeta = const VerificationMeta(
+    'puntajeIdioma',
+  );
+  @override
+  late final GeneratedColumn<String> puntajeIdioma = GeneratedColumn<String>(
+    'puntaje_idioma',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _semestreIntercambioMeta =
+      const VerificationMeta('semestreIntercambio');
+  @override
+  late final GeneratedColumn<String> semestreIntercambio =
+      GeneratedColumn<String>(
+        'semestre_intercambio',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _fechaViajeMeta = const VerificationMeta(
+    'fechaViaje',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaViaje = GeneratedColumn<DateTime>(
+    'fecha_viaje',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fechaRegresoMeta = const VerificationMeta(
+    'fechaRegreso',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaRegreso = GeneratedColumn<DateTime>(
+    'fecha_regreso',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
   @override
@@ -819,15 +1023,32 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
     id,
     estudianteId,
     tipoMovilidad,
+    nombres,
+    apellidos,
+    tipoDocumento,
+    numeroDocumento,
     fechaNacimiento,
     emailInstitucional,
     emailPersonal,
     telefono,
     contactoEmergencia,
     relacionContacto,
+    universidadActual,
+    facultad,
     universidadDestinoId,
+    universidadDestinoNombre,
+    paisDestino,
+    ciudadDestino,
+    facultadDestino,
+    areaEstudio,
     programaAcademico,
     semestre,
+    promedioAcumulado,
+    nivelIdioma,
+    puntajeIdioma,
+    semestreIntercambio,
+    fechaViaje,
+    fechaRegreso,
     estado,
     bloqueada,
     fechaCreacion,
@@ -872,6 +1093,36 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
       );
     } else if (isInserting) {
       context.missing(_tipoMovilidadMeta);
+    }
+    if (data.containsKey('nombres')) {
+      context.handle(
+        _nombresMeta,
+        nombres.isAcceptableOrUnknown(data['nombres']!, _nombresMeta),
+      );
+    }
+    if (data.containsKey('apellidos')) {
+      context.handle(
+        _apellidosMeta,
+        apellidos.isAcceptableOrUnknown(data['apellidos']!, _apellidosMeta),
+      );
+    }
+    if (data.containsKey('tipo_documento')) {
+      context.handle(
+        _tipoDocumentoMeta,
+        tipoDocumento.isAcceptableOrUnknown(
+          data['tipo_documento']!,
+          _tipoDocumentoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('numero_documento')) {
+      context.handle(
+        _numeroDocumentoMeta,
+        numeroDocumento.isAcceptableOrUnknown(
+          data['numero_documento']!,
+          _numeroDocumentoMeta,
+        ),
+      );
     }
     if (data.containsKey('fecha_nacimiento')) {
       context.handle(
@@ -936,6 +1187,21 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
     } else if (isInserting) {
       context.missing(_relacionContactoMeta);
     }
+    if (data.containsKey('universidad_actual')) {
+      context.handle(
+        _universidadActualMeta,
+        universidadActual.isAcceptableOrUnknown(
+          data['universidad_actual']!,
+          _universidadActualMeta,
+        ),
+      );
+    }
+    if (data.containsKey('facultad')) {
+      context.handle(
+        _facultadMeta,
+        facultad.isAcceptableOrUnknown(data['facultad']!, _facultadMeta),
+      );
+    }
     if (data.containsKey('universidad_destino_id')) {
       context.handle(
         _universidadDestinoIdMeta,
@@ -946,6 +1212,51 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
       );
     } else if (isInserting) {
       context.missing(_universidadDestinoIdMeta);
+    }
+    if (data.containsKey('universidad_destino_nombre')) {
+      context.handle(
+        _universidadDestinoNombreMeta,
+        universidadDestinoNombre.isAcceptableOrUnknown(
+          data['universidad_destino_nombre']!,
+          _universidadDestinoNombreMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pais_destino')) {
+      context.handle(
+        _paisDestinoMeta,
+        paisDestino.isAcceptableOrUnknown(
+          data['pais_destino']!,
+          _paisDestinoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('ciudad_destino')) {
+      context.handle(
+        _ciudadDestinoMeta,
+        ciudadDestino.isAcceptableOrUnknown(
+          data['ciudad_destino']!,
+          _ciudadDestinoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('facultad_destino')) {
+      context.handle(
+        _facultadDestinoMeta,
+        facultadDestino.isAcceptableOrUnknown(
+          data['facultad_destino']!,
+          _facultadDestinoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('area_estudio')) {
+      context.handle(
+        _areaEstudioMeta,
+        areaEstudio.isAcceptableOrUnknown(
+          data['area_estudio']!,
+          _areaEstudioMeta,
+        ),
+      );
     }
     if (data.containsKey('programa_academico')) {
       context.handle(
@@ -965,6 +1276,57 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
       );
     } else if (isInserting) {
       context.missing(_semestreMeta);
+    }
+    if (data.containsKey('promedio_acumulado')) {
+      context.handle(
+        _promedioAcumuladoMeta,
+        promedioAcumulado.isAcceptableOrUnknown(
+          data['promedio_acumulado']!,
+          _promedioAcumuladoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('nivel_idioma')) {
+      context.handle(
+        _nivelIdiomaMeta,
+        nivelIdioma.isAcceptableOrUnknown(
+          data['nivel_idioma']!,
+          _nivelIdiomaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('puntaje_idioma')) {
+      context.handle(
+        _puntajeIdiomaMeta,
+        puntajeIdioma.isAcceptableOrUnknown(
+          data['puntaje_idioma']!,
+          _puntajeIdiomaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('semestre_intercambio')) {
+      context.handle(
+        _semestreIntercambioMeta,
+        semestreIntercambio.isAcceptableOrUnknown(
+          data['semestre_intercambio']!,
+          _semestreIntercambioMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fecha_viaje')) {
+      context.handle(
+        _fechaViajeMeta,
+        fechaViaje.isAcceptableOrUnknown(data['fecha_viaje']!, _fechaViajeMeta),
+      );
+    }
+    if (data.containsKey('fecha_regreso')) {
+      context.handle(
+        _fechaRegresoMeta,
+        fechaRegreso.isAcceptableOrUnknown(
+          data['fecha_regreso']!,
+          _fechaRegresoMeta,
+        ),
+      );
     }
     if (data.containsKey('estado')) {
       context.handle(
@@ -1030,6 +1392,22 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
         DriftSqlType.string,
         data['${effectivePrefix}tipo_movilidad'],
       )!,
+      nombres: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nombres'],
+      )!,
+      apellidos: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}apellidos'],
+      )!,
+      tipoDocumento: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tipo_documento'],
+      )!,
+      numeroDocumento: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}numero_documento'],
+      )!,
       fechaNacimiento: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}fecha_nacimiento'],
@@ -1054,9 +1432,37 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
         DriftSqlType.string,
         data['${effectivePrefix}relacion_contacto'],
       )!,
+      universidadActual: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}universidad_actual'],
+      )!,
+      facultad: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}facultad'],
+      )!,
       universidadDestinoId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}universidad_destino_id'],
+      )!,
+      universidadDestinoNombre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}universidad_destino_nombre'],
+      )!,
+      paisDestino: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pais_destino'],
+      )!,
+      ciudadDestino: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ciudad_destino'],
+      )!,
+      facultadDestino: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}facultad_destino'],
+      )!,
+      areaEstudio: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}area_estudio'],
       )!,
       programaAcademico: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -1066,6 +1472,30 @@ class $SolicitudMovilidadTable extends SolicitudMovilidad
         DriftSqlType.int,
         data['${effectivePrefix}semestre'],
       )!,
+      promedioAcumulado: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}promedio_acumulado'],
+      )!,
+      nivelIdioma: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nivel_idioma'],
+      )!,
+      puntajeIdioma: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}puntaje_idioma'],
+      )!,
+      semestreIntercambio: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}semestre_intercambio'],
+      )!,
+      fechaViaje: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_viaje'],
+      ),
+      fechaRegreso: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_regreso'],
+      ),
       estado: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}estado'],
@@ -1100,15 +1530,32 @@ class SolicitudMobilidadData extends DataClass
   final String id;
   final String estudianteId;
   final String tipoMovilidad;
+  final String nombres;
+  final String apellidos;
+  final String tipoDocumento;
+  final String numeroDocumento;
   final DateTime fechaNacimiento;
   final String emailInstitucional;
   final String emailPersonal;
   final String telefono;
   final String contactoEmergencia;
   final String relacionContacto;
+  final String universidadActual;
+  final String facultad;
   final String universidadDestinoId;
+  final String universidadDestinoNombre;
+  final String paisDestino;
+  final String ciudadDestino;
+  final String facultadDestino;
+  final String areaEstudio;
   final String programaAcademico;
   final int semestre;
+  final double promedioAcumulado;
+  final String nivelIdioma;
+  final String puntajeIdioma;
+  final String semestreIntercambio;
+  final DateTime? fechaViaje;
+  final DateTime? fechaRegreso;
   final String estado;
   final bool bloqueada;
   final DateTime fechaCreacion;
@@ -1118,15 +1565,32 @@ class SolicitudMobilidadData extends DataClass
     required this.id,
     required this.estudianteId,
     required this.tipoMovilidad,
+    required this.nombres,
+    required this.apellidos,
+    required this.tipoDocumento,
+    required this.numeroDocumento,
     required this.fechaNacimiento,
     required this.emailInstitucional,
     required this.emailPersonal,
     required this.telefono,
     required this.contactoEmergencia,
     required this.relacionContacto,
+    required this.universidadActual,
+    required this.facultad,
     required this.universidadDestinoId,
+    required this.universidadDestinoNombre,
+    required this.paisDestino,
+    required this.ciudadDestino,
+    required this.facultadDestino,
+    required this.areaEstudio,
     required this.programaAcademico,
     required this.semestre,
+    required this.promedioAcumulado,
+    required this.nivelIdioma,
+    required this.puntajeIdioma,
+    required this.semestreIntercambio,
+    this.fechaViaje,
+    this.fechaRegreso,
     required this.estado,
     required this.bloqueada,
     required this.fechaCreacion,
@@ -1139,15 +1603,38 @@ class SolicitudMobilidadData extends DataClass
     map['id'] = Variable<String>(id);
     map['estudiante_id'] = Variable<String>(estudianteId);
     map['tipo_movilidad'] = Variable<String>(tipoMovilidad);
+    map['nombres'] = Variable<String>(nombres);
+    map['apellidos'] = Variable<String>(apellidos);
+    map['tipo_documento'] = Variable<String>(tipoDocumento);
+    map['numero_documento'] = Variable<String>(numeroDocumento);
     map['fecha_nacimiento'] = Variable<DateTime>(fechaNacimiento);
     map['email_institucional'] = Variable<String>(emailInstitucional);
     map['email_personal'] = Variable<String>(emailPersonal);
     map['telefono'] = Variable<String>(telefono);
     map['contacto_emergencia'] = Variable<String>(contactoEmergencia);
     map['relacion_contacto'] = Variable<String>(relacionContacto);
+    map['universidad_actual'] = Variable<String>(universidadActual);
+    map['facultad'] = Variable<String>(facultad);
     map['universidad_destino_id'] = Variable<String>(universidadDestinoId);
+    map['universidad_destino_nombre'] = Variable<String>(
+      universidadDestinoNombre,
+    );
+    map['pais_destino'] = Variable<String>(paisDestino);
+    map['ciudad_destino'] = Variable<String>(ciudadDestino);
+    map['facultad_destino'] = Variable<String>(facultadDestino);
+    map['area_estudio'] = Variable<String>(areaEstudio);
     map['programa_academico'] = Variable<String>(programaAcademico);
     map['semestre'] = Variable<int>(semestre);
+    map['promedio_acumulado'] = Variable<double>(promedioAcumulado);
+    map['nivel_idioma'] = Variable<String>(nivelIdioma);
+    map['puntaje_idioma'] = Variable<String>(puntajeIdioma);
+    map['semestre_intercambio'] = Variable<String>(semestreIntercambio);
+    if (!nullToAbsent || fechaViaje != null) {
+      map['fecha_viaje'] = Variable<DateTime>(fechaViaje);
+    }
+    if (!nullToAbsent || fechaRegreso != null) {
+      map['fecha_regreso'] = Variable<DateTime>(fechaRegreso);
+    }
     map['estado'] = Variable<String>(estado);
     map['bloqueada'] = Variable<bool>(bloqueada);
     map['fecha_creacion'] = Variable<DateTime>(fechaCreacion);
@@ -1161,15 +1648,36 @@ class SolicitudMobilidadData extends DataClass
       id: Value(id),
       estudianteId: Value(estudianteId),
       tipoMovilidad: Value(tipoMovilidad),
+      nombres: Value(nombres),
+      apellidos: Value(apellidos),
+      tipoDocumento: Value(tipoDocumento),
+      numeroDocumento: Value(numeroDocumento),
       fechaNacimiento: Value(fechaNacimiento),
       emailInstitucional: Value(emailInstitucional),
       emailPersonal: Value(emailPersonal),
       telefono: Value(telefono),
       contactoEmergencia: Value(contactoEmergencia),
       relacionContacto: Value(relacionContacto),
+      universidadActual: Value(universidadActual),
+      facultad: Value(facultad),
       universidadDestinoId: Value(universidadDestinoId),
+      universidadDestinoNombre: Value(universidadDestinoNombre),
+      paisDestino: Value(paisDestino),
+      ciudadDestino: Value(ciudadDestino),
+      facultadDestino: Value(facultadDestino),
+      areaEstudio: Value(areaEstudio),
       programaAcademico: Value(programaAcademico),
       semestre: Value(semestre),
+      promedioAcumulado: Value(promedioAcumulado),
+      nivelIdioma: Value(nivelIdioma),
+      puntajeIdioma: Value(puntajeIdioma),
+      semestreIntercambio: Value(semestreIntercambio),
+      fechaViaje: fechaViaje == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaViaje),
+      fechaRegreso: fechaRegreso == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaRegreso),
       estado: Value(estado),
       bloqueada: Value(bloqueada),
       fechaCreacion: Value(fechaCreacion),
@@ -1187,6 +1695,10 @@ class SolicitudMobilidadData extends DataClass
       id: serializer.fromJson<String>(json['id']),
       estudianteId: serializer.fromJson<String>(json['estudianteId']),
       tipoMovilidad: serializer.fromJson<String>(json['tipoMovilidad']),
+      nombres: serializer.fromJson<String>(json['nombres']),
+      apellidos: serializer.fromJson<String>(json['apellidos']),
+      tipoDocumento: serializer.fromJson<String>(json['tipoDocumento']),
+      numeroDocumento: serializer.fromJson<String>(json['numeroDocumento']),
       fechaNacimiento: serializer.fromJson<DateTime>(json['fechaNacimiento']),
       emailInstitucional: serializer.fromJson<String>(
         json['emailInstitucional'],
@@ -1197,11 +1709,28 @@ class SolicitudMobilidadData extends DataClass
         json['contactoEmergencia'],
       ),
       relacionContacto: serializer.fromJson<String>(json['relacionContacto']),
+      universidadActual: serializer.fromJson<String>(json['universidadActual']),
+      facultad: serializer.fromJson<String>(json['facultad']),
       universidadDestinoId: serializer.fromJson<String>(
         json['universidadDestinoId'],
       ),
+      universidadDestinoNombre: serializer.fromJson<String>(
+        json['universidadDestinoNombre'],
+      ),
+      paisDestino: serializer.fromJson<String>(json['paisDestino']),
+      ciudadDestino: serializer.fromJson<String>(json['ciudadDestino']),
+      facultadDestino: serializer.fromJson<String>(json['facultadDestino']),
+      areaEstudio: serializer.fromJson<String>(json['areaEstudio']),
       programaAcademico: serializer.fromJson<String>(json['programaAcademico']),
       semestre: serializer.fromJson<int>(json['semestre']),
+      promedioAcumulado: serializer.fromJson<double>(json['promedioAcumulado']),
+      nivelIdioma: serializer.fromJson<String>(json['nivelIdioma']),
+      puntajeIdioma: serializer.fromJson<String>(json['puntajeIdioma']),
+      semestreIntercambio: serializer.fromJson<String>(
+        json['semestreIntercambio'],
+      ),
+      fechaViaje: serializer.fromJson<DateTime?>(json['fechaViaje']),
+      fechaRegreso: serializer.fromJson<DateTime?>(json['fechaRegreso']),
       estado: serializer.fromJson<String>(json['estado']),
       bloqueada: serializer.fromJson<bool>(json['bloqueada']),
       fechaCreacion: serializer.fromJson<DateTime>(json['fechaCreacion']),
@@ -1218,15 +1747,34 @@ class SolicitudMobilidadData extends DataClass
       'id': serializer.toJson<String>(id),
       'estudianteId': serializer.toJson<String>(estudianteId),
       'tipoMovilidad': serializer.toJson<String>(tipoMovilidad),
+      'nombres': serializer.toJson<String>(nombres),
+      'apellidos': serializer.toJson<String>(apellidos),
+      'tipoDocumento': serializer.toJson<String>(tipoDocumento),
+      'numeroDocumento': serializer.toJson<String>(numeroDocumento),
       'fechaNacimiento': serializer.toJson<DateTime>(fechaNacimiento),
       'emailInstitucional': serializer.toJson<String>(emailInstitucional),
       'emailPersonal': serializer.toJson<String>(emailPersonal),
       'telefono': serializer.toJson<String>(telefono),
       'contactoEmergencia': serializer.toJson<String>(contactoEmergencia),
       'relacionContacto': serializer.toJson<String>(relacionContacto),
+      'universidadActual': serializer.toJson<String>(universidadActual),
+      'facultad': serializer.toJson<String>(facultad),
       'universidadDestinoId': serializer.toJson<String>(universidadDestinoId),
+      'universidadDestinoNombre': serializer.toJson<String>(
+        universidadDestinoNombre,
+      ),
+      'paisDestino': serializer.toJson<String>(paisDestino),
+      'ciudadDestino': serializer.toJson<String>(ciudadDestino),
+      'facultadDestino': serializer.toJson<String>(facultadDestino),
+      'areaEstudio': serializer.toJson<String>(areaEstudio),
       'programaAcademico': serializer.toJson<String>(programaAcademico),
       'semestre': serializer.toJson<int>(semestre),
+      'promedioAcumulado': serializer.toJson<double>(promedioAcumulado),
+      'nivelIdioma': serializer.toJson<String>(nivelIdioma),
+      'puntajeIdioma': serializer.toJson<String>(puntajeIdioma),
+      'semestreIntercambio': serializer.toJson<String>(semestreIntercambio),
+      'fechaViaje': serializer.toJson<DateTime?>(fechaViaje),
+      'fechaRegreso': serializer.toJson<DateTime?>(fechaRegreso),
       'estado': serializer.toJson<String>(estado),
       'bloqueada': serializer.toJson<bool>(bloqueada),
       'fechaCreacion': serializer.toJson<DateTime>(fechaCreacion),
@@ -1239,15 +1787,32 @@ class SolicitudMobilidadData extends DataClass
     String? id,
     String? estudianteId,
     String? tipoMovilidad,
+    String? nombres,
+    String? apellidos,
+    String? tipoDocumento,
+    String? numeroDocumento,
     DateTime? fechaNacimiento,
     String? emailInstitucional,
     String? emailPersonal,
     String? telefono,
     String? contactoEmergencia,
     String? relacionContacto,
+    String? universidadActual,
+    String? facultad,
     String? universidadDestinoId,
+    String? universidadDestinoNombre,
+    String? paisDestino,
+    String? ciudadDestino,
+    String? facultadDestino,
+    String? areaEstudio,
     String? programaAcademico,
     int? semestre,
+    double? promedioAcumulado,
+    String? nivelIdioma,
+    String? puntajeIdioma,
+    String? semestreIntercambio,
+    Value<DateTime?> fechaViaje = const Value.absent(),
+    Value<DateTime?> fechaRegreso = const Value.absent(),
     String? estado,
     bool? bloqueada,
     DateTime? fechaCreacion,
@@ -1257,15 +1822,33 @@ class SolicitudMobilidadData extends DataClass
     id: id ?? this.id,
     estudianteId: estudianteId ?? this.estudianteId,
     tipoMovilidad: tipoMovilidad ?? this.tipoMovilidad,
+    nombres: nombres ?? this.nombres,
+    apellidos: apellidos ?? this.apellidos,
+    tipoDocumento: tipoDocumento ?? this.tipoDocumento,
+    numeroDocumento: numeroDocumento ?? this.numeroDocumento,
     fechaNacimiento: fechaNacimiento ?? this.fechaNacimiento,
     emailInstitucional: emailInstitucional ?? this.emailInstitucional,
     emailPersonal: emailPersonal ?? this.emailPersonal,
     telefono: telefono ?? this.telefono,
     contactoEmergencia: contactoEmergencia ?? this.contactoEmergencia,
     relacionContacto: relacionContacto ?? this.relacionContacto,
+    universidadActual: universidadActual ?? this.universidadActual,
+    facultad: facultad ?? this.facultad,
     universidadDestinoId: universidadDestinoId ?? this.universidadDestinoId,
+    universidadDestinoNombre:
+        universidadDestinoNombre ?? this.universidadDestinoNombre,
+    paisDestino: paisDestino ?? this.paisDestino,
+    ciudadDestino: ciudadDestino ?? this.ciudadDestino,
+    facultadDestino: facultadDestino ?? this.facultadDestino,
+    areaEstudio: areaEstudio ?? this.areaEstudio,
     programaAcademico: programaAcademico ?? this.programaAcademico,
     semestre: semestre ?? this.semestre,
+    promedioAcumulado: promedioAcumulado ?? this.promedioAcumulado,
+    nivelIdioma: nivelIdioma ?? this.nivelIdioma,
+    puntajeIdioma: puntajeIdioma ?? this.puntajeIdioma,
+    semestreIntercambio: semestreIntercambio ?? this.semestreIntercambio,
+    fechaViaje: fechaViaje.present ? fechaViaje.value : this.fechaViaje,
+    fechaRegreso: fechaRegreso.present ? fechaRegreso.value : this.fechaRegreso,
     estado: estado ?? this.estado,
     bloqueada: bloqueada ?? this.bloqueada,
     fechaCreacion: fechaCreacion ?? this.fechaCreacion,
@@ -1281,6 +1864,14 @@ class SolicitudMobilidadData extends DataClass
       tipoMovilidad: data.tipoMovilidad.present
           ? data.tipoMovilidad.value
           : this.tipoMovilidad,
+      nombres: data.nombres.present ? data.nombres.value : this.nombres,
+      apellidos: data.apellidos.present ? data.apellidos.value : this.apellidos,
+      tipoDocumento: data.tipoDocumento.present
+          ? data.tipoDocumento.value
+          : this.tipoDocumento,
+      numeroDocumento: data.numeroDocumento.present
+          ? data.numeroDocumento.value
+          : this.numeroDocumento,
       fechaNacimiento: data.fechaNacimiento.present
           ? data.fechaNacimiento.value
           : this.fechaNacimiento,
@@ -1297,13 +1888,50 @@ class SolicitudMobilidadData extends DataClass
       relacionContacto: data.relacionContacto.present
           ? data.relacionContacto.value
           : this.relacionContacto,
+      universidadActual: data.universidadActual.present
+          ? data.universidadActual.value
+          : this.universidadActual,
+      facultad: data.facultad.present ? data.facultad.value : this.facultad,
       universidadDestinoId: data.universidadDestinoId.present
           ? data.universidadDestinoId.value
           : this.universidadDestinoId,
+      universidadDestinoNombre: data.universidadDestinoNombre.present
+          ? data.universidadDestinoNombre.value
+          : this.universidadDestinoNombre,
+      paisDestino: data.paisDestino.present
+          ? data.paisDestino.value
+          : this.paisDestino,
+      ciudadDestino: data.ciudadDestino.present
+          ? data.ciudadDestino.value
+          : this.ciudadDestino,
+      facultadDestino: data.facultadDestino.present
+          ? data.facultadDestino.value
+          : this.facultadDestino,
+      areaEstudio: data.areaEstudio.present
+          ? data.areaEstudio.value
+          : this.areaEstudio,
       programaAcademico: data.programaAcademico.present
           ? data.programaAcademico.value
           : this.programaAcademico,
       semestre: data.semestre.present ? data.semestre.value : this.semestre,
+      promedioAcumulado: data.promedioAcumulado.present
+          ? data.promedioAcumulado.value
+          : this.promedioAcumulado,
+      nivelIdioma: data.nivelIdioma.present
+          ? data.nivelIdioma.value
+          : this.nivelIdioma,
+      puntajeIdioma: data.puntajeIdioma.present
+          ? data.puntajeIdioma.value
+          : this.puntajeIdioma,
+      semestreIntercambio: data.semestreIntercambio.present
+          ? data.semestreIntercambio.value
+          : this.semestreIntercambio,
+      fechaViaje: data.fechaViaje.present
+          ? data.fechaViaje.value
+          : this.fechaViaje,
+      fechaRegreso: data.fechaRegreso.present
+          ? data.fechaRegreso.value
+          : this.fechaRegreso,
       estado: data.estado.present ? data.estado.value : this.estado,
       bloqueada: data.bloqueada.present ? data.bloqueada.value : this.bloqueada,
       fechaCreacion: data.fechaCreacion.present
@@ -1324,15 +1952,32 @@ class SolicitudMobilidadData extends DataClass
           ..write('id: $id, ')
           ..write('estudianteId: $estudianteId, ')
           ..write('tipoMovilidad: $tipoMovilidad, ')
+          ..write('nombres: $nombres, ')
+          ..write('apellidos: $apellidos, ')
+          ..write('tipoDocumento: $tipoDocumento, ')
+          ..write('numeroDocumento: $numeroDocumento, ')
           ..write('fechaNacimiento: $fechaNacimiento, ')
           ..write('emailInstitucional: $emailInstitucional, ')
           ..write('emailPersonal: $emailPersonal, ')
           ..write('telefono: $telefono, ')
           ..write('contactoEmergencia: $contactoEmergencia, ')
           ..write('relacionContacto: $relacionContacto, ')
+          ..write('universidadActual: $universidadActual, ')
+          ..write('facultad: $facultad, ')
           ..write('universidadDestinoId: $universidadDestinoId, ')
+          ..write('universidadDestinoNombre: $universidadDestinoNombre, ')
+          ..write('paisDestino: $paisDestino, ')
+          ..write('ciudadDestino: $ciudadDestino, ')
+          ..write('facultadDestino: $facultadDestino, ')
+          ..write('areaEstudio: $areaEstudio, ')
           ..write('programaAcademico: $programaAcademico, ')
           ..write('semestre: $semestre, ')
+          ..write('promedioAcumulado: $promedioAcumulado, ')
+          ..write('nivelIdioma: $nivelIdioma, ')
+          ..write('puntajeIdioma: $puntajeIdioma, ')
+          ..write('semestreIntercambio: $semestreIntercambio, ')
+          ..write('fechaViaje: $fechaViaje, ')
+          ..write('fechaRegreso: $fechaRegreso, ')
           ..write('estado: $estado, ')
           ..write('bloqueada: $bloqueada, ')
           ..write('fechaCreacion: $fechaCreacion, ')
@@ -1343,25 +1988,42 @@ class SolicitudMobilidadData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     estudianteId,
     tipoMovilidad,
+    nombres,
+    apellidos,
+    tipoDocumento,
+    numeroDocumento,
     fechaNacimiento,
     emailInstitucional,
     emailPersonal,
     telefono,
     contactoEmergencia,
     relacionContacto,
+    universidadActual,
+    facultad,
     universidadDestinoId,
+    universidadDestinoNombre,
+    paisDestino,
+    ciudadDestino,
+    facultadDestino,
+    areaEstudio,
     programaAcademico,
     semestre,
+    promedioAcumulado,
+    nivelIdioma,
+    puntajeIdioma,
+    semestreIntercambio,
+    fechaViaje,
+    fechaRegreso,
     estado,
     bloqueada,
     fechaCreacion,
     fechaActualizacion,
     pendingSync,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1369,15 +2031,32 @@ class SolicitudMobilidadData extends DataClass
           other.id == this.id &&
           other.estudianteId == this.estudianteId &&
           other.tipoMovilidad == this.tipoMovilidad &&
+          other.nombres == this.nombres &&
+          other.apellidos == this.apellidos &&
+          other.tipoDocumento == this.tipoDocumento &&
+          other.numeroDocumento == this.numeroDocumento &&
           other.fechaNacimiento == this.fechaNacimiento &&
           other.emailInstitucional == this.emailInstitucional &&
           other.emailPersonal == this.emailPersonal &&
           other.telefono == this.telefono &&
           other.contactoEmergencia == this.contactoEmergencia &&
           other.relacionContacto == this.relacionContacto &&
+          other.universidadActual == this.universidadActual &&
+          other.facultad == this.facultad &&
           other.universidadDestinoId == this.universidadDestinoId &&
+          other.universidadDestinoNombre == this.universidadDestinoNombre &&
+          other.paisDestino == this.paisDestino &&
+          other.ciudadDestino == this.ciudadDestino &&
+          other.facultadDestino == this.facultadDestino &&
+          other.areaEstudio == this.areaEstudio &&
           other.programaAcademico == this.programaAcademico &&
           other.semestre == this.semestre &&
+          other.promedioAcumulado == this.promedioAcumulado &&
+          other.nivelIdioma == this.nivelIdioma &&
+          other.puntajeIdioma == this.puntajeIdioma &&
+          other.semestreIntercambio == this.semestreIntercambio &&
+          other.fechaViaje == this.fechaViaje &&
+          other.fechaRegreso == this.fechaRegreso &&
           other.estado == this.estado &&
           other.bloqueada == this.bloqueada &&
           other.fechaCreacion == this.fechaCreacion &&
@@ -1390,15 +2069,32 @@ class SolicitudMovilidadCompanion
   final Value<String> id;
   final Value<String> estudianteId;
   final Value<String> tipoMovilidad;
+  final Value<String> nombres;
+  final Value<String> apellidos;
+  final Value<String> tipoDocumento;
+  final Value<String> numeroDocumento;
   final Value<DateTime> fechaNacimiento;
   final Value<String> emailInstitucional;
   final Value<String> emailPersonal;
   final Value<String> telefono;
   final Value<String> contactoEmergencia;
   final Value<String> relacionContacto;
+  final Value<String> universidadActual;
+  final Value<String> facultad;
   final Value<String> universidadDestinoId;
+  final Value<String> universidadDestinoNombre;
+  final Value<String> paisDestino;
+  final Value<String> ciudadDestino;
+  final Value<String> facultadDestino;
+  final Value<String> areaEstudio;
   final Value<String> programaAcademico;
   final Value<int> semestre;
+  final Value<double> promedioAcumulado;
+  final Value<String> nivelIdioma;
+  final Value<String> puntajeIdioma;
+  final Value<String> semestreIntercambio;
+  final Value<DateTime?> fechaViaje;
+  final Value<DateTime?> fechaRegreso;
   final Value<String> estado;
   final Value<bool> bloqueada;
   final Value<DateTime> fechaCreacion;
@@ -1409,15 +2105,32 @@ class SolicitudMovilidadCompanion
     this.id = const Value.absent(),
     this.estudianteId = const Value.absent(),
     this.tipoMovilidad = const Value.absent(),
+    this.nombres = const Value.absent(),
+    this.apellidos = const Value.absent(),
+    this.tipoDocumento = const Value.absent(),
+    this.numeroDocumento = const Value.absent(),
     this.fechaNacimiento = const Value.absent(),
     this.emailInstitucional = const Value.absent(),
     this.emailPersonal = const Value.absent(),
     this.telefono = const Value.absent(),
     this.contactoEmergencia = const Value.absent(),
     this.relacionContacto = const Value.absent(),
+    this.universidadActual = const Value.absent(),
+    this.facultad = const Value.absent(),
     this.universidadDestinoId = const Value.absent(),
+    this.universidadDestinoNombre = const Value.absent(),
+    this.paisDestino = const Value.absent(),
+    this.ciudadDestino = const Value.absent(),
+    this.facultadDestino = const Value.absent(),
+    this.areaEstudio = const Value.absent(),
     this.programaAcademico = const Value.absent(),
     this.semestre = const Value.absent(),
+    this.promedioAcumulado = const Value.absent(),
+    this.nivelIdioma = const Value.absent(),
+    this.puntajeIdioma = const Value.absent(),
+    this.semestreIntercambio = const Value.absent(),
+    this.fechaViaje = const Value.absent(),
+    this.fechaRegreso = const Value.absent(),
     this.estado = const Value.absent(),
     this.bloqueada = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
@@ -1429,15 +2142,32 @@ class SolicitudMovilidadCompanion
     required String id,
     required String estudianteId,
     required String tipoMovilidad,
+    this.nombres = const Value.absent(),
+    this.apellidos = const Value.absent(),
+    this.tipoDocumento = const Value.absent(),
+    this.numeroDocumento = const Value.absent(),
     required DateTime fechaNacimiento,
     required String emailInstitucional,
     required String emailPersonal,
     required String telefono,
     required String contactoEmergencia,
     required String relacionContacto,
+    this.universidadActual = const Value.absent(),
+    this.facultad = const Value.absent(),
     required String universidadDestinoId,
+    this.universidadDestinoNombre = const Value.absent(),
+    this.paisDestino = const Value.absent(),
+    this.ciudadDestino = const Value.absent(),
+    this.facultadDestino = const Value.absent(),
+    this.areaEstudio = const Value.absent(),
     required String programaAcademico,
     required int semestre,
+    this.promedioAcumulado = const Value.absent(),
+    this.nivelIdioma = const Value.absent(),
+    this.puntajeIdioma = const Value.absent(),
+    this.semestreIntercambio = const Value.absent(),
+    this.fechaViaje = const Value.absent(),
+    this.fechaRegreso = const Value.absent(),
     this.estado = const Value.absent(),
     this.bloqueada = const Value.absent(),
     required DateTime fechaCreacion,
@@ -1462,15 +2192,32 @@ class SolicitudMovilidadCompanion
     Expression<String>? id,
     Expression<String>? estudianteId,
     Expression<String>? tipoMovilidad,
+    Expression<String>? nombres,
+    Expression<String>? apellidos,
+    Expression<String>? tipoDocumento,
+    Expression<String>? numeroDocumento,
     Expression<DateTime>? fechaNacimiento,
     Expression<String>? emailInstitucional,
     Expression<String>? emailPersonal,
     Expression<String>? telefono,
     Expression<String>? contactoEmergencia,
     Expression<String>? relacionContacto,
+    Expression<String>? universidadActual,
+    Expression<String>? facultad,
     Expression<String>? universidadDestinoId,
+    Expression<String>? universidadDestinoNombre,
+    Expression<String>? paisDestino,
+    Expression<String>? ciudadDestino,
+    Expression<String>? facultadDestino,
+    Expression<String>? areaEstudio,
     Expression<String>? programaAcademico,
     Expression<int>? semestre,
+    Expression<double>? promedioAcumulado,
+    Expression<String>? nivelIdioma,
+    Expression<String>? puntajeIdioma,
+    Expression<String>? semestreIntercambio,
+    Expression<DateTime>? fechaViaje,
+    Expression<DateTime>? fechaRegreso,
     Expression<String>? estado,
     Expression<bool>? bloqueada,
     Expression<DateTime>? fechaCreacion,
@@ -1482,16 +2229,35 @@ class SolicitudMovilidadCompanion
       if (id != null) 'id': id,
       if (estudianteId != null) 'estudiante_id': estudianteId,
       if (tipoMovilidad != null) 'tipo_movilidad': tipoMovilidad,
+      if (nombres != null) 'nombres': nombres,
+      if (apellidos != null) 'apellidos': apellidos,
+      if (tipoDocumento != null) 'tipo_documento': tipoDocumento,
+      if (numeroDocumento != null) 'numero_documento': numeroDocumento,
       if (fechaNacimiento != null) 'fecha_nacimiento': fechaNacimiento,
       if (emailInstitucional != null) 'email_institucional': emailInstitucional,
       if (emailPersonal != null) 'email_personal': emailPersonal,
       if (telefono != null) 'telefono': telefono,
       if (contactoEmergencia != null) 'contacto_emergencia': contactoEmergencia,
       if (relacionContacto != null) 'relacion_contacto': relacionContacto,
+      if (universidadActual != null) 'universidad_actual': universidadActual,
+      if (facultad != null) 'facultad': facultad,
       if (universidadDestinoId != null)
         'universidad_destino_id': universidadDestinoId,
+      if (universidadDestinoNombre != null)
+        'universidad_destino_nombre': universidadDestinoNombre,
+      if (paisDestino != null) 'pais_destino': paisDestino,
+      if (ciudadDestino != null) 'ciudad_destino': ciudadDestino,
+      if (facultadDestino != null) 'facultad_destino': facultadDestino,
+      if (areaEstudio != null) 'area_estudio': areaEstudio,
       if (programaAcademico != null) 'programa_academico': programaAcademico,
       if (semestre != null) 'semestre': semestre,
+      if (promedioAcumulado != null) 'promedio_acumulado': promedioAcumulado,
+      if (nivelIdioma != null) 'nivel_idioma': nivelIdioma,
+      if (puntajeIdioma != null) 'puntaje_idioma': puntajeIdioma,
+      if (semestreIntercambio != null)
+        'semestre_intercambio': semestreIntercambio,
+      if (fechaViaje != null) 'fecha_viaje': fechaViaje,
+      if (fechaRegreso != null) 'fecha_regreso': fechaRegreso,
       if (estado != null) 'estado': estado,
       if (bloqueada != null) 'bloqueada': bloqueada,
       if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
@@ -1505,15 +2271,32 @@ class SolicitudMovilidadCompanion
     Value<String>? id,
     Value<String>? estudianteId,
     Value<String>? tipoMovilidad,
+    Value<String>? nombres,
+    Value<String>? apellidos,
+    Value<String>? tipoDocumento,
+    Value<String>? numeroDocumento,
     Value<DateTime>? fechaNacimiento,
     Value<String>? emailInstitucional,
     Value<String>? emailPersonal,
     Value<String>? telefono,
     Value<String>? contactoEmergencia,
     Value<String>? relacionContacto,
+    Value<String>? universidadActual,
+    Value<String>? facultad,
     Value<String>? universidadDestinoId,
+    Value<String>? universidadDestinoNombre,
+    Value<String>? paisDestino,
+    Value<String>? ciudadDestino,
+    Value<String>? facultadDestino,
+    Value<String>? areaEstudio,
     Value<String>? programaAcademico,
     Value<int>? semestre,
+    Value<double>? promedioAcumulado,
+    Value<String>? nivelIdioma,
+    Value<String>? puntajeIdioma,
+    Value<String>? semestreIntercambio,
+    Value<DateTime?>? fechaViaje,
+    Value<DateTime?>? fechaRegreso,
     Value<String>? estado,
     Value<bool>? bloqueada,
     Value<DateTime>? fechaCreacion,
@@ -1525,15 +2308,33 @@ class SolicitudMovilidadCompanion
       id: id ?? this.id,
       estudianteId: estudianteId ?? this.estudianteId,
       tipoMovilidad: tipoMovilidad ?? this.tipoMovilidad,
+      nombres: nombres ?? this.nombres,
+      apellidos: apellidos ?? this.apellidos,
+      tipoDocumento: tipoDocumento ?? this.tipoDocumento,
+      numeroDocumento: numeroDocumento ?? this.numeroDocumento,
       fechaNacimiento: fechaNacimiento ?? this.fechaNacimiento,
       emailInstitucional: emailInstitucional ?? this.emailInstitucional,
       emailPersonal: emailPersonal ?? this.emailPersonal,
       telefono: telefono ?? this.telefono,
       contactoEmergencia: contactoEmergencia ?? this.contactoEmergencia,
       relacionContacto: relacionContacto ?? this.relacionContacto,
+      universidadActual: universidadActual ?? this.universidadActual,
+      facultad: facultad ?? this.facultad,
       universidadDestinoId: universidadDestinoId ?? this.universidadDestinoId,
+      universidadDestinoNombre:
+          universidadDestinoNombre ?? this.universidadDestinoNombre,
+      paisDestino: paisDestino ?? this.paisDestino,
+      ciudadDestino: ciudadDestino ?? this.ciudadDestino,
+      facultadDestino: facultadDestino ?? this.facultadDestino,
+      areaEstudio: areaEstudio ?? this.areaEstudio,
       programaAcademico: programaAcademico ?? this.programaAcademico,
       semestre: semestre ?? this.semestre,
+      promedioAcumulado: promedioAcumulado ?? this.promedioAcumulado,
+      nivelIdioma: nivelIdioma ?? this.nivelIdioma,
+      puntajeIdioma: puntajeIdioma ?? this.puntajeIdioma,
+      semestreIntercambio: semestreIntercambio ?? this.semestreIntercambio,
+      fechaViaje: fechaViaje ?? this.fechaViaje,
+      fechaRegreso: fechaRegreso ?? this.fechaRegreso,
       estado: estado ?? this.estado,
       bloqueada: bloqueada ?? this.bloqueada,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
@@ -1555,6 +2356,18 @@ class SolicitudMovilidadCompanion
     if (tipoMovilidad.present) {
       map['tipo_movilidad'] = Variable<String>(tipoMovilidad.value);
     }
+    if (nombres.present) {
+      map['nombres'] = Variable<String>(nombres.value);
+    }
+    if (apellidos.present) {
+      map['apellidos'] = Variable<String>(apellidos.value);
+    }
+    if (tipoDocumento.present) {
+      map['tipo_documento'] = Variable<String>(tipoDocumento.value);
+    }
+    if (numeroDocumento.present) {
+      map['numero_documento'] = Variable<String>(numeroDocumento.value);
+    }
     if (fechaNacimiento.present) {
       map['fecha_nacimiento'] = Variable<DateTime>(fechaNacimiento.value);
     }
@@ -1573,16 +2386,57 @@ class SolicitudMovilidadCompanion
     if (relacionContacto.present) {
       map['relacion_contacto'] = Variable<String>(relacionContacto.value);
     }
+    if (universidadActual.present) {
+      map['universidad_actual'] = Variable<String>(universidadActual.value);
+    }
+    if (facultad.present) {
+      map['facultad'] = Variable<String>(facultad.value);
+    }
     if (universidadDestinoId.present) {
       map['universidad_destino_id'] = Variable<String>(
         universidadDestinoId.value,
       );
+    }
+    if (universidadDestinoNombre.present) {
+      map['universidad_destino_nombre'] = Variable<String>(
+        universidadDestinoNombre.value,
+      );
+    }
+    if (paisDestino.present) {
+      map['pais_destino'] = Variable<String>(paisDestino.value);
+    }
+    if (ciudadDestino.present) {
+      map['ciudad_destino'] = Variable<String>(ciudadDestino.value);
+    }
+    if (facultadDestino.present) {
+      map['facultad_destino'] = Variable<String>(facultadDestino.value);
+    }
+    if (areaEstudio.present) {
+      map['area_estudio'] = Variable<String>(areaEstudio.value);
     }
     if (programaAcademico.present) {
       map['programa_academico'] = Variable<String>(programaAcademico.value);
     }
     if (semestre.present) {
       map['semestre'] = Variable<int>(semestre.value);
+    }
+    if (promedioAcumulado.present) {
+      map['promedio_acumulado'] = Variable<double>(promedioAcumulado.value);
+    }
+    if (nivelIdioma.present) {
+      map['nivel_idioma'] = Variable<String>(nivelIdioma.value);
+    }
+    if (puntajeIdioma.present) {
+      map['puntaje_idioma'] = Variable<String>(puntajeIdioma.value);
+    }
+    if (semestreIntercambio.present) {
+      map['semestre_intercambio'] = Variable<String>(semestreIntercambio.value);
+    }
+    if (fechaViaje.present) {
+      map['fecha_viaje'] = Variable<DateTime>(fechaViaje.value);
+    }
+    if (fechaRegreso.present) {
+      map['fecha_regreso'] = Variable<DateTime>(fechaRegreso.value);
     }
     if (estado.present) {
       map['estado'] = Variable<String>(estado.value);
@@ -1611,15 +2465,32 @@ class SolicitudMovilidadCompanion
           ..write('id: $id, ')
           ..write('estudianteId: $estudianteId, ')
           ..write('tipoMovilidad: $tipoMovilidad, ')
+          ..write('nombres: $nombres, ')
+          ..write('apellidos: $apellidos, ')
+          ..write('tipoDocumento: $tipoDocumento, ')
+          ..write('numeroDocumento: $numeroDocumento, ')
           ..write('fechaNacimiento: $fechaNacimiento, ')
           ..write('emailInstitucional: $emailInstitucional, ')
           ..write('emailPersonal: $emailPersonal, ')
           ..write('telefono: $telefono, ')
           ..write('contactoEmergencia: $contactoEmergencia, ')
           ..write('relacionContacto: $relacionContacto, ')
+          ..write('universidadActual: $universidadActual, ')
+          ..write('facultad: $facultad, ')
           ..write('universidadDestinoId: $universidadDestinoId, ')
+          ..write('universidadDestinoNombre: $universidadDestinoNombre, ')
+          ..write('paisDestino: $paisDestino, ')
+          ..write('ciudadDestino: $ciudadDestino, ')
+          ..write('facultadDestino: $facultadDestino, ')
+          ..write('areaEstudio: $areaEstudio, ')
           ..write('programaAcademico: $programaAcademico, ')
           ..write('semestre: $semestre, ')
+          ..write('promedioAcumulado: $promedioAcumulado, ')
+          ..write('nivelIdioma: $nivelIdioma, ')
+          ..write('puntajeIdioma: $puntajeIdioma, ')
+          ..write('semestreIntercambio: $semestreIntercambio, ')
+          ..write('fechaViaje: $fechaViaje, ')
+          ..write('fechaRegreso: $fechaRegreso, ')
           ..write('estado: $estado, ')
           ..write('bloqueada: $bloqueada, ')
           ..write('fechaCreacion: $fechaCreacion, ')
@@ -4000,15 +4871,32 @@ typedef $$SolicitudMovilidadTableCreateCompanionBuilder =
       required String id,
       required String estudianteId,
       required String tipoMovilidad,
+      Value<String> nombres,
+      Value<String> apellidos,
+      Value<String> tipoDocumento,
+      Value<String> numeroDocumento,
       required DateTime fechaNacimiento,
       required String emailInstitucional,
       required String emailPersonal,
       required String telefono,
       required String contactoEmergencia,
       required String relacionContacto,
+      Value<String> universidadActual,
+      Value<String> facultad,
       required String universidadDestinoId,
+      Value<String> universidadDestinoNombre,
+      Value<String> paisDestino,
+      Value<String> ciudadDestino,
+      Value<String> facultadDestino,
+      Value<String> areaEstudio,
       required String programaAcademico,
       required int semestre,
+      Value<double> promedioAcumulado,
+      Value<String> nivelIdioma,
+      Value<String> puntajeIdioma,
+      Value<String> semestreIntercambio,
+      Value<DateTime?> fechaViaje,
+      Value<DateTime?> fechaRegreso,
       Value<String> estado,
       Value<bool> bloqueada,
       required DateTime fechaCreacion,
@@ -4021,15 +4909,32 @@ typedef $$SolicitudMovilidadTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> estudianteId,
       Value<String> tipoMovilidad,
+      Value<String> nombres,
+      Value<String> apellidos,
+      Value<String> tipoDocumento,
+      Value<String> numeroDocumento,
       Value<DateTime> fechaNacimiento,
       Value<String> emailInstitucional,
       Value<String> emailPersonal,
       Value<String> telefono,
       Value<String> contactoEmergencia,
       Value<String> relacionContacto,
+      Value<String> universidadActual,
+      Value<String> facultad,
       Value<String> universidadDestinoId,
+      Value<String> universidadDestinoNombre,
+      Value<String> paisDestino,
+      Value<String> ciudadDestino,
+      Value<String> facultadDestino,
+      Value<String> areaEstudio,
       Value<String> programaAcademico,
       Value<int> semestre,
+      Value<double> promedioAcumulado,
+      Value<String> nivelIdioma,
+      Value<String> puntajeIdioma,
+      Value<String> semestreIntercambio,
+      Value<DateTime?> fechaViaje,
+      Value<DateTime?> fechaRegreso,
       Value<String> estado,
       Value<bool> bloqueada,
       Value<DateTime> fechaCreacion,
@@ -4059,6 +4964,26 @@ class $$SolicitudMovilidadTableFilterComposer
 
   ColumnFilters<String> get tipoMovilidad => $composableBuilder(
     column: $table.tipoMovilidad,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nombres => $composableBuilder(
+    column: $table.nombres,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get apellidos => $composableBuilder(
+    column: $table.apellidos,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tipoDocumento => $composableBuilder(
+    column: $table.tipoDocumento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get numeroDocumento => $composableBuilder(
+    column: $table.numeroDocumento,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4092,8 +5017,43 @@ class $$SolicitudMovilidadTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get universidadActual => $composableBuilder(
+    column: $table.universidadActual,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get facultad => $composableBuilder(
+    column: $table.facultad,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get universidadDestinoId => $composableBuilder(
     column: $table.universidadDestinoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get universidadDestinoNombre => $composableBuilder(
+    column: $table.universidadDestinoNombre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paisDestino => $composableBuilder(
+    column: $table.paisDestino,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ciudadDestino => $composableBuilder(
+    column: $table.ciudadDestino,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get facultadDestino => $composableBuilder(
+    column: $table.facultadDestino,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get areaEstudio => $composableBuilder(
+    column: $table.areaEstudio,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4104,6 +5064,36 @@ class $$SolicitudMovilidadTableFilterComposer
 
   ColumnFilters<int> get semestre => $composableBuilder(
     column: $table.semestre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get promedioAcumulado => $composableBuilder(
+    column: $table.promedioAcumulado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nivelIdioma => $composableBuilder(
+    column: $table.nivelIdioma,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get puntajeIdioma => $composableBuilder(
+    column: $table.puntajeIdioma,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get semestreIntercambio => $composableBuilder(
+    column: $table.semestreIntercambio,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaViaje => $composableBuilder(
+    column: $table.fechaViaje,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaRegreso => $composableBuilder(
+    column: $table.fechaRegreso,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4157,6 +5147,26 @@ class $$SolicitudMovilidadTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get nombres => $composableBuilder(
+    column: $table.nombres,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get apellidos => $composableBuilder(
+    column: $table.apellidos,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipoDocumento => $composableBuilder(
+    column: $table.tipoDocumento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get numeroDocumento => $composableBuilder(
+    column: $table.numeroDocumento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get fechaNacimiento => $composableBuilder(
     column: $table.fechaNacimiento,
     builder: (column) => ColumnOrderings(column),
@@ -4187,8 +5197,43 @@ class $$SolicitudMovilidadTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get universidadActual => $composableBuilder(
+    column: $table.universidadActual,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get facultad => $composableBuilder(
+    column: $table.facultad,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get universidadDestinoId => $composableBuilder(
     column: $table.universidadDestinoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get universidadDestinoNombre => $composableBuilder(
+    column: $table.universidadDestinoNombre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paisDestino => $composableBuilder(
+    column: $table.paisDestino,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ciudadDestino => $composableBuilder(
+    column: $table.ciudadDestino,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get facultadDestino => $composableBuilder(
+    column: $table.facultadDestino,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get areaEstudio => $composableBuilder(
+    column: $table.areaEstudio,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4199,6 +5244,36 @@ class $$SolicitudMovilidadTableOrderingComposer
 
   ColumnOrderings<int> get semestre => $composableBuilder(
     column: $table.semestre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get promedioAcumulado => $composableBuilder(
+    column: $table.promedioAcumulado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nivelIdioma => $composableBuilder(
+    column: $table.nivelIdioma,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get puntajeIdioma => $composableBuilder(
+    column: $table.puntajeIdioma,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get semestreIntercambio => $composableBuilder(
+    column: $table.semestreIntercambio,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaViaje => $composableBuilder(
+    column: $table.fechaViaje,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaRegreso => $composableBuilder(
+    column: $table.fechaRegreso,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4250,6 +5325,22 @@ class $$SolicitudMovilidadTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get nombres =>
+      $composableBuilder(column: $table.nombres, builder: (column) => column);
+
+  GeneratedColumn<String> get apellidos =>
+      $composableBuilder(column: $table.apellidos, builder: (column) => column);
+
+  GeneratedColumn<String> get tipoDocumento => $composableBuilder(
+    column: $table.tipoDocumento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get numeroDocumento => $composableBuilder(
+    column: $table.numeroDocumento,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get fechaNacimiento => $composableBuilder(
     column: $table.fechaNacimiento,
     builder: (column) => column,
@@ -4278,8 +5369,41 @@ class $$SolicitudMovilidadTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get universidadActual => $composableBuilder(
+    column: $table.universidadActual,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get facultad =>
+      $composableBuilder(column: $table.facultad, builder: (column) => column);
+
   GeneratedColumn<String> get universidadDestinoId => $composableBuilder(
     column: $table.universidadDestinoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get universidadDestinoNombre => $composableBuilder(
+    column: $table.universidadDestinoNombre,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get paisDestino => $composableBuilder(
+    column: $table.paisDestino,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ciudadDestino => $composableBuilder(
+    column: $table.ciudadDestino,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get facultadDestino => $composableBuilder(
+    column: $table.facultadDestino,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get areaEstudio => $composableBuilder(
+    column: $table.areaEstudio,
     builder: (column) => column,
   );
 
@@ -4290,6 +5414,36 @@ class $$SolicitudMovilidadTableAnnotationComposer
 
   GeneratedColumn<int> get semestre =>
       $composableBuilder(column: $table.semestre, builder: (column) => column);
+
+  GeneratedColumn<double> get promedioAcumulado => $composableBuilder(
+    column: $table.promedioAcumulado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get nivelIdioma => $composableBuilder(
+    column: $table.nivelIdioma,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get puntajeIdioma => $composableBuilder(
+    column: $table.puntajeIdioma,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get semestreIntercambio => $composableBuilder(
+    column: $table.semestreIntercambio,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fechaViaje => $composableBuilder(
+    column: $table.fechaViaje,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fechaRegreso => $composableBuilder(
+    column: $table.fechaRegreso,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get estado =>
       $composableBuilder(column: $table.estado, builder: (column) => column);
@@ -4356,15 +5510,32 @@ class $$SolicitudMovilidadTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> estudianteId = const Value.absent(),
                 Value<String> tipoMovilidad = const Value.absent(),
+                Value<String> nombres = const Value.absent(),
+                Value<String> apellidos = const Value.absent(),
+                Value<String> tipoDocumento = const Value.absent(),
+                Value<String> numeroDocumento = const Value.absent(),
                 Value<DateTime> fechaNacimiento = const Value.absent(),
                 Value<String> emailInstitucional = const Value.absent(),
                 Value<String> emailPersonal = const Value.absent(),
                 Value<String> telefono = const Value.absent(),
                 Value<String> contactoEmergencia = const Value.absent(),
                 Value<String> relacionContacto = const Value.absent(),
+                Value<String> universidadActual = const Value.absent(),
+                Value<String> facultad = const Value.absent(),
                 Value<String> universidadDestinoId = const Value.absent(),
+                Value<String> universidadDestinoNombre = const Value.absent(),
+                Value<String> paisDestino = const Value.absent(),
+                Value<String> ciudadDestino = const Value.absent(),
+                Value<String> facultadDestino = const Value.absent(),
+                Value<String> areaEstudio = const Value.absent(),
                 Value<String> programaAcademico = const Value.absent(),
                 Value<int> semestre = const Value.absent(),
+                Value<double> promedioAcumulado = const Value.absent(),
+                Value<String> nivelIdioma = const Value.absent(),
+                Value<String> puntajeIdioma = const Value.absent(),
+                Value<String> semestreIntercambio = const Value.absent(),
+                Value<DateTime?> fechaViaje = const Value.absent(),
+                Value<DateTime?> fechaRegreso = const Value.absent(),
                 Value<String> estado = const Value.absent(),
                 Value<bool> bloqueada = const Value.absent(),
                 Value<DateTime> fechaCreacion = const Value.absent(),
@@ -4375,15 +5546,32 @@ class $$SolicitudMovilidadTableTableManager
                 id: id,
                 estudianteId: estudianteId,
                 tipoMovilidad: tipoMovilidad,
+                nombres: nombres,
+                apellidos: apellidos,
+                tipoDocumento: tipoDocumento,
+                numeroDocumento: numeroDocumento,
                 fechaNacimiento: fechaNacimiento,
                 emailInstitucional: emailInstitucional,
                 emailPersonal: emailPersonal,
                 telefono: telefono,
                 contactoEmergencia: contactoEmergencia,
                 relacionContacto: relacionContacto,
+                universidadActual: universidadActual,
+                facultad: facultad,
                 universidadDestinoId: universidadDestinoId,
+                universidadDestinoNombre: universidadDestinoNombre,
+                paisDestino: paisDestino,
+                ciudadDestino: ciudadDestino,
+                facultadDestino: facultadDestino,
+                areaEstudio: areaEstudio,
                 programaAcademico: programaAcademico,
                 semestre: semestre,
+                promedioAcumulado: promedioAcumulado,
+                nivelIdioma: nivelIdioma,
+                puntajeIdioma: puntajeIdioma,
+                semestreIntercambio: semestreIntercambio,
+                fechaViaje: fechaViaje,
+                fechaRegreso: fechaRegreso,
                 estado: estado,
                 bloqueada: bloqueada,
                 fechaCreacion: fechaCreacion,
@@ -4396,15 +5584,32 @@ class $$SolicitudMovilidadTableTableManager
                 required String id,
                 required String estudianteId,
                 required String tipoMovilidad,
+                Value<String> nombres = const Value.absent(),
+                Value<String> apellidos = const Value.absent(),
+                Value<String> tipoDocumento = const Value.absent(),
+                Value<String> numeroDocumento = const Value.absent(),
                 required DateTime fechaNacimiento,
                 required String emailInstitucional,
                 required String emailPersonal,
                 required String telefono,
                 required String contactoEmergencia,
                 required String relacionContacto,
+                Value<String> universidadActual = const Value.absent(),
+                Value<String> facultad = const Value.absent(),
                 required String universidadDestinoId,
+                Value<String> universidadDestinoNombre = const Value.absent(),
+                Value<String> paisDestino = const Value.absent(),
+                Value<String> ciudadDestino = const Value.absent(),
+                Value<String> facultadDestino = const Value.absent(),
+                Value<String> areaEstudio = const Value.absent(),
                 required String programaAcademico,
                 required int semestre,
+                Value<double> promedioAcumulado = const Value.absent(),
+                Value<String> nivelIdioma = const Value.absent(),
+                Value<String> puntajeIdioma = const Value.absent(),
+                Value<String> semestreIntercambio = const Value.absent(),
+                Value<DateTime?> fechaViaje = const Value.absent(),
+                Value<DateTime?> fechaRegreso = const Value.absent(),
                 Value<String> estado = const Value.absent(),
                 Value<bool> bloqueada = const Value.absent(),
                 required DateTime fechaCreacion,
@@ -4415,15 +5620,32 @@ class $$SolicitudMovilidadTableTableManager
                 id: id,
                 estudianteId: estudianteId,
                 tipoMovilidad: tipoMovilidad,
+                nombres: nombres,
+                apellidos: apellidos,
+                tipoDocumento: tipoDocumento,
+                numeroDocumento: numeroDocumento,
                 fechaNacimiento: fechaNacimiento,
                 emailInstitucional: emailInstitucional,
                 emailPersonal: emailPersonal,
                 telefono: telefono,
                 contactoEmergencia: contactoEmergencia,
                 relacionContacto: relacionContacto,
+                universidadActual: universidadActual,
+                facultad: facultad,
                 universidadDestinoId: universidadDestinoId,
+                universidadDestinoNombre: universidadDestinoNombre,
+                paisDestino: paisDestino,
+                ciudadDestino: ciudadDestino,
+                facultadDestino: facultadDestino,
+                areaEstudio: areaEstudio,
                 programaAcademico: programaAcademico,
                 semestre: semestre,
+                promedioAcumulado: promedioAcumulado,
+                nivelIdioma: nivelIdioma,
+                puntajeIdioma: puntajeIdioma,
+                semestreIntercambio: semestreIntercambio,
+                fechaViaje: fechaViaje,
+                fechaRegreso: fechaRegreso,
                 estado: estado,
                 bloqueada: bloqueada,
                 fechaCreacion: fechaCreacion,

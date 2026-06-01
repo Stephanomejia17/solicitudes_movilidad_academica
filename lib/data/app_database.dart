@@ -33,15 +33,35 @@ class SolicitudMovilidad extends Table {
   TextColumn get id => text()();
   TextColumn get estudianteId => text()();
   TextColumn get tipoMovilidad => text()();
+  TextColumn get nombres => text().withDefault(const Constant(''))();
+  TextColumn get apellidos => text().withDefault(const Constant(''))();
+  TextColumn get tipoDocumento => text().withDefault(const Constant('CC'))();
+  TextColumn get numeroDocumento => text().withDefault(const Constant(''))();
   DateTimeColumn get fechaNacimiento => dateTime()();
   TextColumn get emailInstitucional => text()();
   TextColumn get emailPersonal => text()();
   TextColumn get telefono => text()();
   TextColumn get contactoEmergencia => text()();
   TextColumn get relacionContacto => text()();
+  TextColumn get universidadActual =>
+      text().withDefault(const Constant('Universidad de Medellin'))();
+  TextColumn get facultad => text().withDefault(const Constant(''))();
   TextColumn get universidadDestinoId => text()();
+  TextColumn get universidadDestinoNombre =>
+      text().withDefault(const Constant(''))();
+  TextColumn get paisDestino => text().withDefault(const Constant(''))();
+  TextColumn get ciudadDestino => text().withDefault(const Constant(''))();
+  TextColumn get facultadDestino => text().withDefault(const Constant(''))();
+  TextColumn get areaEstudio => text().withDefault(const Constant(''))();
   TextColumn get programaAcademico => text()();
   IntColumn get semestre => integer()();
+  RealColumn get promedioAcumulado => real().withDefault(const Constant(0.0))();
+  TextColumn get nivelIdioma => text().withDefault(const Constant(''))();
+  TextColumn get puntajeIdioma => text().withDefault(const Constant(''))();
+  TextColumn get semestreIntercambio =>
+      text().withDefault(const Constant(''))();
+  DateTimeColumn get fechaViaje => dateTime().nullable()();
+  DateTimeColumn get fechaRegreso => dateTime().nullable()();
   TextColumn get estado => text().withDefault(const Constant('borrador'))();
   BoolColumn get bloqueada => boolean().withDefault(const Constant(false))();
   DateTimeColumn get fechaCreacion => dateTime()();
@@ -59,7 +79,8 @@ class UniversidadDestino extends Table {
   TextColumn get pais => text()();
   TextColumn get ciudad => text()();
   TextColumn get tipoMovilidad => text()();
-  BoolColumn get convenioActivo => boolean().withDefault(const Constant(true))();
+  BoolColumn get convenioActivo =>
+      boolean().withDefault(const Constant(true))();
   BoolColumn get pendingSync => boolean().withDefault(const Constant(true))();
 
   @override
@@ -120,12 +141,12 @@ class HistorialEstado extends Table {
     HistorialEstado,
   ],
 )
-
 class AppDatabase extends _$AppDatabase with ChangeNotifier {
   bool _initialized = false;
 
-  AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection()) {
-     if (!_initialized) {
+  AppDatabase([QueryExecutor? executor])
+    : super(executor ?? _openConnection()) {
+    if (!_initialized) {
       _initialized = true;
       unawaited(_initialize());
     }
@@ -134,13 +155,51 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   static const _uuid = Uuid();
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async => m.createAll(),
-        onUpgrade: (m, from, to) async => await m.createAll(),
-      );
+    onCreate: (m) async => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 3) {
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.nombres);
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.apellidos);
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.tipoDocumento);
+        await m.addColumn(
+          solicitudMovilidad,
+          solicitudMovilidad.numeroDocumento,
+        );
+        await m.addColumn(
+          solicitudMovilidad,
+          solicitudMovilidad.universidadActual,
+        );
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.facultad);
+        await m.addColumn(
+          solicitudMovilidad,
+          solicitudMovilidad.universidadDestinoNombre,
+        );
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.paisDestino);
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.ciudadDestino);
+        await m.addColumn(
+          solicitudMovilidad,
+          solicitudMovilidad.facultadDestino,
+        );
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.areaEstudio);
+        await m.addColumn(
+          solicitudMovilidad,
+          solicitudMovilidad.promedioAcumulado,
+        );
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.nivelIdioma);
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.puntajeIdioma);
+        await m.addColumn(
+          solicitudMovilidad,
+          solicitudMovilidad.semestreIntercambio,
+        );
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.fechaViaje);
+        await m.addColumn(solicitudMovilidad, solicitudMovilidad.fechaRegreso);
+      }
+    },
+  );
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
@@ -159,6 +218,17 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   bool isBusy = false;
   String? authError;
   final RequestWorkflowService _workflow = const RequestWorkflowService();
+
+  void setAuthError(String? message) {
+    authError = message;
+    notifyListeners();
+  }
+
+  void setCurrentUser(UsuarioData? user) {
+    currentUser = user;
+    authError = null;
+    notifyListeners();
+  }
 
   Future<bool> register({
     required String nombre,
@@ -203,7 +273,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     authError = null;
     try {
       final user = await getUsuarioByEmail(email);
-      if (user == null || user.passwordHash != password || user.estado != 'activo') {
+      if (user == null ||
+          user.passwordHash != password ||
+          user.estado != 'activo') {
         authError = 'Correo o contrasena incorrectos.';
         return false;
       }
@@ -215,15 +287,14 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   }
 
   void logout() {
-    currentUser = null;
-    authError = null;
-    notifyListeners();
+    setCurrentUser(null);
   }
 
   Future<UsuarioData?> getUsuarioByEmail(String email) async {
     final normalizedEmail = email.trim().toLowerCase();
-    return (select(usuarios)..where((t) => t.email.equals(normalizedEmail)))
-        .getSingleOrNull();
+    return (select(
+      usuarios,
+    )..where((t) => t.email.equals(normalizedEmail))).getSingleOrNull();
   }
 
   Future<UsuarioData?> getUsuarioById(String id) async {
@@ -232,6 +303,61 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
 
   Future<List<UsuarioData>> getAllUsuarios() async {
     return select(usuarios).get();
+  }
+
+  Future<void> upsertUsuarioLocal({
+    required String id,
+    required String nombre,
+    required String apellido,
+    required String email,
+    required String passwordHash,
+    required String rol,
+    required String estado,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    required bool pendingSync,
+  }) async {
+    final normalizedEmail = email.trim().toLowerCase();
+    final existing = await getUsuarioByEmail(normalizedEmail);
+    if (existing == null) {
+      await into(usuarios).insert(
+        UsuariosCompanion.insert(
+          id: id,
+          nombre: nombre.trim(),
+          apellido: apellido.trim(),
+          email: normalizedEmail,
+          passwordHash: passwordHash,
+          rol: rol.trim(),
+          estado: Value(estado),
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+          pendingSync: Value(pendingSync),
+        ),
+      );
+      return;
+    }
+
+    await (update(usuarios)..where((t) => t.id.equals(existing.id))).write(
+      UsuariosCompanion(
+        nombre: Value(nombre.trim()),
+        apellido: Value(apellido.trim()),
+        passwordHash: Value(passwordHash),
+        rol: Value(rol.trim()),
+        estado: Value(estado),
+        updatedAt: Value(updatedAt),
+        pendingSync: Value(pendingSync),
+      ),
+    );
+  }
+
+  Future<void> marcarUsuarioSincronizado(String id) async {
+    await (update(usuarios)..where((t) => t.id.equals(id))).write(
+      const UsuariosCompanion(pendingSync: Value(false)),
+    );
+  }
+
+  Future<List<UsuarioData>> getUsuariosPendientesSync() async {
+    return (select(usuarios)..where((t) => t.pendingSync.equals(true))).get();
   }
 
   Stream<List<UsuarioData>> watchUsuarios() {
@@ -250,15 +376,20 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     }
 
     final updated = existing.copyWith(
-      nombre: companion.nombre.present ? companion.nombre.value : existing.nombre,
-      apellido:
-          companion.apellido.present ? companion.apellido.value : existing.apellido,
+      nombre: companion.nombre.present
+          ? companion.nombre.value
+          : existing.nombre,
+      apellido: companion.apellido.present
+          ? companion.apellido.value
+          : existing.apellido,
       email: companion.email.present ? companion.email.value : existing.email,
       passwordHash: companion.passwordHash.present
           ? companion.passwordHash.value
           : existing.passwordHash,
       rol: companion.rol.present ? companion.rol.value : existing.rol,
-      estado: companion.estado.present ? companion.estado.value : existing.estado,
+      estado: companion.estado.present
+          ? companion.estado.value
+          : existing.estado,
       updatedAt: DateTime.now(),
       pendingSync: companion.pendingSync.present
           ? companion.pendingSync.value
@@ -282,9 +413,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   }
 
   Stream<List<SolicitudMobilidadData>> watchSolicitudes() {
-    return (select(solicitudMovilidad)
-          ..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)]))
-        .watch();
+    return (select(
+      solicitudMovilidad,
+    )..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)])).watch();
   }
 
   Stream<List<SolicitudMobilidadData>> watchSolicitudesDeEstudiante(
@@ -297,14 +428,15 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   }
 
   Future<List<SolicitudMobilidadData>> getAllSolicitudes() async {
-    return (select(solicitudMovilidad)
-          ..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)]))
-        .get();
+    return (select(
+      solicitudMovilidad,
+    )..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)])).get();
   }
 
   Future<SolicitudMobilidadData?> getSolicitudById(String id) async {
-    return (select(solicitudMovilidad)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    return (select(
+      solicitudMovilidad,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
   Future<String> crearSolicitud(SolicitudMovilidadCompanion companion) async {
@@ -323,10 +455,14 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     return id;
   }
 
-  Future<void> actualizarSolicitud(SolicitudMovilidadCompanion companion) async {
+  Future<void> actualizarSolicitud(
+    SolicitudMovilidadCompanion companion,
+  ) async {
     final id = companion.id.present ? companion.id.value : null;
     if (id == null) {
-      throw ArgumentError('El id de la solicitud es obligatorio para actualizar.');
+      throw ArgumentError(
+        'El id de la solicitud es obligatorio para actualizar.',
+      );
     }
 
     final existing = await getSolicitudById(id);
@@ -344,6 +480,18 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
       tipoMovilidad: companion.tipoMovilidad.present
           ? companion.tipoMovilidad.value
           : existing.tipoMovilidad,
+      nombres: companion.nombres.present
+          ? companion.nombres.value
+          : existing.nombres,
+      apellidos: companion.apellidos.present
+          ? companion.apellidos.value
+          : existing.apellidos,
+      tipoDocumento: companion.tipoDocumento.present
+          ? companion.tipoDocumento.value
+          : existing.tipoDocumento,
+      numeroDocumento: companion.numeroDocumento.present
+          ? companion.numeroDocumento.value
+          : existing.numeroDocumento,
       fechaNacimiento: companion.fechaNacimiento.present
           ? companion.fechaNacimiento.value
           : existing.fechaNacimiento,
@@ -353,22 +501,70 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
       emailPersonal: companion.emailPersonal.present
           ? companion.emailPersonal.value
           : existing.emailPersonal,
-      telefono:
-          companion.telefono.present ? companion.telefono.value : existing.telefono,
+      telefono: companion.telefono.present
+          ? companion.telefono.value
+          : existing.telefono,
       contactoEmergencia: companion.contactoEmergencia.present
           ? companion.contactoEmergencia.value
           : existing.contactoEmergencia,
       relacionContacto: companion.relacionContacto.present
           ? companion.relacionContacto.value
           : existing.relacionContacto,
+      universidadActual: companion.universidadActual.present
+          ? companion.universidadActual.value
+          : existing.universidadActual,
+      facultad: companion.facultad.present
+          ? companion.facultad.value
+          : existing.facultad,
       universidadDestinoId: companion.universidadDestinoId.present
           ? companion.universidadDestinoId.value
           : existing.universidadDestinoId,
+      universidadDestinoNombre: companion.universidadDestinoNombre.present
+          ? companion.universidadDestinoNombre.value
+          : existing.universidadDestinoNombre,
+      paisDestino: companion.paisDestino.present
+          ? companion.paisDestino.value
+          : existing.paisDestino,
+      ciudadDestino: companion.ciudadDestino.present
+          ? companion.ciudadDestino.value
+          : existing.ciudadDestino,
+      facultadDestino: companion.facultadDestino.present
+          ? companion.facultadDestino.value
+          : existing.facultadDestino,
+      areaEstudio: companion.areaEstudio.present
+          ? companion.areaEstudio.value
+          : existing.areaEstudio,
       programaAcademico: companion.programaAcademico.present
           ? companion.programaAcademico.value
           : existing.programaAcademico,
-      semestre: companion.semestre.present ? companion.semestre.value : existing.semestre,
-      estado: companion.estado.present ? companion.estado.value : existing.estado,
+      semestre: companion.semestre.present
+          ? companion.semestre.value
+          : existing.semestre,
+      promedioAcumulado: companion.promedioAcumulado.present
+          ? companion.promedioAcumulado.value
+          : existing.promedioAcumulado,
+      nivelIdioma: companion.nivelIdioma.present
+          ? companion.nivelIdioma.value
+          : existing.nivelIdioma,
+      puntajeIdioma: companion.puntajeIdioma.present
+          ? companion.puntajeIdioma.value
+          : existing.puntajeIdioma,
+      semestreIntercambio: companion.semestreIntercambio.present
+          ? companion.semestreIntercambio.value
+          : existing.semestreIntercambio,
+      fechaViaje: Value(
+        companion.fechaViaje.present
+            ? companion.fechaViaje.value
+            : existing.fechaViaje,
+      ),
+      fechaRegreso: Value(
+        companion.fechaRegreso.present
+            ? companion.fechaRegreso.value
+            : existing.fechaRegreso,
+      ),
+      estado: companion.estado.present
+          ? companion.estado.value
+          : existing.estado,
       bloqueada: companion.bloqueada.present
           ? companion.bloqueada.value
           : existing.bloqueada,
@@ -379,7 +575,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
           : existing.pendingSync,
     );
 
-    await (update(solicitudMovilidad)..where((t) => t.id.equals(id))).replace(updated);
+    await (update(
+      solicitudMovilidad,
+    )..where((t) => t.id.equals(id))).replace(updated);
   }
 
   Future<void> enviarSolicitud(
@@ -403,8 +601,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     );
 
     await transaction(() async {
-      await (update(solicitudMovilidad)..where((t) => t.id.equals(id)))
-          .replace(updated);
+      await (update(
+        solicitudMovilidad,
+      )..where((t) => t.id.equals(id))).replace(updated);
       await _registrarCambioEstado(
         solicitudId: id,
         usuarioId: actor.id,
@@ -456,8 +655,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
         pendingSync: true,
       );
 
-      await (update(solicitudMovilidad)..where((t) => t.id.equals(id)))
-          .replace(updated);
+      await (update(
+        solicitudMovilidad,
+      )..where((t) => t.id.equals(id))).replace(updated);
       await _registrarCambioEstado(
         solicitudId: id,
         usuarioId: coordinador.id,
@@ -483,8 +683,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     );
 
     await transaction(() async {
-      await (update(solicitudMovilidad)..where((t) => t.id.equals(id)))
-          .replace(updated);
+      await (update(
+        solicitudMovilidad,
+      )..where((t) => t.id.equals(id))).replace(updated);
       await _registrarCambioEstado(
         solicitudId: id,
         usuarioId: actor.id,
@@ -504,6 +705,18 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     await (delete(solicitudMovilidad)..where((t) => t.id.equals(id))).go();
   }
 
+  Future<void> marcarSolicitudSincronizada(String id) async {
+    await (update(solicitudMovilidad)..where((t) => t.id.equals(id))).write(
+      const SolicitudMovilidadCompanion(pendingSync: Value(false)),
+    );
+  }
+
+  Future<List<SolicitudMobilidadData>> getSolicitudesPendientesSync() async {
+    return (select(
+      solicitudMovilidad,
+    )..where((t) => t.pendingSync.equals(true))).get();
+  }
+
   Future<List<UniversidadDestinoData>> getAllUniversidades() async {
     return select(universidadDestino).get();
   }
@@ -513,14 +726,17 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   }
 
   Future<UniversidadDestinoData?> getUniversidadById(String id) async {
-    return (select(universidadDestino)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    return (select(
+      universidadDestino,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
-  Future<void> insertarUniversidad(UniversidadDestinoCompanion companion) async {
+  Future<void> insertarUniversidad(
+    UniversidadDestinoCompanion companion,
+  ) async {
     await into(universidadDestino).insert(
       companion.copyWith(
-        id: Value( _uuid.v4()),
+        id: Value(_uuid.v4()),
         convenioActivo: companion.convenioActivo.present
             ? companion.convenioActivo
             : const Value(true),
@@ -529,7 +745,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     );
   }
 
-  Future<void> actualizarUniversidad(UniversidadDestinoCompanion companion) async {
+  Future<void> actualizarUniversidad(
+    UniversidadDestinoCompanion companion,
+  ) async {
     final id = companion.id.present ? companion.id.value : null;
     if (id == null) {
       throw ArgumentError('El id de la universidad es obligatorio.');
@@ -540,10 +758,13 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     }
 
     final updated = existing.copyWith(
-      nombre:
-          companion.nombre.present ? companion.nombre.value : existing.nombre,
+      nombre: companion.nombre.present
+          ? companion.nombre.value
+          : existing.nombre,
       pais: companion.pais.present ? companion.pais.value : existing.pais,
-      ciudad: companion.ciudad.present ? companion.ciudad.value : existing.ciudad,
+      ciudad: companion.ciudad.present
+          ? companion.ciudad.value
+          : existing.ciudad,
       tipoMovilidad: companion.tipoMovilidad.present
           ? companion.tipoMovilidad.value
           : existing.tipoMovilidad,
@@ -555,11 +776,14 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
           : existing.pendingSync,
     );
 
-    await (update(universidadDestino)..where((t) => t.id.equals(id)))
-        .replace(updated);
+    await (update(
+      universidadDestino,
+    )..where((t) => t.id.equals(id))).replace(updated);
   }
 
-  Future<List<DocumentoData>> getDocumentosDeSolicitud(String solicitudId) async {
+  Future<List<DocumentoData>> getDocumentosDeSolicitud(
+    String solicitudId,
+  ) async {
     return (select(documento)
           ..where((t) => t.solicitudId.equals(solicitudId))
           ..orderBy([(t) => OrderingTerm.desc(t.fechaSubida)]))
@@ -594,8 +818,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     if (id == null) {
       throw ArgumentError('El id del documento es obligatorio.');
     }
-    final existing = await (select(documento)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final existing = await (select(
+      documento,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     if (existing == null) {
       throw StateError('Documento no encontrado.');
     }
@@ -610,7 +835,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
       nombreArchivo: companion.nombreArchivo.present
           ? companion.nombreArchivo.value
           : existing.nombreArchivo,
-      estado: companion.estado.present ? companion.estado.value : existing.estado,
+      estado: companion.estado.present
+          ? companion.estado.value
+          : existing.estado,
       fechaSubida: companion.fechaSubida.present
           ? companion.fechaSubida.value
           : existing.fechaSubida,
@@ -626,14 +853,18 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     await (delete(documento)..where((t) => t.id.equals(id))).go();
   }
 
-  Future<List<HistorialEstadoData>> getHistorialDeSolicitud(String solicitudId) async {
+  Future<List<HistorialEstadoData>> getHistorialDeSolicitud(
+    String solicitudId,
+  ) async {
     return (select(historialEstado)
           ..where((t) => t.solicitudId.equals(solicitudId))
           ..orderBy([(t) => OrderingTerm.desc(t.fechaCambio)]))
         .get();
   }
 
-  Stream<List<HistorialEstadoData>> watchHistorialDeSolicitud(String solicitudId) {
+  Stream<List<HistorialEstadoData>> watchHistorialDeSolicitud(
+    String solicitudId,
+  ) {
     return (select(historialEstado)
           ..where((t) => t.solicitudId.equals(solicitudId))
           ..orderBy([(t) => OrderingTerm.desc(t.fechaCambio)]))
@@ -661,7 +892,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     );
   }
 
-  Future<List<AprobacionData>> getAprobacionesDeSolicitud(String solicitudId) async {
+  Future<List<AprobacionData>> getAprobacionesDeSolicitud(
+    String solicitudId,
+  ) async {
     return (select(aprobacion)
           ..where((t) => t.solicitudId.equals(solicitudId))
           ..orderBy([(t) => OrderingTerm.desc(t.fechaDecision)]))
@@ -686,84 +919,78 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     if (hasUsers == null) {
       final now = DateTime.now();
       await batch((batch) {
-        batch.insertAll(
-          usuarios,
-          [
-            UsuariosCompanion.insert(
-              id: _uuid.v4(),
-              nombre: 'Ana',
-              apellido: 'Admin',
-              email: 'admin@xchange.edu.co',
-              passwordHash: 'Admin123',
-              rol: 'administrador',
-              createdAt: now,
-              updatedAt: now,
-              pendingSync: const Value(true),
-            ),
-            UsuariosCompanion.insert(
-              id: _uuid.v4(),
-              nombre: 'Carlos',
-              apellido: 'Coordinador',
-              email: 'coordinador@xchange.edu.co',
-              passwordHash: 'Coord123',
-              rol: 'coordinador',
-              createdAt: now,
-              updatedAt: now,
-              pendingSync: const Value(true),
-            ),
-            UsuariosCompanion.insert(
-              id: _uuid.v4(),
-              nombre: 'Sara',
-              apellido: 'Estudiante',
-              email: 'estudiante@xchange.edu.co',
-              passwordHash: 'User12345',
-              rol: 'estudiante',
-              createdAt: now,
-              updatedAt: now,
-              pendingSync: const Value(true),
-            ),
-          ],
-        );
+        batch.insertAll(usuarios, [
+          UsuariosCompanion.insert(
+            id: _uuid.v4(),
+            nombre: 'Ana',
+            apellido: 'Admin',
+            email: 'admin@xchange.edu.co',
+            passwordHash: 'Admin123',
+            rol: 'administrador',
+            createdAt: now,
+            updatedAt: now,
+            pendingSync: const Value(true),
+          ),
+          UsuariosCompanion.insert(
+            id: _uuid.v4(),
+            nombre: 'Carlos',
+            apellido: 'Coordinador',
+            email: 'coordinador@xchange.edu.co',
+            passwordHash: 'Coord123',
+            rol: 'coordinador',
+            createdAt: now,
+            updatedAt: now,
+            pendingSync: const Value(true),
+          ),
+          UsuariosCompanion.insert(
+            id: _uuid.v4(),
+            nombre: 'Sara',
+            apellido: 'Estudiante',
+            email: 'estudiante@xchange.edu.co',
+            passwordHash: 'User12345',
+            rol: 'estudiante',
+            createdAt: now,
+            updatedAt: now,
+            pendingSync: const Value(true),
+          ),
+        ]);
       });
     }
 
-    final hasUniversidades = await (select(universidadDestino)
-          ..limit(1))
-        .getSingleOrNull();
+    final hasUniversidades = await (select(
+      universidadDestino,
+    )..limit(1)).getSingleOrNull();
     if (hasUniversidades == null) {
       await batch((batch) {
-        batch.insertAll(
-          universidadDestino,
-          [
-            UniversidadDestinoCompanion.insert(
-              id: _uuid.v4(),
-              nombre: 'Universidad de Valencia',
-              pais: 'España',
-              ciudad: 'Valencia',
-              tipoMovilidad: 'internacional',
-              convenioActivo: const Value(true),
-              pendingSync: const Value(true),
-            ),
-            UniversidadDestinoCompanion.insert(
-              id: _uuid.v4(),
-              nombre: 'Universidad de Buenos Aires',
-              pais: 'Argentina',
-              ciudad: 'Buenos Aires',
-              tipoMovilidad: 'internacional',
-              convenioActivo: const Value(true),
-              pendingSync: const Value(true),
-            ),
-            UniversidadDestinoCompanion.insert(
-              id: _uuid.v4(),
-              nombre: 'Universidad Nacional de Colombia',
-              pais: 'Colombia',
-              ciudad: 'Bogotá',
-              tipoMovilidad: 'nacional',
-              convenioActivo: const Value(true),
-              pendingSync: const Value(true),
-            ),
-          ],
-        );
+        batch.insertAll(universidadDestino, [
+          UniversidadDestinoCompanion.insert(
+            id: _uuid.v4(),
+            nombre: 'Universidad de Valencia',
+            pais: 'España',
+            ciudad: 'Valencia',
+            tipoMovilidad: 'internacional',
+            convenioActivo: const Value(true),
+            pendingSync: const Value(true),
+          ),
+          UniversidadDestinoCompanion.insert(
+            id: _uuid.v4(),
+            nombre: 'Universidad de Buenos Aires',
+            pais: 'Argentina',
+            ciudad: 'Buenos Aires',
+            tipoMovilidad: 'internacional',
+            convenioActivo: const Value(true),
+            pendingSync: const Value(true),
+          ),
+          UniversidadDestinoCompanion.insert(
+            id: _uuid.v4(),
+            nombre: 'Universidad Nacional de Colombia',
+            pais: 'Colombia',
+            ciudad: 'Bogotá',
+            tipoMovilidad: 'nacional',
+            convenioActivo: const Value(true),
+            pendingSync: const Value(true),
+          ),
+        ]);
       });
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/app_database.dart';
+import '../services/user_repository.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -15,6 +16,7 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     final db = AppStateScope.of(context);
+    final repository = UserRepository(localDb: db);
 
     return Scaffold(
       body: Center(
@@ -44,10 +46,12 @@ class _AuthPageState extends State<AuthPage> {
                         ? _LoginForm(
                             key: const ValueKey('login'),
                             db: db,
+                            repository: repository,
                           )
                         : _RegisterForm(
                             key: const ValueKey('register'),
                             db: db,
+                            repository: repository,
                           ),
                   ),
                 ],
@@ -61,9 +65,10 @@ class _AuthPageState extends State<AuthPage> {
 }
 
 class _LoginForm extends StatefulWidget {
-  const _LoginForm({super.key, required this.db});
+  const _LoginForm({super.key, required this.db, required this.repository});
 
   final AppDatabase db;
+  final UserRepository repository;
 
   @override
   State<_LoginForm> createState() => _LoginFormState();
@@ -83,7 +88,7 @@ class _LoginFormState extends State<_LoginForm> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final success = await widget.db.login(
+    final success = await widget.repository.loginLocal(
       email: _email.text,
       password: _password.text,
     );
@@ -132,9 +137,10 @@ class _LoginFormState extends State<_LoginForm> {
 }
 
 class _RegisterForm extends StatefulWidget {
-  const _RegisterForm({super.key, required this.db});
+  const _RegisterForm({super.key, required this.db, required this.repository});
 
   final AppDatabase db;
+  final UserRepository repository;
 
   @override
   State<_RegisterForm> createState() => _RegisterFormState();
@@ -159,7 +165,7 @@ class _RegisterFormState extends State<_RegisterForm> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final success = await widget.db.register(
+    final success = await widget.repository.registerLocal(
       nombre: _nombre.text,
       apellido: _apellido.text,
       email: _email.text,
@@ -175,9 +181,15 @@ class _RegisterFormState extends State<_RegisterForm> {
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Usuario creado')),
-    );
+    if (widget.db.authError != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(widget.db.authError!)));
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Usuario creado')));
   }
 
   @override
@@ -208,10 +220,13 @@ class _RegisterFormState extends State<_RegisterForm> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: _rol,
+            initialValue: _rol,
             items: const [
               DropdownMenuItem(value: 'estudiante', child: Text('Estudiante')),
-              DropdownMenuItem(value: 'coordinador', child: Text('Coordinador')),
+              DropdownMenuItem(
+                value: 'coordinador',
+                child: Text('Coordinador'),
+              ),
               DropdownMenuItem(
                 value: 'administrador',
                 child: Text('Administrador'),
@@ -231,4 +246,3 @@ class _RegisterFormState extends State<_RegisterForm> {
     );
   }
 }
-
