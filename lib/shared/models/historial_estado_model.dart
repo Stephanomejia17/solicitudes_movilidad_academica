@@ -54,6 +54,16 @@ class HistorialEstadoModel {
         'pendingSync': pendingSync,
       };
 
+  Map<String, dynamic> toFirestore() => {
+        'solicitudId': solicitudId,
+        'usuarioId': usuarioId,
+        'estadoAnterior': estadoAnterior,
+        'estadoNuevo': estadoNuevo,
+        'comentario': comentario,
+        'fechaCambio': Timestamp.fromDate(fechaCambio),
+        'pendingSync': pendingSync,
+      };
+
   factory HistorialEstadoModel.fromMap(Map<String, dynamic> map) {
     return HistorialEstadoModel(
       id: (map['id'] as String? ?? '').trim(),
@@ -66,6 +76,17 @@ class HistorialEstadoModel {
           _readDate(map['fechaCambio']) ?? DateTime.fromMillisecondsSinceEpoch(0),
       pendingSync: map['pendingSync'] as bool? ?? false,
     );
+  }
+
+  factory HistorialEstadoModel.fromFirestore(
+    String docId,
+    Map<String, dynamic> map,
+  ) {
+    return HistorialEstadoModel.fromMap({
+      ...map,
+      'id': docId,
+      'pendingSync': false,
+    });
   }
 
   static DateTime? _readDate(Object? value) {

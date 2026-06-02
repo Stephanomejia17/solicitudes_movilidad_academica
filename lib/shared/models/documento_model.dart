@@ -49,6 +49,15 @@ class DocumentoModel {
         'pendingSync': pendingSync,
       };
 
+  Map<String, dynamic> toFirestore() => {
+        'solicitudId': solicitudId,
+        'tipoDocumento': tipoDocumento,
+        'nombreArchivo': nombreArchivo,
+        'estado': estado,
+        'fechaSubida': Timestamp.fromDate(fechaSubida),
+        'pendingSync': pendingSync,
+      };
+
   factory DocumentoModel.fromMap(Map<String, dynamic> map) {
     return DocumentoModel(
       id: (map['id'] as String? ?? '').trim(),
@@ -60,6 +69,14 @@ class DocumentoModel {
           _readDate(map['fechaSubida']) ?? DateTime.fromMillisecondsSinceEpoch(0),
       pendingSync: map['pendingSync'] as bool? ?? false,
     );
+  }
+
+  factory DocumentoModel.fromFirestore(String docId, Map<String, dynamic> map) {
+    return DocumentoModel.fromMap({
+      ...map,
+      'id': docId,
+      'pendingSync': false,
+    });
   }
 
   static DateTime? _readDate(Object? value) {
