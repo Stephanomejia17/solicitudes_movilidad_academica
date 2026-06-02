@@ -3970,9 +3970,9 @@ class $HistorialEstadoTable extends HistorialEstado
   late final GeneratedColumn<String> solicitudId = GeneratedColumn<String>(
     'solicitud_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _usuarioIdMeta = const VerificationMeta(
     'usuarioId',
@@ -4080,8 +4080,6 @@ class $HistorialEstadoTable extends HistorialEstado
           _solicitudIdMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_solicitudIdMeta);
     }
     if (data.containsKey('usuario_id')) {
       context.handle(
@@ -4155,7 +4153,7 @@ class $HistorialEstadoTable extends HistorialEstado
       solicitudId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}solicitud_id'],
-      )!,
+      ),
       usuarioId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}usuario_id'],
@@ -4192,7 +4190,7 @@ class $HistorialEstadoTable extends HistorialEstado
 class HistorialEstadoData extends DataClass
     implements Insertable<HistorialEstadoData> {
   final String id;
-  final String solicitudId;
+  final String? solicitudId;
   final String usuarioId;
   final String estadoAnterior;
   final String estadoNuevo;
@@ -4201,7 +4199,7 @@ class HistorialEstadoData extends DataClass
   final bool pendingSync;
   const HistorialEstadoData({
     required this.id,
-    required this.solicitudId,
+    this.solicitudId,
     required this.usuarioId,
     required this.estadoAnterior,
     required this.estadoNuevo,
@@ -4213,7 +4211,9 @@ class HistorialEstadoData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['solicitud_id'] = Variable<String>(solicitudId);
+    if (!nullToAbsent || solicitudId != null) {
+      map['solicitud_id'] = Variable<String>(solicitudId);
+    }
     map['usuario_id'] = Variable<String>(usuarioId);
     map['estado_anterior'] = Variable<String>(estadoAnterior);
     map['estado_nuevo'] = Variable<String>(estadoNuevo);
@@ -4228,7 +4228,9 @@ class HistorialEstadoData extends DataClass
   HistorialEstadoCompanion toCompanion(bool nullToAbsent) {
     return HistorialEstadoCompanion(
       id: Value(id),
-      solicitudId: Value(solicitudId),
+      solicitudId: solicitudId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(solicitudId),
       usuarioId: Value(usuarioId),
       estadoAnterior: Value(estadoAnterior),
       estadoNuevo: Value(estadoNuevo),
@@ -4247,7 +4249,7 @@ class HistorialEstadoData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return HistorialEstadoData(
       id: serializer.fromJson<String>(json['id']),
-      solicitudId: serializer.fromJson<String>(json['solicitudId']),
+      solicitudId: serializer.fromJson<String?>(json['solicitudId']),
       usuarioId: serializer.fromJson<String>(json['usuarioId']),
       estadoAnterior: serializer.fromJson<String>(json['estadoAnterior']),
       estadoNuevo: serializer.fromJson<String>(json['estadoNuevo']),
@@ -4261,7 +4263,7 @@ class HistorialEstadoData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'solicitudId': serializer.toJson<String>(solicitudId),
+      'solicitudId': serializer.toJson<String?>(solicitudId),
       'usuarioId': serializer.toJson<String>(usuarioId),
       'estadoAnterior': serializer.toJson<String>(estadoAnterior),
       'estadoNuevo': serializer.toJson<String>(estadoNuevo),
@@ -4273,7 +4275,7 @@ class HistorialEstadoData extends DataClass
 
   HistorialEstadoData copyWith({
     String? id,
-    String? solicitudId,
+    Value<String?> solicitudId = const Value.absent(),
     String? usuarioId,
     String? estadoAnterior,
     String? estadoNuevo,
@@ -4282,7 +4284,7 @@ class HistorialEstadoData extends DataClass
     bool? pendingSync,
   }) => HistorialEstadoData(
     id: id ?? this.id,
-    solicitudId: solicitudId ?? this.solicitudId,
+    solicitudId: solicitudId.present ? solicitudId.value : this.solicitudId,
     usuarioId: usuarioId ?? this.usuarioId,
     estadoAnterior: estadoAnterior ?? this.estadoAnterior,
     estadoNuevo: estadoNuevo ?? this.estadoNuevo,
@@ -4357,7 +4359,7 @@ class HistorialEstadoData extends DataClass
 
 class HistorialEstadoCompanion extends UpdateCompanion<HistorialEstadoData> {
   final Value<String> id;
-  final Value<String> solicitudId;
+  final Value<String?> solicitudId;
   final Value<String> usuarioId;
   final Value<String> estadoAnterior;
   final Value<String> estadoNuevo;
@@ -4378,7 +4380,7 @@ class HistorialEstadoCompanion extends UpdateCompanion<HistorialEstadoData> {
   });
   HistorialEstadoCompanion.insert({
     required String id,
-    required String solicitudId,
+    this.solicitudId = const Value.absent(),
     required String usuarioId,
     required String estadoAnterior,
     required String estadoNuevo,
@@ -4387,7 +4389,6 @@ class HistorialEstadoCompanion extends UpdateCompanion<HistorialEstadoData> {
     this.pendingSync = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       solicitudId = Value(solicitudId),
        usuarioId = Value(usuarioId),
        estadoAnterior = Value(estadoAnterior),
        estadoNuevo = Value(estadoNuevo),
@@ -4418,7 +4419,7 @@ class HistorialEstadoCompanion extends UpdateCompanion<HistorialEstadoData> {
 
   HistorialEstadoCompanion copyWith({
     Value<String>? id,
-    Value<String>? solicitudId,
+    Value<String?>? solicitudId,
     Value<String>? usuarioId,
     Value<String>? estadoAnterior,
     Value<String>? estadoNuevo,
@@ -6383,7 +6384,7 @@ typedef $$AprobacionTableProcessedTableManager =
 typedef $$HistorialEstadoTableCreateCompanionBuilder =
     HistorialEstadoCompanion Function({
       required String id,
-      required String solicitudId,
+      Value<String?> solicitudId,
       required String usuarioId,
       required String estadoAnterior,
       required String estadoNuevo,
@@ -6395,7 +6396,7 @@ typedef $$HistorialEstadoTableCreateCompanionBuilder =
 typedef $$HistorialEstadoTableUpdateCompanionBuilder =
     HistorialEstadoCompanion Function({
       Value<String> id,
-      Value<String> solicitudId,
+      Value<String?> solicitudId,
       Value<String> usuarioId,
       Value<String> estadoAnterior,
       Value<String> estadoNuevo,
@@ -6589,7 +6590,7 @@ class $$HistorialEstadoTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> solicitudId = const Value.absent(),
+                Value<String?> solicitudId = const Value.absent(),
                 Value<String> usuarioId = const Value.absent(),
                 Value<String> estadoAnterior = const Value.absent(),
                 Value<String> estadoNuevo = const Value.absent(),
@@ -6611,7 +6612,7 @@ class $$HistorialEstadoTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String solicitudId,
+                Value<String?> solicitudId = const Value.absent(),
                 required String usuarioId,
                 required String estadoAnterior,
                 required String estadoNuevo,
