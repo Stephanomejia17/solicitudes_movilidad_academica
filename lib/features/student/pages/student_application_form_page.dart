@@ -22,6 +22,8 @@ class StudentApplicationFormPage extends StatefulWidget {
 
 class _StudentApplicationFormPageState
     extends State<StudentApplicationFormPage> {
+  static final DateTime _emptyDraftDate = DateTime(1900);
+
   final _formKey = GlobalKey<FormState>();
   int _currentStep = 0;
   bool _saving = false;
@@ -409,12 +411,9 @@ class _StudentApplicationFormPageState
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_birthDate == null || _travelDate == null || _returnDate == null) {
-      _showMessage('Completa todas las fechas requeridas.');
-      return;
-    }
-    if (_returnDate!.isBefore(_travelDate!)) {
+    if (_travelDate != null &&
+        _returnDate != null &&
+        _returnDate!.isBefore(_travelDate!)) {
       _showMessage('La fecha de regreso debe ser posterior al viaje.');
       return;
     }
@@ -429,7 +428,7 @@ class _StudentApplicationFormPageState
       apellidos: _lastNameController.text.trim(),
       tipoDocumento: _documentTypeController.text.trim(),
       numeroDocumento: _documentNumberController.text.trim(),
-      fechaNacimiento: _birthDate!,
+      fechaNacimiento: _birthDate ?? _emptyDraftDate,
       emailInstitucional: _institutionalEmailController.text.trim(),
       emailPersonal: _personalEmailController.text.trim(),
       telefono: _phoneController.text.trim(),
@@ -444,22 +443,26 @@ class _StudentApplicationFormPageState
       facultadDestino: _destinationFacultyController.text.trim(),
       areaEstudio: _studyAreaController.text.trim(),
       programaAcademico: _programController.text.trim(),
-      semestre: int.parse(_semesterController.text.trim()),
-      promedioAcumulado: double.parse(
-        _averageController.text.trim().replaceAll(',', '.'),
-      ),
+      semestre: int.tryParse(_semesterController.text.trim()) ?? 0,
+      promedioAcumulado:
+          double.tryParse(
+            _averageController.text.trim().replaceAll(',', '.'),
+          ) ??
+          0,
       nivelIdioma: _languageLevelController.text.trim(),
       puntajeIdioma: _languageScoreController.text.trim(),
       semestreIntercambio: _exchangeSemesterController.text.trim(),
-      fechaViaje: _travelDate!,
-      fechaRegreso: _returnDate!,
+      fechaViaje: _travelDate,
+      fechaRegreso: _returnDate,
     );
 
     try {
+      late final String solicitudId;
       if (widget.existing == null) {
-        await repository.create(draft);
+        solicitudId = await repository.create(draft);
       } else {
-        await repository.update(widget.existing!.id, draft);
+        solicitudId = widget.existing!.id;
+        await repository.update(solicitudId, draft);
       }
       if (!mounted) return;
       _showMessage(
@@ -467,7 +470,7 @@ class _StudentApplicationFormPageState
             ? 'Solicitud creada exitosamente.'
             : 'Solicitud actualizada exitosamente.',
       );
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(solicitudId);
     } catch (error) {
       if (mounted) _showMessage(error.toString());
     } finally {

@@ -229,7 +229,6 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     notifyListeners();
   }
 
-
   Future<UsuarioData?> getUsuarioByEmail(String email) async {
     final normalizedEmail = email.trim().toLowerCase();
     return (select(
@@ -246,9 +245,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   }
 
   Future<void> limpiarUsuariosExcepto(String userId) async {
-    await (delete(usuarios)
-          ..where((u) => u.id.isNotValue(userId)))
-        .go();
+    await (delete(usuarios)..where((u) => u.id.isNotValue(userId))).go();
   }
 
   Future<void> upsertUsuarioLocal({
@@ -267,9 +264,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     final existing = await getUsuarioById(id);
 
     if (existing != null) {
-      await (update(usuarios)
-            ..where((u) => u.id.equals(id)))
-          .write(
+      await (update(usuarios)..where((u) => u.id.equals(id))).write(
         UsuariosCompanion(
           nombre: Value(nombre.trim()),
           apellido: Value(apellido.trim()),
@@ -333,8 +328,8 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
           : existing.apellido,
       email: companion.email.present ? companion.email.value : existing.email,
       //passwordHash: companion.passwordHash.present
-          //? companion.passwordHash.value
-          //: existing.passwordHash,
+      //? companion.passwordHash.value
+      //: existing.passwordHash,
       rol: companion.rol.present ? companion.rol.value : existing.rol,
       estado: companion.estado.present
           ? companion.estado.value
@@ -345,7 +340,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
           : existing.pendingSync,
     );
 
-    await (update(usuarios)..where((t) => t.id.equals(id))).replace(updated);
+    await update(usuarios).replace(updated);
   }
 
   Future<void> setUsuarioEstado(String id, String estado) async {
@@ -401,6 +396,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
         pendingSync: const Value(true),
       ),
     );
+    notifyListeners();
     return id;
   }
 
@@ -422,111 +418,41 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
       throw StateError('Solo una solicitud en borrador puede editarse.');
     }
 
-    final updated = existing.copyWith(
-      estudianteId: companion.estudianteId.present
-          ? companion.estudianteId.value
-          : existing.estudianteId,
-      tipoMovilidad: companion.tipoMovilidad.present
-          ? companion.tipoMovilidad.value
-          : existing.tipoMovilidad,
-      nombres: companion.nombres.present
-          ? companion.nombres.value
-          : existing.nombres,
-      apellidos: companion.apellidos.present
-          ? companion.apellidos.value
-          : existing.apellidos,
-      tipoDocumento: companion.tipoDocumento.present
-          ? companion.tipoDocumento.value
-          : existing.tipoDocumento,
-      numeroDocumento: companion.numeroDocumento.present
-          ? companion.numeroDocumento.value
-          : existing.numeroDocumento,
-      fechaNacimiento: companion.fechaNacimiento.present
-          ? companion.fechaNacimiento.value
-          : existing.fechaNacimiento,
-      emailInstitucional: companion.emailInstitucional.present
-          ? companion.emailInstitucional.value
-          : existing.emailInstitucional,
-      emailPersonal: companion.emailPersonal.present
-          ? companion.emailPersonal.value
-          : existing.emailPersonal,
-      telefono: companion.telefono.present
-          ? companion.telefono.value
-          : existing.telefono,
-      contactoEmergencia: companion.contactoEmergencia.present
-          ? companion.contactoEmergencia.value
-          : existing.contactoEmergencia,
-      relacionContacto: companion.relacionContacto.present
-          ? companion.relacionContacto.value
-          : existing.relacionContacto,
-      universidadActual: companion.universidadActual.present
-          ? companion.universidadActual.value
-          : existing.universidadActual,
-      facultad: companion.facultad.present
-          ? companion.facultad.value
-          : existing.facultad,
-      universidadDestinoId: companion.universidadDestinoId.present
-          ? companion.universidadDestinoId.value
-          : existing.universidadDestinoId,
-      universidadDestinoNombre: companion.universidadDestinoNombre.present
-          ? companion.universidadDestinoNombre.value
-          : existing.universidadDestinoNombre,
-      paisDestino: companion.paisDestino.present
-          ? companion.paisDestino.value
-          : existing.paisDestino,
-      ciudadDestino: companion.ciudadDestino.present
-          ? companion.ciudadDestino.value
-          : existing.ciudadDestino,
-      facultadDestino: companion.facultadDestino.present
-          ? companion.facultadDestino.value
-          : existing.facultadDestino,
-      areaEstudio: companion.areaEstudio.present
-          ? companion.areaEstudio.value
-          : existing.areaEstudio,
-      programaAcademico: companion.programaAcademico.present
-          ? companion.programaAcademico.value
-          : existing.programaAcademico,
-      semestre: companion.semestre.present
-          ? companion.semestre.value
-          : existing.semestre,
-      promedioAcumulado: companion.promedioAcumulado.present
-          ? companion.promedioAcumulado.value
-          : existing.promedioAcumulado,
-      nivelIdioma: companion.nivelIdioma.present
-          ? companion.nivelIdioma.value
-          : existing.nivelIdioma,
-      puntajeIdioma: companion.puntajeIdioma.present
-          ? companion.puntajeIdioma.value
-          : existing.puntajeIdioma,
-      semestreIntercambio: companion.semestreIntercambio.present
-          ? companion.semestreIntercambio.value
-          : existing.semestreIntercambio,
-      fechaViaje: Value(
-        companion.fechaViaje.present
-            ? companion.fechaViaje.value
-            : existing.fechaViaje,
+    await (update(solicitudMovilidad)..where((t) => t.id.equals(id))).write(
+      SolicitudMovilidadCompanion(
+        estudianteId: companion.estudianteId,
+        tipoMovilidad: companion.tipoMovilidad,
+        nombres: companion.nombres,
+        apellidos: companion.apellidos,
+        tipoDocumento: companion.tipoDocumento,
+        numeroDocumento: companion.numeroDocumento,
+        fechaNacimiento: companion.fechaNacimiento,
+        emailInstitucional: companion.emailInstitucional,
+        emailPersonal: companion.emailPersonal,
+        telefono: companion.telefono,
+        contactoEmergencia: companion.contactoEmergencia,
+        relacionContacto: companion.relacionContacto,
+        universidadActual: companion.universidadActual,
+        facultad: companion.facultad,
+        universidadDestinoId: companion.universidadDestinoId,
+        universidadDestinoNombre: companion.universidadDestinoNombre,
+        paisDestino: companion.paisDestino,
+        ciudadDestino: companion.ciudadDestino,
+        facultadDestino: companion.facultadDestino,
+        areaEstudio: companion.areaEstudio,
+        programaAcademico: companion.programaAcademico,
+        semestre: companion.semestre,
+        promedioAcumulado: companion.promedioAcumulado,
+        nivelIdioma: companion.nivelIdioma,
+        puntajeIdioma: companion.puntajeIdioma,
+        semestreIntercambio: companion.semestreIntercambio,
+        fechaViaje: companion.fechaViaje,
+        fechaRegreso: companion.fechaRegreso,
+        fechaActualizacion: Value(DateTime.now()),
+        pendingSync: const Value(true),
       ),
-      fechaRegreso: Value(
-        companion.fechaRegreso.present
-            ? companion.fechaRegreso.value
-            : existing.fechaRegreso,
-      ),
-      estado: companion.estado.present
-          ? companion.estado.value
-          : existing.estado,
-      bloqueada: companion.bloqueada.present
-          ? companion.bloqueada.value
-          : existing.bloqueada,
-      fechaCreacion: existing.fechaCreacion,
-      fechaActualizacion: DateTime.now(),
-      pendingSync: companion.pendingSync.present
-          ? companion.pendingSync.value
-          : existing.pendingSync,
     );
-
-    await (update(
-      solicitudMovilidad,
-    )..where((t) => t.id.equals(id))).replace(updated);
+    notifyListeners();
   }
 
   Future<void> enviarSolicitud(
@@ -538,21 +464,39 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     if (solicitud == null) {
       throw StateError('Solicitud no encontrada.');
     }
-    if (!_workflow.canSubmit(actor, solicitud, documentos)) {
-      throw StateError('La solicitud no cumple los requisitos de envio.');
+
+    // Validaciones específicas con mensajes claros para el usuario
+    if (actor.rol != 'estudiante' || actor.estado != 'activo') {
+      throw StateError('Solo un estudiante activo puede enviar la solicitud.');
+    }
+    if (solicitud.estado != 'borrador' || solicitud.bloqueada) {
+      throw StateError('Solo una solicitud en borrador puede enviarse.');
+    }
+    if (solicitud.universidadDestinoId.trim().isEmpty) {
+      throw StateError('Debes seleccionar una universidad destino.');
+    }
+    if (solicitud.programaAcademico.trim().isEmpty) {
+      throw StateError('El programa académico es obligatorio.');
+    }
+    if (solicitud.semestre <= 0) {
+      throw StateError('El semestre debe ser mayor a cero.');
+    }
+    if (!documentos.any((d) => d.tipoDocumento == 'carta_motivacion')) {
+      throw StateError('Debes cargar la carta de motivación.');
+    }
+    if (!documentos.any((d) => d.tipoDocumento == 'documento_identidad')) {
+      throw StateError('Debes cargar el documento de identidad.');
     }
 
-    final updated = solicitud.copyWith(
-      estado: 'enviada',
-      bloqueada: true,
-      fechaActualizacion: DateTime.now(),
-      pendingSync: true,
-    );
-
     await transaction(() async {
-      await (update(
-        solicitudMovilidad,
-      )..where((t) => t.id.equals(id))).replace(updated);
+      await (update(solicitudMovilidad)..where((t) => t.id.equals(id))).write(
+        SolicitudMovilidadCompanion(
+          estado: const Value('enviada'),
+          bloqueada: const Value(true),
+          fechaActualizacion: Value(DateTime.now()),
+          pendingSync: const Value(true),
+        ),
+      );
       await _registrarCambioEstado(
         solicitudId: id,
         usuarioId: actor.id,
@@ -597,16 +541,14 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
         ),
       );
 
-      final updated = solicitud.copyWith(
-        estado: decision,
-        bloqueada: true,
-        fechaActualizacion: DateTime.now(),
-        pendingSync: true,
+      await (update(solicitudMovilidad)..where((t) => t.id.equals(id))).write(
+        SolicitudMovilidadCompanion(
+          estado: Value(decision),
+          bloqueada: const Value(true),
+          fechaActualizacion: Value(DateTime.now()),
+          pendingSync: const Value(true),
+        ),
       );
-
-      await (update(
-        solicitudMovilidad,
-      )..where((t) => t.id.equals(id))).replace(updated);
       await _registrarCambioEstado(
         solicitudId: id,
         usuarioId: coordinador.id,
@@ -624,17 +566,15 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
       throw StateError('Una solicitud aprobada no puede cancelarse.');
     }
 
-    final updated = solicitud.copyWith(
-      estado: 'cancelada',
-      bloqueada: true,
-      fechaActualizacion: DateTime.now(),
-      pendingSync: true,
-    );
-
     await transaction(() async {
-      await (update(
-        solicitudMovilidad,
-      )..where((t) => t.id.equals(id))).replace(updated);
+      await (update(solicitudMovilidad)..where((t) => t.id.equals(id))).write(
+        SolicitudMovilidadCompanion(
+          estado: const Value('cancelada'),
+          bloqueada: const Value(true),
+          fechaActualizacion: Value(DateTime.now()),
+          pendingSync: const Value(true),
+        ),
+      );
       await _registrarCambioEstado(
         solicitudId: id,
         usuarioId: actor.id,
@@ -657,6 +597,15 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   Future<void> marcarSolicitudSincronizada(String id) async {
     await (update(solicitudMovilidad)..where((t) => t.id.equals(id))).write(
       const SolicitudMovilidadCompanion(pendingSync: Value(false)),
+    );
+  }
+
+  Future<void> marcarSolicitudPendienteSync(String id) async {
+    await (update(solicitudMovilidad)..where((t) => t.id.equals(id))).write(
+      SolicitudMovilidadCompanion(
+        fechaActualizacion: Value(DateTime.now()),
+        pendingSync: const Value(true),
+      ),
     );
   }
 
@@ -725,9 +674,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
           : existing.pendingSync,
     );
 
-    await (update(
-      universidadDestino,
-    )..where((t) => t.id.equals(id))).replace(updated);
+    await update(universidadDestino).replace(updated);
   }
 
   Future<List<DocumentoData>> getDocumentosDeSolicitud(
@@ -747,19 +694,24 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   }
 
   Future<void> insertarDocumento(DocumentoCompanion companion) async {
-    await into(documento).insert(
-      DocumentoCompanion.insert(
-        id: _uuid.v4(),
-        solicitudId: companion.solicitudId.value,
-        tipoDocumento: companion.tipoDocumento.value,
-        nombreArchivo: companion.nombreArchivo.value,
-        estado: const Value('pendiente'),
-        fechaSubida: companion.fechaSubida.present
-            ? companion.fechaSubida.value
-            : DateTime.now(),
-        pendingSync: const Value(true),
-      ),
-    );
+    final solicitudId = companion.solicitudId.value;
+    await transaction(() async {
+      await into(documento).insert(
+        DocumentoCompanion.insert(
+          id: _uuid.v4(),
+          solicitudId: solicitudId,
+          tipoDocumento: companion.tipoDocumento.value,
+          nombreArchivo: companion.nombreArchivo.value,
+          estado: const Value('pendiente'),
+          fechaSubida: companion.fechaSubida.present
+              ? companion.fechaSubida.value
+              : DateTime.now(),
+          pendingSync: const Value(true),
+        ),
+      );
+      await marcarSolicitudPendienteSync(solicitudId);
+    });
+    notifyListeners();
   }
 
   Future<void> actualizarDocumento(DocumentoCompanion companion) async {
@@ -795,11 +747,27 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
           : existing.pendingSync,
     );
 
-    await (update(documento)..where((t) => t.id.equals(id))).replace(updated);
+    await update(documento).replace(updated);
   }
 
   Future<void> eliminarDocumento(String id) async {
-    await (delete(documento)..where((t) => t.id.equals(id))).go();
+    final existing = await (select(
+      documento,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+    if (existing == null) return;
+
+    await transaction(() async {
+      await (delete(documento)..where((t) => t.id.equals(id))).go();
+      await marcarSolicitudPendienteSync(existing.solicitudId);
+    });
+    notifyListeners();
+  }
+
+  Future<void> marcarDocumentosSolicitudSincronizados(
+    String solicitudId,
+  ) async {
+    await (update(documento)..where((t) => t.solicitudId.equals(solicitudId)))
+        .write(const DocumentoCompanion(pendingSync: Value(false)));
   }
 
   Future<List<HistorialEstadoData>> getHistorialDeSolicitud(
@@ -933,9 +901,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
         .get();
   }
 
-  Stream<List<HistorialEstadoData>> watchHistorialDeUsuario(
-    String usuarioId,
-  ) {
+  Stream<List<HistorialEstadoData>> watchHistorialDeUsuario(String usuarioId) {
     return (select(historialEstado)
           ..where((t) => t.usuarioId.equals(usuarioId))
           ..orderBy([(t) => OrderingTerm.desc(t.fechaCambio)]))
@@ -945,7 +911,8 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   Future<List<HistorialEstadoData>> getHistorialPendientesSync() async {
     return (select(historialEstado)
           ..where((t) => t.pendingSync.equals(true))
-          ..where((t) => t.solicitudId.isNull())).get();
+          ..where((t) => t.solicitudId.isNull()))
+        .get();
   }
 
   Future<void> marcarHistorialSincronizado(String id) async {

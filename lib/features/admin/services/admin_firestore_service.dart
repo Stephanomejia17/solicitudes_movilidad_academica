@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../data/app_database.dart';
+import '../../../shared/services/firestore_collections.dart';
 
 class AdminFirestoreService {
   AdminFirestoreService({FirebaseFirestore? firestore})
@@ -9,10 +10,10 @@ class AdminFirestoreService {
   final FirebaseFirestore _firestore;
 
   CollectionReference<Map<String, dynamic>> get _usuarios =>
-      _firestore.collection('usuarios');
+      _firestore.collection(FirestoreCollections.users);
 
   CollectionReference<Map<String, dynamic>> get _historialUsuarios =>
-      _firestore.collection('historial_usuarios');
+      _firestore.collection(FirestoreCollections.userHistory);
 
   Future<void> upsertUsuario(UsuarioData usuario, {String? createdBy}) async {
     final payload = {
@@ -34,10 +35,9 @@ class AdminFirestoreService {
   }
 
   Future<void> upsertHistorialUsuario(HistorialEstadoData historial) async {
-    await _historialUsuarios.doc(historial.id).set(
-          _historialToMap(historial),
-          SetOptions(merge: true),
-        );
+    await _historialUsuarios
+        .doc(historial.id)
+        .set(_historialToMap(historial), SetOptions(merge: true));
   }
 
   Future<List<UsuarioData>> traerTodosLosUsuarios() async {
@@ -53,10 +53,10 @@ class AdminFirestoreService {
           email: data['email'] ?? '',
           rol: _roleFromRemote(data['rol'] ?? data['role'] ?? 'student'),
           estado: data['estado'] ?? 'activo',
-          createdAt: (data['createdAt'] as Timestamp?)?.toDate() ??
-              DateTime.now(),
-          updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ??
-              DateTime.now(),
+          createdAt:
+              (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          updatedAt:
+              (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
           pendingSync: false,
         );
         usuarios.add(usuario);
@@ -69,7 +69,9 @@ class AdminFirestoreService {
 
   Future<List<UsuarioData>> traerUsuariosDeAdmin(String adminId) async {
     try {
-      final snapshot = await _usuarios.where('createdBy', isEqualTo: adminId).get();
+      final snapshot = await _usuarios
+          .where('createdBy', isEqualTo: adminId)
+          .get();
       final usuarios = <UsuarioData>[];
       for (final doc in snapshot.docs) {
         final data = doc.data();
@@ -80,10 +82,10 @@ class AdminFirestoreService {
           email: data['email'] ?? '',
           rol: _roleFromRemote(data['rol'] ?? data['role'] ?? 'student'),
           estado: data['estado'] ?? 'activo',
-          createdAt: (data['createdAt'] as Timestamp?)?.toDate() ??
-              DateTime.now(),
-          updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ??
-              DateTime.now(),
+          createdAt:
+              (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          updatedAt:
+              (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
           pendingSync: false,
         );
         usuarios.add(usuario);

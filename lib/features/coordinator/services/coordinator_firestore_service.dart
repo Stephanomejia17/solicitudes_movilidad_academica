@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../shared/models/models.dart';
+import '../../../shared/services/firestore_collections.dart';
 
 class CoordinatorFirestoreService {
   CoordinatorFirestoreService({FirebaseFirestore? firestore})
@@ -9,7 +10,7 @@ class CoordinatorFirestoreService {
   final FirebaseFirestore _firestore;
 
   CollectionReference<Map<String, dynamic>> get _solicitudes =>
-      _firestore.collection('solicitudes_movilidad');
+      _firestore.collection(FirestoreCollections.mobilityRequests);
 
   Future<void> upsertSolicitudBundle({
     required SolicitudMovilidadModel solicitud,
@@ -18,19 +19,15 @@ class CoordinatorFirestoreService {
     final docRef = _solicitudes.doc(solicitud.id);
     final batch = _firestore.batch();
 
-    batch.set(
-      docRef,
-      {
-        ...solicitud.toFirestore(),
-        'pendingSync': false,
-        'syncedAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    );
+    batch.set(docRef, {
+      ...solicitud.toFirestore(),
+      'pendingSync': false,
+      'syncedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
 
     for (final aprobacion in aprobaciones) {
       batch.set(
-        docRef.collection('aprobaciones').doc(aprobacion.id),
+        docRef.collection(FirestoreCollections.approvals).doc(aprobacion.id),
         {
           ...aprobacion.toFirestore(),
           'pendingSync': false,
@@ -44,10 +41,9 @@ class CoordinatorFirestoreService {
   }
 
   Future<List<SolicitudMovilidadModel>> fetchSolicitudes() async {
-    final snapshot = await _solicitudes.orderBy(
-      'fechaActualizacion',
-      descending: true,
-    ).get();
+    final snapshot = await _solicitudes
+        .orderBy('fechaActualizacion', descending: true)
+        .get();
 
     return snapshot.docs
         .map((doc) => SolicitudMovilidadModel.fromFirestore(doc.id, doc.data()))
@@ -63,7 +59,7 @@ class CoordinatorFirestoreService {
   Future<List<AprobacionModel>> fetchAprobaciones(String solicitudId) async {
     final snapshot = await _solicitudes
         .doc(solicitudId)
-        .collection('aprobaciones')
+        .collection(FirestoreCollections.approvals)
         .orderBy('fechaDecision', descending: true)
         .get();
 

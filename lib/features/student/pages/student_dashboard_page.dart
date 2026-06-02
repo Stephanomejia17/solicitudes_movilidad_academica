@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../data/app_database.dart';
@@ -16,6 +18,32 @@ class StudentDashboardPage extends StatefulWidget {
 
 class _StudentDashboardPageState extends State<StudentDashboardPage> {
   int _currentIndex = 0;
+  bool _syncedOnOpen = false;
+  Timer? _syncTimer;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_syncedOnOpen) return;
+    _syncedOnOpen = true;
+
+    final db = AppStateScope.of(context);
+    final user = db.currentUser;
+    if (user == null) return;
+
+    final repository = StudentApplicationRepository(database: db);
+    unawaited(repository.syncAll(user));
+    _syncTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => unawaited(repository.syncAll(user)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _syncTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +58,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
         actions: [
           IconButton(
             tooltip: 'Sincronizar',
-            onPressed: repository.syncPending,
+            onPressed: () => repository.syncAll(user),
             icon: const Icon(Icons.cloud_sync_outlined),
           ),
           IconButton(
@@ -90,11 +118,13 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
   }
 
   Future<void> _openForm(BuildContext context, UsuarioData user) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
+    final solicitudId = await Navigator.of(context).push<String>(
+      MaterialPageRoute<String>(
         builder: (_) => StudentApplicationFormPage(user: user),
       ),
     );
+    if (!context.mounted || solicitudId == null) return;
+    await _openDetail(context, solicitudId);
   }
 
   Future<void> _openDetail(BuildContext context, String id) async {

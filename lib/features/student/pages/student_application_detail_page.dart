@@ -108,6 +108,8 @@ class StudentApplicationDetailPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
+              _DocumentsSection(repository: repository, solicitud: solicitud),
+              const SizedBox(height: 16),
               _HistorySection(
                 repository: repository,
                 solicitudId: solicitud.id,
@@ -124,7 +126,7 @@ class StudentApplicationDetailPage extends StatelessWidget {
                         solicitud.estado == 'borrador' && !solicitud.bloqueada
                         ? () {
                             Navigator.of(context).push(
-                              MaterialPageRoute<void>(
+                              MaterialPageRoute<String>(
                                 builder: (_) => StudentApplicationFormPage(
                                   user: user,
                                   existing: solicitud,
@@ -173,6 +175,242 @@ class StudentApplicationDetailPage extends StatelessWidget {
   }
 }
 
+class _DocumentsSection extends StatelessWidget {
+  const _DocumentsSection({required this.repository, required this.solicitud});
+
+  final StudentApplicationRepository repository;
+  final SolicitudMobilidadData solicitud;
+
+  static const _requiredDocuments = {
+    'carta_motivacion': 'Carta de motivacion',
+    'documento_identidad': 'Documento de identidad',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final canEdit = solicitud.estado == 'borrador' && !solicitud.bloqueada;
+
+    return StreamBuilder<List<DocumentoData>>(
+      stream: repository.watchDocuments(solicitud.id),
+      builder: (context, snapshot) {
+        final documents = snapshot.data ?? const <DocumentoData>[];
+        final uploadedTypes = documents
+            .map((item) => item.tipoDocumento)
+            .toSet();
+        final missing = _requiredDocuments.entries
+            .where((entry) => !uploadedTypes.contains(entry.key))
+            .map((entry) => entry.value)
+            .toList();
+
+        return DetailSection(
+          title: 'Documentos requeridos',
+          rows: [
+            if (missing.isEmpty)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Text('Documentos completos para enviar.'),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text('Pendientes: ${missing.join(', ')}.'),
+              ),
+            if (documents.isEmpty)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Text('Aun no hay documentos cargados.'),
+              )
+            else
+              ...documents.map(
+                (document) => _DocumentRow(
+                  document: document,
+                  label:
+                      _requiredDocuments[document.tipoDocumento] ??
+                      document.tipoDocumento,
+                  canEdit: canEdit,
+                  onDelete: () async {
+                    try {
+                      await repository.deleteDocument(document);
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Documento eliminado.')),
+                      );
+                    } catch (error) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(error.toString())));
+                    }
+                  },
+                ),
+              ),
+            if (canEdit && missing.isNotEmpty)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FilledButton.icon(
+                  onPressed: () => _showDocumentDialog(context, documents),
+                  icon: const Icon(Icons.upload_file_outlined),
+                  label: const Text('Cargar documento'),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showDocumentDialog(
+    BuildContext context,
+    List<DocumentoData> documents,
+  ) async {
+    final nameController = TextEditingController();
+    var selectedType = _requiredDocuments.keys.firstWhere(
+      (type) => !documents.any((document) => document.tipoDocumento == type),
+      orElse: () => _requiredDocuments.keys.first,
+    );
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Cargar documento'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedType,
+                    decoration: const InputDecoration(
+                      labelText: 'Tipo de documento',
+                    ),
+                    items: _requiredDocuments.entries
+                        .map(
+                          (entry) => DropdownMenuItem(
+                            value: entry.key,
+                            child: Text(entry.value),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() => selectedType = value);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nombre del archivo',
+                      hintText: 'Ej: carta_motivacion.pdf',
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancelar'),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    final fileName = nameController.text.trim();
+                    if (fileName.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Ingresa el nombre del archivo.'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    try {
+                      await repository.addDocument(
+                        solicitudId: solicitud.id,
+                        tipoDocumento: selectedType,
+                        nombreArchivo: fileName,
+                      );
+                      if (!dialogContext.mounted) return;
+                      Navigator.of(dialogContext).pop();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Documento cargado.')),
+                      );
+                    } catch (error) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(error.toString())));
+                    }
+                  },
+                  child: const Text('Guardar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    nameController.dispose();
+  }
+}
+
+class _DocumentRow extends StatelessWidget {
+  const _DocumentRow({
+    required this.document,
+    required this.label,
+    required this.canEdit,
+    required this.onDelete,
+  });
+
+  final DocumentoData document;
+  final String label;
+  final bool canEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          const Icon(Icons.description_outlined),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                Text(document.nombreArchivo),
+              ],
+            ),
+          ),
+          StatusPill(status: document.estado),
+          if (document.pendingSync) ...[
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.cloud_off_outlined,
+              size: 18,
+              color: Colors.orange,
+            ),
+          ],
+          if (canEdit) ...[
+            const SizedBox(width: 8),
+            IconButton(
+              tooltip: 'Eliminar documento',
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _StatusHeader extends StatelessWidget {
   const _StatusHeader({required this.solicitud});
 
@@ -196,7 +434,9 @@ class _StatusHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    solicitud.programaAcademico,
+                    solicitud.programaAcademico.isEmpty
+                        ? 'Solicitud en borrador'
+                        : solicitud.programaAcademico,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -204,6 +444,14 @@ class _StatusHeader extends StatelessWidget {
                   Text(
                     'Creada el ${formatStudentDate(solicitud.fechaCreacion)}',
                   ),
+                  if (solicitud.pendingSync)
+                    Text(
+                      'Pendiente de sincronizar',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.orange.shade800,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                 ],
               ),
             ),

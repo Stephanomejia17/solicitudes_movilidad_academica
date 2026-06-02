@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../shared/models/usuario_model.dart';
+import '../../../shared/services/firestore_collections.dart';
 
 class UserFirestoreService {
   UserFirestoreService({FirebaseFirestore? firestore})
@@ -9,16 +10,16 @@ class UserFirestoreService {
   final FirebaseFirestore _firestore;
 
   CollectionReference<Map<String, dynamic>> get _usuarios =>
-      _firestore.collection('usuarios');
+      _firestore.collection(FirestoreCollections.users);
 
   Future<void> upsertUser(UsuarioModel user) async {
     final payload = {
-      ...user.toFirestore(),           
+      ...user.toFirestore(),
       'syncedAt': FieldValue.serverTimestamp(),
       'isActive': user.isActive,
       'role': _roleToRemote(user.rol),
     };
-  
+
     await _usuarios.doc(user.id).set(payload, SetOptions(merge: true));
   }
 
@@ -51,13 +52,12 @@ class UserFirestoreService {
     return UsuarioModel.fromFirestore(doc.id, doc.data());
   }
 
-
   String _roleToRemote(String role) {
     return switch (role.trim().toLowerCase()) {
-      'estudiante'    => 'student',
-      'coordinador'   => 'coordinator',
+      'estudiante' => 'student',
+      'coordinador' => 'coordinator',
       'administrador' => 'admin',
-      _               => role,
+      _ => role,
     };
   }
 }

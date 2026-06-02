@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../data/app_database.dart';
 
 String formatStudentDate(DateTime? value) {
-  if (value == null) return 'Sin fecha';
+  if (value == null || value.year <= 1900) return 'Sin fecha';
   final day = value.day.toString().padLeft(2, '0');
   final month = value.month.toString().padLeft(2, '0');
   return '$day/$month/${value.year}';
@@ -17,6 +17,8 @@ String statusLabel(String status) {
     'aprobada' => 'Aprobada',
     'rechazada' => 'Rechazada',
     'cancelada' => 'Cancelada',
+    'pendiente' => 'Pendiente',
+    'sincronizado' => 'Sincronizado',
     _ => status,
   };
 }
@@ -26,6 +28,8 @@ Color statusColor(BuildContext context, String status) {
   return switch (status) {
     'aprobada' => Colors.green.shade700,
     'rechazada' || 'cancelada' => colors.error,
+    'pendiente' => Colors.orange.shade800,
+    'sincronizado' => Colors.green.shade700,
     'enviada' || 'en_revision' => Colors.indigo.shade700,
     _ => colors.primary,
   };
@@ -196,9 +200,11 @@ class RequestSummaryCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      solicitud.universidadDestinoNombre.isEmpty
+                      solicitud.universidadDestinoNombre.isNotEmpty
+                          ? solicitud.universidadDestinoNombre
+                          : solicitud.programaAcademico.isNotEmpty
                           ? solicitud.programaAcademico
-                          : solicitud.universidadDestinoNombre,
+                          : 'Solicitud en borrador',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),

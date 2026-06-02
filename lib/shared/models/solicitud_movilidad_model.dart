@@ -152,117 +152,191 @@ class SolicitudMovilidadModel {
   }
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'estudianteId': estudianteId,
-        'tipoMovilidad': tipoMovilidad,
-        'nombres': nombres,
-        'apellidos': apellidos,
-        'tipoDocumento': tipoDocumento,
-        'numeroDocumento': numeroDocumento,
-        'fechaNacimiento': _dateToString(fechaNacimiento),
-        'emailInstitucional': emailInstitucional,
-        'emailPersonal': emailPersonal,
-        'telefono': telefono,
-        'contactoEmergencia': contactoEmergencia,
-        'relacionContacto': relacionContacto,
-        'universidadActual': universidadActual,
-        'facultad': facultad,
-        'universidadDestinoId': universidadDestinoId,
-        'universidadDestinoNombre': universidadDestinoNombre,
-        'paisDestino': paisDestino,
-        'ciudadDestino': ciudadDestino,
-        'facultadDestino': facultadDestino,
-        'areaEstudio': areaEstudio,
-        'programaAcademico': programaAcademico,
-        'semestre': semestre,
-        'promedioAcumulado': promedioAcumulado,
-        'nivelIdioma': nivelIdioma,
-        'puntajeIdioma': puntajeIdioma,
-        'semestreIntercambio': semestreIntercambio,
-        'fechaViaje': _dateToString(fechaViaje),
-        'fechaRegreso': _dateToString(fechaRegreso),
-        'estado': estado,
-        'bloqueada': bloqueada,
-        'fechaCreacion': _dateToString(fechaCreacion),
-        'fechaActualizacion': _dateToString(fechaActualizacion),
-        'pendingSync': pendingSync,
-      };
+    'id': id,
+    'estudianteId': estudianteId,
+    'tipoMovilidad': tipoMovilidad,
+    'nombres': nombres,
+    'apellidos': apellidos,
+    'tipoDocumento': tipoDocumento,
+    'numeroDocumento': numeroDocumento,
+    'fechaNacimiento': _dateToString(fechaNacimiento),
+    'emailInstitucional': emailInstitucional,
+    'emailPersonal': emailPersonal,
+    'telefono': telefono,
+    'contactoEmergencia': contactoEmergencia,
+    'relacionContacto': relacionContacto,
+    'universidadActual': universidadActual,
+    'facultad': facultad,
+    'universidadDestinoId': universidadDestinoId,
+    'universidadDestinoNombre': universidadDestinoNombre,
+    'paisDestino': paisDestino,
+    'ciudadDestino': ciudadDestino,
+    'facultadDestino': facultadDestino,
+    'areaEstudio': areaEstudio,
+    'programaAcademico': programaAcademico,
+    'semestre': semestre,
+    'promedioAcumulado': promedioAcumulado,
+    'nivelIdioma': nivelIdioma,
+    'puntajeIdioma': puntajeIdioma,
+    'semestreIntercambio': semestreIntercambio,
+    'fechaViaje': _dateToString(fechaViaje),
+    'fechaRegreso': _dateToString(fechaRegreso),
+    'estado': estado,
+    'bloqueada': bloqueada,
+    'fechaCreacion': _dateToString(fechaCreacion),
+    'fechaActualizacion': _dateToString(fechaActualizacion),
+    'pendingSync': pendingSync,
+  };
 
   Map<String, dynamic> toFirestore() => {
-        'estudianteId': estudianteId,
-        'tipoMovilidad': tipoMovilidad,
-        'nombres': nombres,
-        'apellidos': apellidos,
-        'tipoDocumento': tipoDocumento,
-        'numeroDocumento': numeroDocumento,
-        'fechaNacimiento': Timestamp.fromDate(fechaNacimiento),
-        'emailInstitucional': emailInstitucional,
-        'emailPersonal': emailPersonal,
-        'telefono': telefono,
-        'contactoEmergencia': contactoEmergencia,
-        'relacionContacto': relacionContacto,
-        'universidadActual': universidadActual,
-        'facultad': facultad,
-        'universidadDestinoId': universidadDestinoId,
-        'universidadDestinoNombre': universidadDestinoNombre,
-        'paisDestino': paisDestino,
-        'ciudadDestino': ciudadDestino,
-        'facultadDestino': facultadDestino,
-        'areaEstudio': areaEstudio,
-        'programaAcademico': programaAcademico,
-        'semestre': semestre,
-        'promedioAcumulado': promedioAcumulado,
-        'nivelIdioma': nivelIdioma,
-        'puntajeIdioma': puntajeIdioma,
-        'semestreIntercambio': semestreIntercambio,
-        'fechaViaje': fechaViaje == null ? null : Timestamp.fromDate(fechaViaje!),
-        'fechaRegreso':
-            fechaRegreso == null ? null : Timestamp.fromDate(fechaRegreso!),
-        'estado': estado,
-        'bloqueada': bloqueada,
-        'fechaCreacion': Timestamp.fromDate(fechaCreacion),
-        'fechaActualizacion': Timestamp.fromDate(fechaActualizacion),
-        'pendingSync': pendingSync,
-      };
+    'estudianteId': estudianteId,
+    'studentId': estudianteId,
+    'tipoMovilidad': tipoMovilidad,
+    'mobilityType': tipoMovilidad,
+    'nombres': nombres,
+    'firstName': nombres,
+    'apellidos': apellidos,
+    'lastName': apellidos,
+    'tipoDocumento': tipoDocumento,
+    'documentType': tipoDocumento,
+    'numeroDocumento': numeroDocumento,
+    'documentNumber': numeroDocumento,
+    'fechaNacimiento': Timestamp.fromDate(fechaNacimiento),
+    'birthDate': Timestamp.fromDate(fechaNacimiento),
+    'emailInstitucional': emailInstitucional,
+    'institutionalEmail': emailInstitucional,
+    'emailPersonal': emailPersonal,
+    'personalEmail': emailPersonal,
+    'telefono': telefono,
+    'phone': telefono,
+    'contactoEmergencia': contactoEmergencia,
+    'emergencyContact': contactoEmergencia,
+    'relacionContacto': relacionContacto,
+    'emergencyRelationship': relacionContacto,
+    'universidadActual': universidadActual,
+    'currentUniversity': universidadActual,
+    'facultad': facultad,
+    'faculty': facultad,
+    'universidadDestinoId': universidadDestinoId,
+    'destinationUniversityId': universidadDestinoId,
+    'universidadDestinoNombre': universidadDestinoNombre,
+    'destinationUniversity': universidadDestinoNombre,
+    'paisDestino': paisDestino,
+    'country': paisDestino,
+    'ciudadDestino': ciudadDestino,
+    'city': ciudadDestino,
+    'facultadDestino': facultadDestino,
+    'destinationFaculty': facultadDestino,
+    'areaEstudio': areaEstudio,
+    'studyArea': areaEstudio,
+    'programaAcademico': programaAcademico,
+    'academicProgram': programaAcademico,
+    'semestre': semestre,
+    'currentSemester': semestre,
+    'promedioAcumulado': promedioAcumulado,
+    'average': promedioAcumulado,
+    'nivelIdioma': nivelIdioma,
+    'languageLevel': nivelIdioma,
+    'puntajeIdioma': puntajeIdioma,
+    'languageScore': puntajeIdioma,
+    'semestreIntercambio': semestreIntercambio,
+    'exchangeSemester': semestreIntercambio,
+    'fechaViaje': fechaViaje == null ? null : Timestamp.fromDate(fechaViaje!),
+    'travelDate': fechaViaje == null ? null : Timestamp.fromDate(fechaViaje!),
+    'fechaRegreso': fechaRegreso == null
+        ? null
+        : Timestamp.fromDate(fechaRegreso!),
+    'returnDate': fechaRegreso == null
+        ? null
+        : Timestamp.fromDate(fechaRegreso!),
+    'estado': estado,
+    'status': estado,
+    'bloqueada': bloqueada,
+    'locked': bloqueada,
+    'fechaCreacion': Timestamp.fromDate(fechaCreacion),
+    'createdAt': Timestamp.fromDate(fechaCreacion),
+    'fechaActualizacion': Timestamp.fromDate(fechaActualizacion),
+    'updatedAt': Timestamp.fromDate(fechaActualizacion),
+    'pendingSync': pendingSync,
+  };
 
   factory SolicitudMovilidadModel.fromMap(Map<String, dynamic> map) {
     return SolicitudMovilidadModel(
       id: (map['id'] as String? ?? '').trim(),
-      estudianteId: (map['estudianteId'] as String? ?? '').trim(),
-      tipoMovilidad: map['tipoMovilidad'] as String? ?? '',
-      nombres: map['nombres'] as String? ?? '',
-      apellidos: map['apellidos'] as String? ?? '',
-      tipoDocumento: map['tipoDocumento'] as String? ?? '',
-      numeroDocumento: map['numeroDocumento'] as String? ?? '',
+      estudianteId: _readString(map, 'estudianteId', 'studentId'),
+      tipoMovilidad: _readString(map, 'tipoMovilidad', 'mobilityType'),
+      nombres: _readString(map, 'nombres', 'firstName'),
+      apellidos: _readString(map, 'apellidos', 'lastName'),
+      tipoDocumento: _readString(map, 'tipoDocumento', 'documentType'),
+      numeroDocumento: _readString(map, 'numeroDocumento', 'documentNumber'),
       fechaNacimiento:
-          _readDate(map['fechaNacimiento']) ?? DateTime.fromMillisecondsSinceEpoch(0),
-      emailInstitucional: map['emailInstitucional'] as String? ?? '',
-      emailPersonal: map['emailPersonal'] as String? ?? '',
-      telefono: map['telefono'] as String? ?? '',
-      contactoEmergencia: map['contactoEmergencia'] as String? ?? '',
-      relacionContacto: map['relacionContacto'] as String? ?? '',
-      universidadActual: map['universidadActual'] as String? ?? '',
-      facultad: map['facultad'] as String? ?? '',
-      universidadDestinoId: map['universidadDestinoId'] as String? ?? '',
-      universidadDestinoNombre: map['universidadDestinoNombre'] as String? ?? '',
-      paisDestino: map['paisDestino'] as String? ?? '',
-      ciudadDestino: map['ciudadDestino'] as String? ?? '',
-      facultadDestino: map['facultadDestino'] as String? ?? '',
-      areaEstudio: map['areaEstudio'] as String? ?? '',
-      programaAcademico: map['programaAcademico'] as String? ?? '',
-      semestre: (map['semestre'] as num?)?.toInt() ?? 0,
-      promedioAcumulado: (map['promedioAcumulado'] as num?)?.toDouble() ?? 0,
-      nivelIdioma: map['nivelIdioma'] as String? ?? '',
-      puntajeIdioma: map['puntajeIdioma'] as String? ?? '',
-      semestreIntercambio: map['semestreIntercambio'] as String? ?? '',
-      fechaViaje: _readDate(map['fechaViaje']),
-      fechaRegreso: _readDate(map['fechaRegreso']),
-      estado: map['estado'] as String? ?? 'borrador',
-      bloqueada: map['bloqueada'] as bool? ?? false,
+          _readDate(map['fechaNacimiento'] ?? map['birthDate']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      emailInstitucional: _readString(
+        map,
+        'emailInstitucional',
+        'institutionalEmail',
+      ),
+      emailPersonal: _readString(map, 'emailPersonal', 'personalEmail'),
+      telefono: _readString(map, 'telefono', 'phone'),
+      contactoEmergencia: _readString(
+        map,
+        'contactoEmergencia',
+        'emergencyContact',
+      ),
+      relacionContacto: _readString(
+        map,
+        'relacionContacto',
+        'emergencyRelationship',
+      ),
+      universidadActual: _readString(
+        map,
+        'universidadActual',
+        'currentUniversity',
+      ),
+      facultad: _readString(map, 'facultad', 'faculty'),
+      universidadDestinoId: _readString(
+        map,
+        'universidadDestinoId',
+        'destinationUniversityId',
+      ),
+      universidadDestinoNombre: _readString(
+        map,
+        'universidadDestinoNombre',
+        'destinationUniversity',
+      ),
+      paisDestino: _readString(map, 'paisDestino', 'country'),
+      ciudadDestino: _readString(map, 'ciudadDestino', 'city'),
+      facultadDestino: _readString(
+        map,
+        'facultadDestino',
+        'destinationFaculty',
+      ),
+      areaEstudio: _readString(map, 'areaEstudio', 'studyArea'),
+      programaAcademico: _readString(
+        map,
+        'programaAcademico',
+        'academicProgram',
+      ),
+      semestre: _readInt(map, 'semestre', 'currentSemester'),
+      promedioAcumulado: _readDouble(map, 'promedioAcumulado', 'average'),
+      nivelIdioma: _readString(map, 'nivelIdioma', 'languageLevel'),
+      puntajeIdioma: _readString(map, 'puntajeIdioma', 'languageScore'),
+      semestreIntercambio: _readString(
+        map,
+        'semestreIntercambio',
+        'exchangeSemester',
+      ),
+      fechaViaje: _readDate(map['fechaViaje'] ?? map['travelDate']),
+      fechaRegreso: _readDate(map['fechaRegreso'] ?? map['returnDate']),
+      estado: _readString(map, 'estado', 'status', fallback: 'borrador'),
+      bloqueada: _readBool(map, 'bloqueada', 'locked'),
       fechaCreacion:
-          _readDate(map['fechaCreacion']) ?? DateTime.fromMillisecondsSinceEpoch(0),
+          _readDate(map['fechaCreacion'] ?? map['createdAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
       fechaActualizacion:
-          _readDate(map['fechaActualizacion']) ?? DateTime.fromMillisecondsSinceEpoch(0),
+          _readDate(map['fechaActualizacion'] ?? map['updatedAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
       pendingSync: map['pendingSync'] as bool? ?? false,
     );
   }
@@ -285,6 +359,42 @@ class SolicitudMovilidadModel {
     return null;
   }
 
+  static String _readString(
+    Map<String, dynamic> map,
+    String primary,
+    String fallbackKey, {
+    String fallback = '',
+  }) {
+    final value = map[primary] ?? map[fallbackKey];
+    return value is String ? value.trim() : fallback;
+  }
+
+  static int _readInt(
+    Map<String, dynamic> map,
+    String primary,
+    String fallbackKey,
+  ) {
+    final value = map[primary] ?? map[fallbackKey];
+    return value is num ? value.toInt() : 0;
+  }
+
+  static double _readDouble(
+    Map<String, dynamic> map,
+    String primary,
+    String fallbackKey,
+  ) {
+    final value = map[primary] ?? map[fallbackKey];
+    return value is num ? value.toDouble() : 0;
+  }
+
+  static bool _readBool(
+    Map<String, dynamic> map,
+    String primary,
+    String fallbackKey,
+  ) {
+    final value = map[primary] ?? map[fallbackKey];
+    return value is bool ? value : false;
+  }
+
   static String? _dateToString(DateTime? value) => value?.toIso8601String();
 }
-
