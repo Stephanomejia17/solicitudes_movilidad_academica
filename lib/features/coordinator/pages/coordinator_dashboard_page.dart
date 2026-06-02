@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/app_database.dart';
+import '../../auth/services/auth_service.dart';
 import '../../../shared/widgets/simple_entity_card.dart';
 
 class CoordinatorDashboardPage extends StatelessWidget {
@@ -9,13 +10,14 @@ class CoordinatorDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final db = AppStateScope.of(context);
+    final authService = AuthServiceScope.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Coordinador'),
         actions: [
           IconButton(
-            onPressed: db.logout,
+            onPressed: authService.logout,
             icon: const Icon(Icons.logout),
           ),
         ],

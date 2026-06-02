@@ -48,17 +48,6 @@ class $UsuariosTable extends Usuarios
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
-  static const VerificationMeta _passwordHashMeta = const VerificationMeta(
-    'passwordHash',
-  );
-  @override
-  late final GeneratedColumn<String> passwordHash = GeneratedColumn<String>(
-    'password_hash',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _rolMeta = const VerificationMeta('rol');
   @override
   late final GeneratedColumn<String> rol = GeneratedColumn<String>(
@@ -121,7 +110,6 @@ class $UsuariosTable extends Usuarios
     nombre,
     apellido,
     email,
-    passwordHash,
     rol,
     estado,
     createdAt,
@@ -168,17 +156,6 @@ class $UsuariosTable extends Usuarios
       );
     } else if (isInserting) {
       context.missing(_emailMeta);
-    }
-    if (data.containsKey('password_hash')) {
-      context.handle(
-        _passwordHashMeta,
-        passwordHash.isAcceptableOrUnknown(
-          data['password_hash']!,
-          _passwordHashMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_passwordHashMeta);
     }
     if (data.containsKey('rol')) {
       context.handle(
@@ -244,10 +221,6 @@ class $UsuariosTable extends Usuarios
         DriftSqlType.string,
         data['${effectivePrefix}email'],
       )!,
-      passwordHash: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}password_hash'],
-      )!,
       rol: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}rol'],
@@ -282,7 +255,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
   final String nombre;
   final String apellido;
   final String email;
-  final String passwordHash;
   final String rol;
   final String estado;
   final DateTime createdAt;
@@ -293,7 +265,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
     required this.nombre,
     required this.apellido,
     required this.email,
-    required this.passwordHash,
     required this.rol,
     required this.estado,
     required this.createdAt,
@@ -307,7 +278,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
     map['nombre'] = Variable<String>(nombre);
     map['apellido'] = Variable<String>(apellido);
     map['email'] = Variable<String>(email);
-    map['password_hash'] = Variable<String>(passwordHash);
     map['rol'] = Variable<String>(rol);
     map['estado'] = Variable<String>(estado);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -322,7 +292,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
       nombre: Value(nombre),
       apellido: Value(apellido),
       email: Value(email),
-      passwordHash: Value(passwordHash),
       rol: Value(rol),
       estado: Value(estado),
       createdAt: Value(createdAt),
@@ -341,7 +310,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
       nombre: serializer.fromJson<String>(json['nombre']),
       apellido: serializer.fromJson<String>(json['apellido']),
       email: serializer.fromJson<String>(json['email']),
-      passwordHash: serializer.fromJson<String>(json['passwordHash']),
       rol: serializer.fromJson<String>(json['rol']),
       estado: serializer.fromJson<String>(json['estado']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -357,7 +325,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
       'nombre': serializer.toJson<String>(nombre),
       'apellido': serializer.toJson<String>(apellido),
       'email': serializer.toJson<String>(email),
-      'passwordHash': serializer.toJson<String>(passwordHash),
       'rol': serializer.toJson<String>(rol),
       'estado': serializer.toJson<String>(estado),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -371,7 +338,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
     String? nombre,
     String? apellido,
     String? email,
-    String? passwordHash,
     String? rol,
     String? estado,
     DateTime? createdAt,
@@ -382,7 +348,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
     nombre: nombre ?? this.nombre,
     apellido: apellido ?? this.apellido,
     email: email ?? this.email,
-    passwordHash: passwordHash ?? this.passwordHash,
     rol: rol ?? this.rol,
     estado: estado ?? this.estado,
     createdAt: createdAt ?? this.createdAt,
@@ -395,9 +360,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
       nombre: data.nombre.present ? data.nombre.value : this.nombre,
       apellido: data.apellido.present ? data.apellido.value : this.apellido,
       email: data.email.present ? data.email.value : this.email,
-      passwordHash: data.passwordHash.present
-          ? data.passwordHash.value
-          : this.passwordHash,
       rol: data.rol.present ? data.rol.value : this.rol,
       estado: data.estado.present ? data.estado.value : this.estado,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -415,7 +377,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
           ..write('nombre: $nombre, ')
           ..write('apellido: $apellido, ')
           ..write('email: $email, ')
-          ..write('passwordHash: $passwordHash, ')
           ..write('rol: $rol, ')
           ..write('estado: $estado, ')
           ..write('createdAt: $createdAt, ')
@@ -431,7 +392,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
     nombre,
     apellido,
     email,
-    passwordHash,
     rol,
     estado,
     createdAt,
@@ -446,7 +406,6 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
           other.nombre == this.nombre &&
           other.apellido == this.apellido &&
           other.email == this.email &&
-          other.passwordHash == this.passwordHash &&
           other.rol == this.rol &&
           other.estado == this.estado &&
           other.createdAt == this.createdAt &&
@@ -459,7 +418,6 @@ class UsuariosCompanion extends UpdateCompanion<UsuarioData> {
   final Value<String> nombre;
   final Value<String> apellido;
   final Value<String> email;
-  final Value<String> passwordHash;
   final Value<String> rol;
   final Value<String> estado;
   final Value<DateTime> createdAt;
@@ -471,7 +429,6 @@ class UsuariosCompanion extends UpdateCompanion<UsuarioData> {
     this.nombre = const Value.absent(),
     this.apellido = const Value.absent(),
     this.email = const Value.absent(),
-    this.passwordHash = const Value.absent(),
     this.rol = const Value.absent(),
     this.estado = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -484,7 +441,6 @@ class UsuariosCompanion extends UpdateCompanion<UsuarioData> {
     required String nombre,
     required String apellido,
     required String email,
-    required String passwordHash,
     required String rol,
     this.estado = const Value.absent(),
     required DateTime createdAt,
@@ -495,7 +451,6 @@ class UsuariosCompanion extends UpdateCompanion<UsuarioData> {
        nombre = Value(nombre),
        apellido = Value(apellido),
        email = Value(email),
-       passwordHash = Value(passwordHash),
        rol = Value(rol),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
@@ -504,7 +459,6 @@ class UsuariosCompanion extends UpdateCompanion<UsuarioData> {
     Expression<String>? nombre,
     Expression<String>? apellido,
     Expression<String>? email,
-    Expression<String>? passwordHash,
     Expression<String>? rol,
     Expression<String>? estado,
     Expression<DateTime>? createdAt,
@@ -517,7 +471,6 @@ class UsuariosCompanion extends UpdateCompanion<UsuarioData> {
       if (nombre != null) 'nombre': nombre,
       if (apellido != null) 'apellido': apellido,
       if (email != null) 'email': email,
-      if (passwordHash != null) 'password_hash': passwordHash,
       if (rol != null) 'rol': rol,
       if (estado != null) 'estado': estado,
       if (createdAt != null) 'created_at': createdAt,
@@ -532,7 +485,6 @@ class UsuariosCompanion extends UpdateCompanion<UsuarioData> {
     Value<String>? nombre,
     Value<String>? apellido,
     Value<String>? email,
-    Value<String>? passwordHash,
     Value<String>? rol,
     Value<String>? estado,
     Value<DateTime>? createdAt,
@@ -545,7 +497,6 @@ class UsuariosCompanion extends UpdateCompanion<UsuarioData> {
       nombre: nombre ?? this.nombre,
       apellido: apellido ?? this.apellido,
       email: email ?? this.email,
-      passwordHash: passwordHash ?? this.passwordHash,
       rol: rol ?? this.rol,
       estado: estado ?? this.estado,
       createdAt: createdAt ?? this.createdAt,
@@ -569,9 +520,6 @@ class UsuariosCompanion extends UpdateCompanion<UsuarioData> {
     }
     if (email.present) {
       map['email'] = Variable<String>(email.value);
-    }
-    if (passwordHash.present) {
-      map['password_hash'] = Variable<String>(passwordHash.value);
     }
     if (rol.present) {
       map['rol'] = Variable<String>(rol.value);
@@ -601,7 +549,6 @@ class UsuariosCompanion extends UpdateCompanion<UsuarioData> {
           ..write('nombre: $nombre, ')
           ..write('apellido: $apellido, ')
           ..write('email: $email, ')
-          ..write('passwordHash: $passwordHash, ')
           ..write('rol: $rol, ')
           ..write('estado: $estado, ')
           ..write('createdAt: $createdAt, ')
@@ -4576,7 +4523,6 @@ typedef $$UsuariosTableCreateCompanionBuilder =
       required String nombre,
       required String apellido,
       required String email,
-      required String passwordHash,
       required String rol,
       Value<String> estado,
       required DateTime createdAt,
@@ -4590,7 +4536,6 @@ typedef $$UsuariosTableUpdateCompanionBuilder =
       Value<String> nombre,
       Value<String> apellido,
       Value<String> email,
-      Value<String> passwordHash,
       Value<String> rol,
       Value<String> estado,
       Value<DateTime> createdAt,
@@ -4625,11 +4570,6 @@ class $$UsuariosTableFilterComposer
 
   ColumnFilters<String> get email => $composableBuilder(
     column: $table.email,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get passwordHash => $composableBuilder(
-    column: $table.passwordHash,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4688,11 +4628,6 @@ class $$UsuariosTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get passwordHash => $composableBuilder(
-    column: $table.passwordHash,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get rol => $composableBuilder(
     column: $table.rol,
     builder: (column) => ColumnOrderings(column),
@@ -4739,11 +4674,6 @@ class $$UsuariosTableAnnotationComposer
 
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
-
-  GeneratedColumn<String> get passwordHash => $composableBuilder(
-    column: $table.passwordHash,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<String> get rol =>
       $composableBuilder(column: $table.rol, builder: (column) => column);
@@ -4798,7 +4728,6 @@ class $$UsuariosTableTableManager
                 Value<String> nombre = const Value.absent(),
                 Value<String> apellido = const Value.absent(),
                 Value<String> email = const Value.absent(),
-                Value<String> passwordHash = const Value.absent(),
                 Value<String> rol = const Value.absent(),
                 Value<String> estado = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -4810,7 +4739,6 @@ class $$UsuariosTableTableManager
                 nombre: nombre,
                 apellido: apellido,
                 email: email,
-                passwordHash: passwordHash,
                 rol: rol,
                 estado: estado,
                 createdAt: createdAt,
@@ -4824,7 +4752,6 @@ class $$UsuariosTableTableManager
                 required String nombre,
                 required String apellido,
                 required String email,
-                required String passwordHash,
                 required String rol,
                 Value<String> estado = const Value.absent(),
                 required DateTime createdAt,
@@ -4836,7 +4763,6 @@ class $$UsuariosTableTableManager
                 nombre: nombre,
                 apellido: apellido,
                 email: email,
-                passwordHash: passwordHash,
                 rol: rol,
                 estado: estado,
                 createdAt: createdAt,

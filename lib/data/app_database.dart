@@ -17,7 +17,6 @@ class Usuarios extends Table {
   TextColumn get nombre => text()();
   TextColumn get apellido => text()();
   TextColumn get email => text().unique()();
-  TextColumn get passwordHash => text()();
   TextColumn get rol => text()();
   TextColumn get estado => text().withDefault(const Constant('activo'))();
   DateTimeColumn get createdAt => dateTime()();
@@ -230,65 +229,6 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> register({
-    required String nombre,
-    required String apellido,
-    required String email,
-    required String passwordHash,
-    required String rol,
-  }) async {
-    _setBusy(true);
-    authError = null;
-    try {
-      final normalizedEmail = email.trim().toLowerCase();
-      final exists = await getUsuarioByEmail(normalizedEmail);
-      if (exists != null) {
-        authError = 'Ya existe una cuenta registrada con este correo.';
-        return false;
-      }
-
-      final now = DateTime.now();
-      await into(usuarios).insert(
-        UsuariosCompanion.insert(
-          id: _uuid.v4(),
-          nombre: nombre.trim(),
-          apellido: apellido.trim(),
-          email: normalizedEmail,
-          passwordHash: passwordHash,
-          rol: rol.trim(),
-          estado: const Value('activo'),
-          createdAt: now,
-          updatedAt: now,
-          pendingSync: const Value(true),
-        ),
-      );
-      return true;
-    } finally {
-      _setBusy(false);
-    }
-  }
-
-  Future<bool> login({required String email, required String password}) async {
-    _setBusy(true);
-    authError = null;
-    try {
-      final user = await getUsuarioByEmail(email);
-      if (user == null ||
-          user.passwordHash != password ||
-          user.estado != 'activo') {
-        authError = 'Correo o contrasena incorrectos.';
-        return false;
-      }
-      currentUser = user;
-      return true;
-    } finally {
-      _setBusy(false);
-    }
-  }
-
-  void logout() {
-    setCurrentUser(null);
-  }
 
   Future<UsuarioData?> getUsuarioByEmail(String email) async {
     final normalizedEmail = email.trim().toLowerCase();
@@ -310,7 +250,6 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     required String nombre,
     required String apellido,
     required String email,
-    required String passwordHash,
     required String rol,
     required String estado,
     required DateTime createdAt,
@@ -318,33 +257,37 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     required bool pendingSync,
   }) async {
     final normalizedEmail = email.trim().toLowerCase();
-    final existing = await getUsuarioByEmail(normalizedEmail);
-    if (existing == null) {
-      await into(usuarios).insert(
-        UsuariosCompanion.insert(
-          id: id,
-          nombre: nombre.trim(),
-          apellido: apellido.trim(),
-          email: normalizedEmail,
-          passwordHash: passwordHash,
-          rol: rol.trim(),
+
+    final existing = await getUsuarioById(id);
+
+    if (existing != null) {
+      await (update(usuarios)
+            ..where((u) => u.id.equals(id)))
+          .write(
+        UsuariosCompanion(
+          nombre: Value(nombre.trim()),
+          apellido: Value(apellido.trim()),
+          email: Value(normalizedEmail),
+          rol: Value(rol.trim()),
           estado: Value(estado),
-          createdAt: createdAt,
-          updatedAt: updatedAt,
+          updatedAt: Value(updatedAt),
           pendingSync: Value(pendingSync),
         ),
       );
+
       return;
     }
 
-    await (update(usuarios)..where((t) => t.id.equals(existing.id))).write(
-      UsuariosCompanion(
-        nombre: Value(nombre.trim()),
-        apellido: Value(apellido.trim()),
-        passwordHash: Value(passwordHash),
-        rol: Value(rol.trim()),
+    await into(usuarios).insert(
+      UsuariosCompanion.insert(
+        id: id,
+        nombre: nombre.trim(),
+        apellido: apellido.trim(),
+        email: normalizedEmail,
+        rol: rol.trim(),
         estado: Value(estado),
-        updatedAt: Value(updatedAt),
+        createdAt: createdAt,
+        updatedAt: updatedAt,
         pendingSync: Value(pendingSync),
       ),
     );
@@ -383,9 +326,9 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
           ? companion.apellido.value
           : existing.apellido,
       email: companion.email.present ? companion.email.value : existing.email,
-      passwordHash: companion.passwordHash.present
-          ? companion.passwordHash.value
-          : existing.passwordHash,
+      //passwordHash: companion.passwordHash.present
+          //? companion.passwordHash.value
+          //: existing.passwordHash,
       rol: companion.rol.present ? companion.rol.value : existing.rol,
       estado: companion.estado.present
           ? companion.estado.value
@@ -915,48 +858,6 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   }
 
   Future<void> _seedDemoDataIfNeeded() async {
-    final hasUsers = await (select(usuarios)..limit(1)).getSingleOrNull();
-    if (hasUsers == null) {
-      final now = DateTime.now();
-      await batch((batch) {
-        batch.insertAll(usuarios, [
-          UsuariosCompanion.insert(
-            id: _uuid.v4(),
-            nombre: 'Ana',
-            apellido: 'Admin',
-            email: 'admin@xchange.edu.co',
-            passwordHash: 'Admin123',
-            rol: 'administrador',
-            createdAt: now,
-            updatedAt: now,
-            pendingSync: const Value(true),
-          ),
-          UsuariosCompanion.insert(
-            id: _uuid.v4(),
-            nombre: 'Carlos',
-            apellido: 'Coordinador',
-            email: 'coordinador@xchange.edu.co',
-            passwordHash: 'Coord123',
-            rol: 'coordinador',
-            createdAt: now,
-            updatedAt: now,
-            pendingSync: const Value(true),
-          ),
-          UsuariosCompanion.insert(
-            id: _uuid.v4(),
-            nombre: 'Sara',
-            apellido: 'Estudiante',
-            email: 'estudiante@xchange.edu.co',
-            passwordHash: 'User12345',
-            rol: 'estudiante',
-            createdAt: now,
-            updatedAt: now,
-            pendingSync: const Value(true),
-          ),
-        ]);
-      });
-    }
-
     final hasUniversidades = await (select(
       universidadDestino,
     )..limit(1)).getSingleOrNull();

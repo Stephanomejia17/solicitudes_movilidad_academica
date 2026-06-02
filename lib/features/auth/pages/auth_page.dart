@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../data/app_database.dart';
+import '../services/auth_service.dart';
 import '../services/user_repository.dart';
 
 class AuthPage extends StatefulWidget {
@@ -15,8 +15,8 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    final db = AppStateScope.of(context);
-    final repository = UserRepository(localDb: db);
+    final authService = AuthServiceScope.of(context);
+    final repository = UserRepository(authService: authService);
 
     return Scaffold(
       body: Center(
@@ -45,12 +45,10 @@ class _AuthPageState extends State<AuthPage> {
                     child: _showLogin
                         ? _LoginForm(
                             key: const ValueKey('login'),
-                            db: db,
                             repository: repository,
                           )
                         : _RegisterForm(
                             key: const ValueKey('register'),
-                            db: db,
                             repository: repository,
                           ),
                   ),
@@ -65,9 +63,8 @@ class _AuthPageState extends State<AuthPage> {
 }
 
 class _LoginForm extends StatefulWidget {
-  const _LoginForm({super.key, required this.db, required this.repository});
+  const _LoginForm({super.key, required this.repository});
 
-  final AppDatabase db;
   final UserRepository repository;
 
   @override
@@ -88,20 +85,22 @@ class _LoginFormState extends State<_LoginForm> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
     final success = await widget.repository.loginLocal(
       email: _email.text,
       password: _password.text,
     );
     if (!mounted) return;
+
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(widget.db.authError ?? 'No fue posible ingresar.'),
+          content: Text(
+            widget.repository.authError ?? 'No fue posible ingresar.',
+          ),
         ),
       );
-      return;
     }
-    setState(() {});
   }
 
   @override
@@ -121,14 +120,14 @@ class _LoginFormState extends State<_LoginForm> {
           TextFormField(
             controller: _password,
             obscureText: true,
-            decoration: const InputDecoration(labelText: 'Contrasena'),
+            decoration: const InputDecoration(labelText: 'Contraseña'),
             validator: (value) =>
                 value == null || value.trim().isEmpty ? 'Requerido' : null,
           ),
           const SizedBox(height: 16),
           FilledButton(
-            onPressed: widget.db.isBusy ? null : _submit,
-            child: Text(widget.db.isBusy ? 'Ingresando...' : 'Ingresar'),
+            onPressed: widget.repository.isBusy ? null : _submit,
+            child: Text(widget.repository.isBusy ? 'Ingresando...' : 'Ingresar'),
           ),
         ],
       ),
@@ -137,9 +136,8 @@ class _LoginFormState extends State<_LoginForm> {
 }
 
 class _RegisterForm extends StatefulWidget {
-  const _RegisterForm({super.key, required this.db, required this.repository});
+  const _RegisterForm({super.key, required this.repository});
 
-  final AppDatabase db;
   final UserRepository repository;
 
   @override
@@ -151,7 +149,7 @@ class _RegisterFormState extends State<_RegisterForm> {
   final _nombre = TextEditingController();
   final _apellido = TextEditingController();
   final _email = TextEditingController();
-  final _passwordHash = TextEditingController();
+  final _password = TextEditingController();
   String _rol = 'estudiante';
 
   @override
@@ -159,37 +157,36 @@ class _RegisterFormState extends State<_RegisterForm> {
     _nombre.dispose();
     _apellido.dispose();
     _email.dispose();
-    _passwordHash.dispose();
+    _password.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
     final success = await widget.repository.registerLocal(
       nombre: _nombre.text,
       apellido: _apellido.text,
       email: _email.text,
-      passwordHash: _passwordHash.text,
+      passwordHash: _password.text,
       rol: _rol,
     );
     if (!mounted) return;
+
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(widget.db.authError ?? 'No fue posible registrar.'),
+          content: Text(
+            widget.repository.authError ?? 'No fue posible registrar.',
+          ),
         ),
       );
       return;
     }
-    if (widget.db.authError != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(widget.db.authError!)));
-      return;
-    }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Usuario creado')));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Usuario creado')),
+    );
   }
 
   @override
@@ -212,11 +209,16 @@ class _RegisterFormState extends State<_RegisterForm> {
           TextFormField(
             controller: _email,
             decoration: const InputDecoration(labelText: 'Email'),
+            validator: (value) =>
+                value == null || value.trim().isEmpty ? 'Requerido' : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
-            controller: _passwordHash,
-            decoration: const InputDecoration(labelText: 'Password hash'),
+            controller: _password,
+            obscureText: true,
+            decoration: const InputDecoration(labelText: 'Contraseña'),
+            validator: (value) =>
+                value == null || value.trim().isEmpty ? 'Requerido' : null,
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
@@ -238,8 +240,8 @@ class _RegisterFormState extends State<_RegisterForm> {
           ),
           const SizedBox(height: 16),
           FilledButton(
-            onPressed: widget.db.isBusy ? null : _submit,
-            child: Text(widget.db.isBusy ? 'Creando...' : 'Registrar'),
+            onPressed: widget.repository.isBusy ? null : _submit,
+            child: Text(widget.repository.isBusy ? 'Creando...' : 'Registrar'),
           ),
         ],
       ),

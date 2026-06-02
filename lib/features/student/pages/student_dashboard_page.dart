@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/app_database.dart';
+import '../../auth/services/auth_service.dart';
 import '../services/student_application_repository.dart';
 import '../widgets/student_dashboard_widgets.dart';
 import 'student_application_detail_page.dart';
@@ -19,6 +20,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
   @override
   Widget build(BuildContext context) {
     final db = AppStateScope.of(context);
+    final authService = AuthServiceScope.of(context);
     final user = db.currentUser!;
     final repository = StudentApplicationRepository(database: db);
 
@@ -33,7 +35,7 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
           ),
           IconButton(
             tooltip: 'Cerrar sesion',
-            onPressed: db.logout,
+            onPressed: authService.logout,
             icon: const Icon(Icons.logout_rounded),
           ),
         ],
