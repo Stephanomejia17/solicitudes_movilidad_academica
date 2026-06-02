@@ -47,6 +47,15 @@ class UniversidadDestinoModel {
         'pendingSync': pendingSync,
       };
 
+  Map<String, dynamic> toFirestore() => {
+        'nombre': nombre,
+        'pais': pais,
+        'ciudad': ciudad,
+        'tipoMovilidad': tipoMovilidad,
+        'convenioActivo': convenioActivo,
+        'pendingSync': pendingSync,
+      };
+
   factory UniversidadDestinoModel.fromMap(Map<String, dynamic> map) {
     return UniversidadDestinoModel(
       id: (map['id'] as String? ?? '').trim(),
@@ -57,6 +66,17 @@ class UniversidadDestinoModel {
       convenioActivo: map['convenioActivo'] as bool? ?? true,
       pendingSync: map['pendingSync'] as bool? ?? false,
     );
+  }
+
+  factory UniversidadDestinoModel.fromFirestore(
+    String docId,
+    Map<String, dynamic> map,
+  ) {
+    return UniversidadDestinoModel.fromMap({
+      ...map,
+      'id': docId,
+      'pendingSync': false,
+    });
   }
 }
 

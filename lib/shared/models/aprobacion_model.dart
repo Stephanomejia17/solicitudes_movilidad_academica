@@ -54,6 +54,16 @@ class AprobacionModel {
         'pendingSync': pendingSync,
       };
 
+  Map<String, dynamic> toFirestore() => {
+        'solicitudId': solicitudId,
+        'coordinadorId': coordinadorId,
+        'usuarioId': usuarioId,
+        'decision': decision,
+        'comentario': comentario,
+        'fechaDecision': Timestamp.fromDate(fechaDecision),
+        'pendingSync': pendingSync,
+      };
+
   factory AprobacionModel.fromMap(Map<String, dynamic> map) {
     return AprobacionModel(
       id: (map['id'] as String? ?? '').trim(),
@@ -66,6 +76,17 @@ class AprobacionModel {
           _readDate(map['fechaDecision']) ?? DateTime.fromMillisecondsSinceEpoch(0),
       pendingSync: map['pendingSync'] as bool? ?? false,
     );
+  }
+
+  factory AprobacionModel.fromFirestore(
+    String docId,
+    Map<String, dynamic> map,
+  ) {
+    return AprobacionModel.fromMap({
+      ...map,
+      'id': docId,
+      'pendingSync': false,
+    });
   }
 
   static DateTime? _readDate(Object? value) {
