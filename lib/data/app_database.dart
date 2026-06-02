@@ -118,7 +118,7 @@ class Aprobacion extends Table {
 @DataClassName('HistorialEstadoData')
 class HistorialEstado extends Table {
   TextColumn get id => text()();
-  TextColumn get solicitudId => text()();
+  TextColumn get solicitudId => text().nullable()();
   TextColumn get usuarioId => text()();
   TextColumn get estadoAnterior => text()();
   TextColumn get estadoNuevo => text()();
@@ -824,7 +824,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     await into(historialEstado).insert(
       HistorialEstadoCompanion.insert(
         id: _uuid.v4(),
-        solicitudId: solicitudId,
+        solicitudId: Value(solicitudId),
         usuarioId: usuarioId,
         estadoAnterior: estadoAnterior,
         estadoNuevo: estadoNuevo,
@@ -896,9 +896,56 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
     }
   }
 
-  void _setBusy(bool value) {
-    isBusy = value;
-    notifyListeners();
+  // Métodos para historial de usuarios (cambios de estado, asignación de roles)
+  Future<void> registrarCambioEstadoUsuario({
+    required String usuarioId,
+    required String estadoAnterior,
+    required String estadoNuevo,
+    String? comentario,
+    required String registradoPor,
+  }) async {
+    await into(historialEstado).insert(
+      HistorialEstadoCompanion.insert(
+        id: _uuid.v4(),
+        solicitudId: const Value.absent(),
+        usuarioId: usuarioId,
+        estadoAnterior: estadoAnterior,
+        estadoNuevo: estadoNuevo,
+        comentario: Value(comentario),
+        fechaCambio: DateTime.now(),
+        pendingSync: const Value(true),
+      ),
+    );
+  }
+
+  Future<List<HistorialEstadoData>> getHistorialDeUsuario(
+    String usuarioId,
+  ) async {
+    return (select(historialEstado)
+          ..where((t) => t.usuarioId.equals(usuarioId))
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaCambio)]))
+        .get();
+  }
+
+  Stream<List<HistorialEstadoData>> watchHistorialDeUsuario(
+    String usuarioId,
+  ) {
+    return (select(historialEstado)
+          ..where((t) => t.usuarioId.equals(usuarioId))
+          ..orderBy([(t) => OrderingTerm.desc(t.fechaCambio)]))
+        .watch();
+  }
+
+  Future<List<HistorialEstadoData>> getHistorialPendientesSync() async {
+    return (select(historialEstado)
+          ..where((t) => t.pendingSync.equals(true))
+          ..where((t) => t.solicitudId.isNull())).get();
+  }
+
+  Future<void> marcarHistorialSincronizado(String id) async {
+    await (update(historialEstado)..where((t) => t.id.equals(id))).write(
+      const HistorialEstadoCompanion(pendingSync: Value(false)),
+    );
   }
 }
 

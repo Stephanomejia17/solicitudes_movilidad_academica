@@ -126,6 +126,18 @@ class AuthService extends ChangeNotifier {
         email: normalizedEmail,
         password: password,
       );
+      // Verificar estado del usuario en Firestore
+      final firebaseUser = _auth.currentUser;
+      if (firebaseUser != null) {
+        final remoteUser = await _remote.findByUid(firebaseUser.uid) ??
+            await _remote.findByEmail(normalizedEmail);
+        if (remoteUser != null && remoteUser.estado != 'activo') {
+          // Usuario inactivo: cerrar sesión y bloquear login
+          await _auth.signOut();
+          _error = 'La cuenta se encuentra inactiva.';
+          return false;
+        }
+      }
       return true;
     } on FirebaseAuthException catch (error) {
       _error = _friendlyAuthError(error);
@@ -189,6 +201,16 @@ class AuthService extends ChangeNotifier {
     final email = firebaseUser.email?.trim().toLowerCase() ?? '';
     UsuarioModel? remoteUser = await _remote.findByUid(firebaseUser.uid);
     remoteUser ??= await _remote.findByEmail(email);
+
+    // Bloquear y evitar cachear usuarios inactivos
+    if (remoteUser != null && remoteUser.estado != 'activo') {
+      try {
+        await _auth.signOut();
+      } catch (_) {}
+      _database.setCurrentUser(null);
+      _error = 'La cuenta se encuentra inactiva.';
+      return;
+    }
 
     final now = DateTime.now();
     final model = remoteUser ??
