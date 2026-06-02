@@ -26,8 +26,8 @@ class AdminFirestoreService {
       'updatedAt': Timestamp.fromDate(usuario.updatedAt),
       'syncedAt': FieldValue.serverTimestamp(),
     };
-    if (createdBy != null && createdBy.isNotEmpty) {
-      payload['createdBy'] = createdBy;
+    if (createdBy?.trim().isNotEmpty == true) {
+      payload['createdBy'] = createdBy!.trim();
     }
 
     await _usuarios.doc(usuario.id).set(payload, SetOptions(merge: true));

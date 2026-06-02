@@ -154,7 +154,7 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
   static const _uuid = Uuid();
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -243,6 +243,12 @@ class AppDatabase extends _$AppDatabase with ChangeNotifier {
 
   Future<List<UsuarioData>> getAllUsuarios() async {
     return select(usuarios).get();
+  }
+
+  Future<void> limpiarUsuariosExcepto(String userId) async {
+    await (delete(usuarios)
+          ..where((u) => u.id.isNotValue(userId)))
+        .go();
   }
 
   Future<void> upsertUsuarioLocal({

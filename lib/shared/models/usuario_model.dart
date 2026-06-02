@@ -11,6 +11,7 @@ class UsuarioModel {
     required this.createdAt,
     required this.updatedAt,
     required this.pendingSync,
+    this.createdBy,
   });
 
   final String id;
@@ -22,6 +23,7 @@ class UsuarioModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool pendingSync;
+  final String? createdBy;
 
   bool get isActive => estado == 'activo';
   String get fullName => '$nombre $apellido'.trim();
@@ -36,6 +38,7 @@ class UsuarioModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? pendingSync,
+    String? createdBy,
   }) {
     return UsuarioModel(
       id: id ?? this.id,
@@ -47,6 +50,7 @@ class UsuarioModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       pendingSync: pendingSync ?? this.pendingSync,
+      createdBy: createdBy ?? this.createdBy,
     );
   }
 
@@ -59,6 +63,7 @@ class UsuarioModel {
     'estado': estado,
     'createdAt': Timestamp.fromDate(createdAt),
     'updatedAt': Timestamp.fromDate(updatedAt),
+    if (createdBy != null && createdBy!.isNotEmpty) 'createdBy': createdBy,
   };
 
   Map<String, dynamic> toMap() => {
@@ -93,6 +98,7 @@ class UsuarioModel {
       createdAt: _readDate(map['createdAt']) ?? DateTime.now(),
       updatedAt: _readDate(map['updatedAt']) ?? DateTime.now(),
       pendingSync: map['pendingSync'] as bool? ?? false,
+      createdBy: map['createdBy'] as String?,
     );
   }
 

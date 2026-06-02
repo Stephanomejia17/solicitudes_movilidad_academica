@@ -41,7 +41,6 @@ class AdminRepository {
     final now = DateTime.now();
     final normalizedEmail = email.trim().toLowerCase();
 
-    // 1. Crear usuario en Firebase Auth vía REST API para no afectar la sesión actual
     const apiKey = 'AIzaSyAQfPHlkC_LSNt70oELypNpp4gyfGe4L48';
     final uri = Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$apiKey');
     final resp = await http.post(
@@ -73,7 +72,6 @@ class AdminRepository {
 
     final id = firebaseUid;
 
-    // 2. Guardar en base de datos local
     await database.upsertUsuarioLocal(
       id: id,
       nombre: nombre,
@@ -86,7 +84,6 @@ class AdminRepository {
       pendingSync: true,
     );
 
-    // 3. Registrar en historial
     await database.registrarCambioEstadoUsuario(
       usuarioId: id,
       estadoAnterior: '',
@@ -95,7 +92,6 @@ class AdminRepository {
       registradoPor: createdBy,
     );
 
-    // 4. Guardar en Firestore con createdBy
     final usuario = await database.getUsuarioById(id);
     if (usuario != null) {
       await _remote.upsertUsuario(usuario, createdBy: createdBy);
@@ -119,16 +115,13 @@ class AdminRepository {
 
     final normalizedEmail = email.trim().toLowerCase();
 
-    // Actualizar email en Firebase Auth si cambió
     if (existing.email != normalizedEmail) {
       try {
         final user = _auth.currentUser;
         if (user?.uid == id) {
           await user?.verifyBeforeUpdateEmail(normalizedEmail);
         }
-      } catch (_) {
-        // Continuar aunque falle la actualización de email en Auth
-      }
+      } catch (_) {}
     }
 
     await database.updateUsuario(
@@ -158,10 +151,8 @@ class AdminRepository {
 
     final estadoAnterior = existing.estado;
 
-    // Cambiar estado
     await database.setUsuarioEstado(id, nuevoEstado);
 
-    // Registrar en historial
     await database.registrarCambioEstadoUsuario(
       usuarioId: id,
       estadoAnterior: estadoAnterior,
@@ -191,7 +182,6 @@ class AdminRepository {
       ),
     );
 
-    // Registrar en historial
     await database.registrarCambioEstadoUsuario(
       usuarioId: id,
       estadoAnterior: 'rol_${existing.rol}',
@@ -210,9 +200,7 @@ class AdminRepository {
     try {
       await _remote.upsertUsuario(usuario);
       await database.marcarUsuarioSincronizado(id);
-    } catch (_) {
-      // El usuario queda marcado como pendiente para reintentar luego
-    }
+    } catch (_) {}
   }
 
   Future<void> syncPending() async {
@@ -221,22 +209,22 @@ class AdminRepository {
       await syncUsuario(usuario.id);
     }
 
-    // Sincronizar también el historial
     final historialPendiente =
         await database.getHistorialPendientesSync();
     for (final historial in historialPendiente) {
       try {
         await _remote.upsertHistorialUsuario(historial);
         await database.marcarHistorialSincronizado(historial.id);
-      } catch (_) {
-        // El historial queda marcado como pendiente
-      }
+      } catch (_) {}
     }
   }
 
   Future<void> sincronizarDesdeFirestore(String adminId) async {
     try {
+      await database.limpiarUsuariosExcepto(adminId);
+
       final usuariosRemoto = await _remote.traerUsuariosDeAdmin(adminId);
+
       for (final usuario in usuariosRemoto) {
         await database.upsertUsuarioLocal(
           id: usuario.id,
@@ -250,9 +238,7 @@ class AdminRepository {
           pendingSync: false,
         );
       }
-    } catch (_) {
-      // Si hay error trayendo de Firestore, continuamos con lo local
-    }
+    } catch (_) {}
   }
 
   Future<List<HistorialEstadoData>> getHistorialUsuario(String usuarioId) {

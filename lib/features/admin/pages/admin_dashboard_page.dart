@@ -19,8 +19,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   @override
   void initState() {
     super.initState();
-    // Sincronizar usuarios de Firestore al abrir
-    _initializeData();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
   }
 
   Future<void> _initializeData() async {
