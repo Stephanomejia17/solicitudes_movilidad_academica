@@ -75,7 +75,8 @@ class _CoordinatorDashboardPageState extends State<CoordinatorDashboardPage> {
                             ),
                       ),
                       const SizedBox(height: 12),
-                      Row(
+                      Wrap(
+                        spacing: 12,
                         children: [
                           _StatCard(
                             label: 'Total',
@@ -204,8 +205,8 @@ class _StatCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(icon, size: 28),
-              const SizedBox(width: 12),
+              Icon(icon, size: 16),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,7 +217,7 @@ class _StatCard extends StatelessWidget {
                             fontWeight: FontWeight.w900,
                           ),
                     ),
-                    Text(label),
+                    Text(label, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
