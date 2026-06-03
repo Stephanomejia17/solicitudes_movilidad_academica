@@ -13,9 +13,9 @@ class AuthService extends ChangeNotifier {
     required AppDatabase database,
     FirebaseAuth? firebaseAuth,
     UserFirestoreServiceBase? remote,
-  })  : _database = database,
-        _auth = firebaseAuth ?? FirebaseAuth.instance,
-        _remote = remote ?? UserFirestoreService();
+  }) : _database = database,
+       _auth = firebaseAuth ?? FirebaseAuth.instance,
+       _remote = remote ?? UserFirestoreService();
 
   final AppDatabase _database;
   final FirebaseAuth _auth;
@@ -62,6 +62,8 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  bool _registering = false;
+
   Future<bool> register({
     required String nombre,
     required String apellido,
@@ -71,6 +73,7 @@ class AuthService extends ChangeNotifier {
   }) async {
     _setBusy(true);
     _error = null;
+    _registering = true;
     try {
       final normalizedEmail = email.trim().toLowerCase();
       final credential = await _auth.createUserWithEmailAndPassword(
@@ -102,6 +105,7 @@ class AuthService extends ChangeNotifier {
       );
 
       await _remote.upsertUser(model);
+      await _cacheUser(model);
       return true;
     } on FirebaseAuthException catch (error) {
       _error = _friendlyAuthError(error);
@@ -110,14 +114,12 @@ class AuthService extends ChangeNotifier {
       _error = 'No fue posible registrar el usuario.';
       return false;
     } finally {
+      _registering = false;
       _setBusy(false);
     }
   }
 
-  Future<bool> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> login({required String email, required String password}) async {
     _setBusy(true);
     _error = null;
     try {
@@ -129,7 +131,8 @@ class AuthService extends ChangeNotifier {
       // Verificar estado del usuario en Firestore
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
-        final remoteUser = await _remote.findByUid(firebaseUser.uid) ??
+        final remoteUser =
+            await _remote.findByUid(firebaseUser.uid) ??
             await _remote.findByEmail(normalizedEmail);
         if (remoteUser != null && remoteUser.estado != 'activo') {
           // Usuario inactivo: cerrar sesión y bloquear login
@@ -143,11 +146,11 @@ class AuthService extends ChangeNotifier {
       _error = _friendlyAuthError(error);
       print(' FirebaseAuthException: ${error.code} - ${error.message}');
       return false;
-    } catch (stackTrace,e) {
+    } catch (stackTrace, e) {
       _error = 'Correo o contrasena incorrectos.';
       print('Error inesperado: $e');
       print(' StackTrace: $stackTrace');
-    _error = 'Correo o contrasena incorrectos.';
+      _error = 'Correo o contrasena incorrectos.';
       return false;
     } finally {
       _setBusy(false);
@@ -165,31 +168,32 @@ class AuthService extends ChangeNotifier {
     }
   }
 
- Future<void> syncPendingUsers() async {
-  final user = _database.currentUser;
-  if (user == null) return;
+  Future<void> syncPendingUsers() async {
+    final user = _database.currentUser;
+    if (user == null) return;
 
-  // Solo sincronizar si realmente está pendiente
-  if (!user.pendingSync) return;
+    // Solo sincronizar si realmente está pendiente
+    if (!user.pendingSync) return;
 
-  final model = UsuarioModel(
-    id: user.id,
-    nombre: user.nombre,
-    apellido: user.apellido,
-    email: user.email,
-    rol: user.rol,
-    estado: user.estado,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-    pendingSync: user.pendingSync,
-  );
+    final model = UsuarioModel(
+      id: user.id,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      email: user.email,
+      rol: user.rol,
+      estado: user.estado,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      pendingSync: user.pendingSync,
+    );
 
-  await _remote.upsertUser(model);
+    await _remote.upsertUser(model);
 
-  await _database.marcarUsuarioSincronizado(user.id);
-}
+    await _database.marcarUsuarioSincronizado(user.id);
+  }
 
   Future<void> _handleAuthStateChange(User? user) async {
+    if (_registering) return;
     if (user == null) {
       _database.setCurrentUser(null);
       return;
@@ -213,7 +217,8 @@ class AuthService extends ChangeNotifier {
     }
 
     final now = DateTime.now();
-    final model = remoteUser ??
+    final model =
+        remoteUser ??
         UsuarioModel(
           id: firebaseUser.uid,
           nombre: firebaseUser.displayName?.trim().split(' ').first ?? '',
@@ -286,7 +291,8 @@ class AuthServiceScope extends InheritedNotifier<AuthService> {
   }) : super(notifier: service);
 
   static AuthService of(BuildContext context) {
-    final scope = context.dependOnInheritedWidgetOfExactType<AuthServiceScope>();
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<AuthServiceScope>();
     assert(scope != null, 'AuthServiceScope no encontrado en el arbol.');
     return scope!.notifier!;
   }
