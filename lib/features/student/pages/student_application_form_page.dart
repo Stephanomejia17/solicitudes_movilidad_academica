@@ -411,6 +411,11 @@ class _StudentApplicationFormPageState
   }
 
   Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) {
+      _showMessage('Revisa los campos obligatorios.');
+      return;
+    }
+
     if (_travelDate != null &&
         _returnDate != null &&
         _returnDate!.isBefore(_travelDate!)) {
