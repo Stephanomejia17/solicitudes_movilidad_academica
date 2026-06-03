@@ -82,21 +82,25 @@ class _CoordinatorDashboardPageState extends State<CoordinatorDashboardPage> {
                             label: 'Total',
                             value: counts.total,
                             icon: Icons.folder_copy_outlined,
+                            accentColor: Colors.blueGrey,
                           ),
                           _StatCard(
                             label: 'Pendientes',
                             value: counts.pending,
                             icon: Icons.hourglass_top_outlined,
+                            accentColor: Colors.orange,
                           ),
                           _StatCard(
                             label: 'Aprobadas',
                             value: counts.approved,
                             icon: Icons.verified_outlined,
+                            accentColor: Colors.green,
                           ),
                           _StatCard(
                             label: 'Rechazadas',
                             value: counts.rejected,
                             icon: Icons.cancel_outlined,
+                            accentColor: const Color.fromARGB(255, 255, 91, 79),
                           ),
                         ],
                       ),
@@ -190,45 +194,65 @@ class _StatCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
+    required this.accentColor,
   });
 
   final String label;
   final int value;
   final IconData icon;
+  final Color accentColor;
 
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 150),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(icon, size: 16),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$value',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w900,
-                          ),
-                    ),
-                    Text(label, overflow: TextOverflow.ellipsis),
-                  ],
-                ),
-              ),
-            ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 105, 105, 105),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: accentColor.withOpacity(0.3),
+            width: 1.2,
           ),
+        ),
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: accentColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 18, color: accentColor),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '$value',
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: -1.5,
+                height: 1,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.white.withOpacity(0.5),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
 class _SolicitudList extends StatelessWidget {
   const _SolicitudList({
     required this.solicitudes,
