@@ -263,11 +263,11 @@ class _DocumentsSection extends StatelessWidget {
     BuildContext context,
     List<DocumentoData> documents,
   ) async {
-    final nameController = TextEditingController();
     var selectedType = _requiredDocuments.keys.firstWhere(
       (type) => !documents.any((document) => document.tipoDocumento == type),
       orElse: () => _requiredDocuments.keys.first,
     );
+    String fileName = '';
 
     await showDialog<void>(
       context: context,
@@ -298,12 +298,12 @@ class _DocumentsSection extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 14),
-                  TextField(
-                    controller: nameController,
+                  TextFormField(
                     decoration: const InputDecoration(
                       labelText: 'Nombre del archivo',
                       hintText: 'Ej: carta_motivacion.pdf',
                     ),
+                    onChanged: (value) => fileName = value,
                   ),
                 ],
               ),
@@ -314,8 +314,8 @@ class _DocumentsSection extends StatelessWidget {
                 ),
                 FilledButton(
                   onPressed: () async {
-                    final fileName = nameController.text.trim();
-                    if (fileName.isEmpty) {
+                    final trimmed = fileName.trim();
+                    if (trimmed.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Ingresa el nombre del archivo.'),
@@ -323,12 +323,11 @@ class _DocumentsSection extends StatelessWidget {
                       );
                       return;
                     }
-
                     try {
                       await repository.addDocument(
                         solicitudId: solicitud.id,
                         tipoDocumento: selectedType,
-                        nombreArchivo: fileName,
+                        nombreArchivo: trimmed,
                       );
                       if (!dialogContext.mounted) return;
                       Navigator.of(dialogContext).pop();
@@ -351,7 +350,7 @@ class _DocumentsSection extends StatelessWidget {
         );
       },
     );
-    nameController.dispose();
+
   }
 }
 

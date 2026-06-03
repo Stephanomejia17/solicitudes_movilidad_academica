@@ -549,6 +549,7 @@ class _UniversityField extends StatelessWidget {
       builder: (context, snapshot) {
         final universities = snapshot.data ?? const <UniversidadDestinoData>[];
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: universities.any((item) => item.id == selectedId)
               ? selectedId
               : null,
@@ -557,7 +558,10 @@ class _UniversityField extends StatelessWidget {
               .map(
                 (university) => DropdownMenuItem(
                   value: university.id,
-                  child: Text('${university.nombre} - ${university.pais}'),
+                  child: Text(
+                    '${university.nombre} - ${university.pais}',
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               )
               .toList(),

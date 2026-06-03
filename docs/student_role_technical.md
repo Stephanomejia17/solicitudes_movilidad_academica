@@ -1,6 +1,6 @@
-# Documentacion tecnica - Rol Estudiante
+# Documentacion tecnica - Estudiante
 
-Esta guia describe unicamente el flujo del rol Estudiante en la aplicacion de solicitudes de movilidad academica.
+Esta guia describe el flujo del rol Estudiante en la aplicacion de solicitudes de movilidad academica.
 
 ## Alcance funcional
 
