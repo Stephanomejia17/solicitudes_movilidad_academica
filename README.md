@@ -1,252 +1,209 @@
 # Solicitudes de Movilidad Académica
 
-Aplicación Flutter para gestionar solicitudes de movilidad académica con autenticación Firebase, persistencia local en Drift/SQLite y sincronización con Cloud Firestore.
+## Nombre del proyecto
+**Solicitudes de Movilidad Académica**
 
-## Descripción General
+## Descripción del problema
+Gestionar solicitudes de movilidad académica con:
+- flujo de aprobación por roles (estudiante → coordinador → aprobada/rechazada),
+- trazabilidad de cambios (historial de estados y decisiones),
+- operación **offline-first** (persistencia local + sincronización best-effort con Firebase),
+- control de acceso por **rol** y **estado de cuenta** (activo/inactivo).
 
-El sistema implementa un flujo de trabajo para tres roles principales:
+## Integrantes del equipo
+Stephano Mejia, Melissa Foronda y Nathalida Velez
 
+## Roles implementados
 - `estudiante`
 - `coordinador`
 - `administrador`
 
-La aplicación arranca con autenticación, resuelve el rol del usuario desde la base local y dirige al panel correspondiente. El diseño funcional actual está orientado a un modelo offline-first: la información se guarda en local primero y luego se sincroniza con Firestore cuando hay conectividad. El alta desde la pantalla de autenticación crea la cuenta, pero el estado inicial del usuario registrado queda `inactivo`, por lo que su acceso efectivo depende de una activación posterior.
+La navegación se decide con el rol y estado actual del usuario en `RootView` (`lib/main.dart`).
 
-## Objetivo De Negocio
+## Usuarios de prueba
+**Estudiante:** `tepho3@gmail.com`  
+**Coordinador:** `stephano.mejia20@icloud.com`  
+**Administrador:** `stephano.mejia900@gmail.com`  
 
-Centralizar la gestión de solicitudes de movilidad académica para:
+Todas las cuentas tienen como contraseña: `123456789`
 
-- reducir errores manuales en el proceso,
-- mantener trazabilidad de cambios,
-- permitir revisión por coordinadores,
-- administrar usuarios desde el rol administrativo,
-- conservar operación local aun sin conexión estable.
+Lo que sí está documentado/implementado como comportamiento:
+- Un usuario registrado desde autenticación se crea con `estado = inactivo` y no puede operar hasta ser activado.
+- El login bloquea usuarios cuyo estado remoto no sea `activo`.
 
-## Características Principales
+Además, el sistema siembra datos demo locales de **universidades destino** cuando la base local está vacía (`_seedDemoDataIfNeeded()` en `lib/data/app_database.dart`).
 
-- Autenticación con Firebase Authentication.
-- Roles funcionales separados por interfaz y permisos.
-- Creación, edición, envío y consulta de solicitudes de movilidad.
-- Carga de documentos requeridos para el flujo del estudiante.
-- Revisión, aprobación y rechazo de solicitudes por coordinador.
-- Gestión de usuarios y estados por administrador.
-- Persistencia local con Drift/SQLite.
-- Sincronización con Cloud Firestore en modo best-effort.
-- Registro de historial de estados y aprobaciones.
-- Validaciones de formularios y reglas de negocio en capa de dominio.
+## Entidades principales
 
-## Arquitectura Del Sistema
+### Persistencia local (Drift / SQLite)
+Tablas en `lib/data/app_database.dart`:
+- **`Usuarios`**: `id`, `nombre`, `apellido`, `email`, `rol`, `estado`, `pendingSync`, `createdAt`, `updatedAt`
+- **`SolicitudMovilidad`**: solicitud del estudiante (campos académicos/contacto + `estado`, `bloqueada`, `pendingSync`, fechas)
+- **`UniversidadDestino`**: catálogo de destinos (`convenioActivo`, `pendingSync`)
+- **`Documento`**: documentos requeridos por solicitud (`tipoDocumento`, `nombreArchivo`, `estado`, `pendingSync`)
+- **`Aprobacion`**: decisiones del coordinador por solicitud (`decision`, `comentario`, `fechaDecision`, `pendingSync`)
+- **`HistorialEstado`**: auditoría de cambios (estado anterior/nuevo por solicitud o por usuario)
 
-La solución combina una arquitectura por capas con separación por feature:
+### Correspondencia conceptual en Firestore
+Colecciones en `lib/shared/services/firestore_collections.dart`:
+- `usuarios`
+- `historial_usuarios`
+- `mobility_requests`
+- `aprobaciones`
+- `documentos`
 
-```mermaid
-flowchart TB
-  UI[Flutter UI / Pages / Widgets] --> APP[Application Services / Repositories]
-  APP --> DB[Drift / SQLite local]
-  APP --> AUTH[Firebase Auth]
-  APP --> FS[Cloud Firestore]
-  DB --> UI
-  AUTH --> UI
-  FS --> APP
-```
+## Explicación del modelo en Firestore
+El repositorio remoto utiliza `FirestoreCollections` para mapear entidades:
 
-### Capas
+- **Usuarios**: se escriben/actualizan desde `UserFirestoreService` (`lib/features/auth/services/user_firestore_service.dart`).
+  - `upsertUser()` hace `set(..., merge: true)` en `usuarios/{uid}`.
+  - Se normaliza el rol al formato remoto:
+    - `estudiante` → `student`
+    - `coordinador` → `coordinator`
+    - `administrador` → `admin`
+  - Se agregan campos como `syncedAt` (serverTimestamp) y una bandera `isActive`.
 
-- Presentación: `pages`, `widgets`.
-- Aplicación: `services`, `repositories`.
-- Dominio: validadores y políticas de acceso.
-- Datos: Drift `AppDatabase` y modelos de Firestore.
-- Integración: Firebase Auth y Cloud Firestore.
+- **Solicitudes y aprobaciones**:
+  - `mobility_requests` guarda la solicitud.
+  - `aprobaciones` guarda decisiones.
 
+- **Documentos**:
+  - `documentos` guarda metadatos por solicitud (localmente se persiste `tipoDocumento`, `nombreArchivo`, etc.).
 
-## Dependencias Principales
+## Reglas de negocio
 
-Declaradas en `pubspec.yaml`:
+### Regla de envío de solicitud (Student → `canSubmit`)
+Definidas en `RequestWorkflowService.canSubmit()` (`lib/shared/services/request_workflow_service.dart`):
+1. Actor debe ser `rol == 'estudiante'` y `estado == 'activo'`.
+2. La solicitud debe estar en `estado == 'borrador'` y `bloqueada == false`.
+3. Debe existir `universidadDestinoId`, `programaAcademico` y `semestre > 0`.
+4. Documentos requeridos:
+   - debe existir `carta_motivacion`
+   - debe existir `documento_identidad`
 
-- `firebase_core`
-- `firebase_auth`
-- `cloud_firestore`
-- `http`
-- `drift`
-- `drift_flutter`
-- `sqlite3_flutter_libs`
-- `path_provider`
-- `uuid`
-- `flutter_lints`
-- `build_runner`
-- `drift_dev`
-- `firebase_auth_mocks`
-- `mocktail`
+### Regla de revisión por coordinador (`canReview`)
+En `RequestWorkflowService.canReview()`:
+- Actor debe ser `rol == 'coordinador'` y `estado == 'activo'`.
+- La solicitud debe estar en `estado == 'enviada'` o `estado == 'en_revision'`.
 
-## Requisitos Previos
+### Aprobación (`approve`)
+En `RequestWorkflowService.approve()`:
+- `estado = 'aprobada'`
+- `bloqueada = true`
+- `fechaActualizacion = now`
+- `pendingSync = true`
 
-- Flutter SDK instalado.
-- Dart SDK compatible con `^3.12.0`.
-- Firebase project configurado.
-- Android Studio y/o Xcode para compilación nativa.
-- Permisos para crear y firmar builds de producción.
+### Rechazo (`reject`)
+En `RequestWorkflowService.reject()`:
+- exige `comentario.trim().isNotEmpty`
+- `estado = 'rechazada'`
+- `bloqueada = true`
+- `pendingSync = true`
 
-## Instalación Paso A Paso
+### Reglas adicionales por rol
+- **Estudiante**: enviar solo si está en `borrador` y no está bloqueada; al enviar pasa a `enviada` y queda bloqueada.
+- **Coordinador**: puede aprobar/rechazar solicitudes revisables; crea `AprobacionData` y actualiza el estado de la solicitud.
+- **Administrador**: gestiona usuarios (rol/estado) y auditabilidad con `HistorialEstadoData`.
 
-1. Clonar el repositorio.
-2. Entrar al proyecto:
+## Estados de negocio
 
+### Estados de usuario
+- `inactivo`
+- `activo`
+
+`RootView` dirige a `PendingApprovalPage` cuando `user.estado == 'inactivo'`.
+
+### Estados de solicitud
+- `borrador` → (enviar) → `enviada` → (approve/reject) → `aprobada` / `rechazada`
+- `cancelada` (contemplado en `cancelarSolicitud()`)
+
+Auxiliares:
+- `bloqueada`: evita edición cuando corresponde.
+- `pendingSync`: usado para offline-first.
+
+### Decisiones del coordinador
+- `decision == 'aprobada'`
+- `decision == 'rechazada'`
+
+## Flujo principal
+
+### 1) Autenticación y ruteo por rol
+1. `main()` inicializa Firebase (cuando aplica) y crea `AppDatabase`.
+2. `AuthService.initialize()` escucha `authStateChanges()` y cachea usuario en local.
+3. `RootView` decide pantalla:
+   - `user == null` → `AuthPage`
+   - `user.estado == 'inactivo'` → `PendingApprovalPage`
+   - `rol == administrador` → `AdminDashboardPage`
+   - `rol == coordinador` → `CoordinatorDashboardPage`
+   - en otro caso → `StudentDashboardPage`
+
+### 2) Estudiante
+- Crea/edita solicitud en `borrador`.
+- Carga documentos requeridos.
+- Envía (valida con `canSubmit`), pasa a `enviada` y queda `bloqueada`.
+
+### 3) Coordinador
+- Revisa solicitudes (solo si `canReview`).
+- Aprueba o rechaza.
+- Se registra `Aprobacion` y se actualiza estado/bloqueo.
+
+### 4) Administrador
+- Gestiona usuarios (crear/editar/rol/estado).
+- Los cambios quedan auditados en historial.
+
+## Explicación de autenticación
+Implementada en `lib/features/auth/services/auth_service.dart`:
+- **Register**: crea usuario con Firebase Auth, lo deja `estado: 'inactivo'`, hace `upsertUser()` en Firestore y cachea local.
+- **Login**: autentica con Firebase Auth, busca el perfil en Firestore, y si `remoteUser.estado != 'activo'` bloquea el acceso.
+- **Sincronización de perfil**: cachea el usuario autenticado en el local.
+
+UI de entrada: `AuthPage`.
+
+## Explicación de roles y permisos
+- `AccessPolicy` da habilitaciones base.
+- La navegación final y el acceso operativo se determinan en `RootView` y en validaciones de dominio con `RequestWorkflowService`.
+
+## Explicación de persistencia local
+- Se usa `AppDatabase` (Drift/SQLite).
+- La app escribe primero en local y marca entidades con `pendingSync`.
+- Auditoría en `HistorialEstado` (solicitudes y usuarios).
+
+## Explicación de sincronización con Firebase
+- Sincronización **best-effort**.
+- Si falla la subida/bajada, se preserva local y se reintenta usando `pendingSync`.
+
+## Instrucciones para ejecutar el proyecto
+
+1. Clonar:
 ```bash
 cd solicitudes_movilidad_academica
 ```
 
-3. Obtener dependencias:
-
+2. Instalar dependencias:
 ```bash
 flutter pub get
 ```
 
-4. Verificar análisis estático:
-
+3. Análisis estático:
 ```bash
 dart analyze
 ```
 
-5. Ejecutar pruebas:
-
+4. Tests:
 ```bash
 flutter test
 ```
 
-## Configuración De Entorno
-
-
-### Variables y parámetros relevantes
-
-- `projectId`: `xchange-5783f`
-- `storageBucket`: `xchange-5783f.firebasestorage.app`
-- `android package`: `com.example.solicitudes_movilidad_academica`
-- `ios bundle id`: `com.example.solicitudesMovilidadAcademica`
-
-## Configuración Firebase
-
-El proyecto está configurado para inicializar Firebase mediante `DefaultFirebaseOptions.currentPlatform`.
-
-```dart
-await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
-```
-
-### Plataformas soportadas
-
-- Web
-- Android
-- iOS
-- macOS
-- Windows
-
-
-## Estructura De Carpetas
-
-```text
-solicitudes_movilidad_academica/
-├── lib/
-│   ├── data/                  # Drift, base local y acceso a estado
-│   ├── features/
-│   │   ├── auth/              # Login, registro, servicio de autenticación
-│   │   ├── student/           # Flujo de solicitudes del estudiante
-│   │   ├── coordinator/       # Revisión y decisión de solicitudes
-│   │   └── admin/             # Gestión de usuarios
-│   └── shared/                # Modelos, utilidades y widgets compartidos
-├── test/                      # Pruebas unitarias y de widget
-├── android/                   # Configuración Android
-├── ios/                       # Configuración iOS
-├── web/                       # Artefactos web y worker de Drift
-├── firestore.rules            # Reglas de seguridad Firestore
-└── pubspec.yaml               # Dependencias y configuración Flutter
-```
-
-## Flujo De Navegación
-
-```mermaid
-flowchart TD
-  A[main] --> B[Firebase.initializeApp]
-  B --> C[AuthService + AppDatabase]
-  C --> D{currentUser disponible?}
-  D -- No --> E[AuthPage]
-  D -- Sí --> F{rol}
-  F -- administrador --> G[AdminDashboardPage]
-  F -- coordinador --> H[CoordinatorDashboardPage]
-  F -- estudiante --> I[StudentDashboardPage]
-```
-
-### Rutas funcionales
-
-- `AuthPage`: login y registro.
-- `StudentDashboardPage`: panel principal del estudiante, acceso a crear y consultar solicitudes.
-- `StudentApplicationFormPage`: formulario por pasos para crear o editar borradores.
-- `StudentApplicationDetailPage`: detalle, documentos, historial y envío.
-- `CoordinatorDashboardPage`: tablero de revisión de solicitudes.
-- `CoordinatorSolicitudDetailPage`: detalle y aprobación/rechazo.
-- `AdminDashboardPage`: gestión de usuarios.
-
-## Gestión De Estados
-
-La aplicación usa una combinación de:
-
-- `ChangeNotifier` para `AuthService`.
-- `InheritedNotifier` para exponer `AuthServiceScope` y `AppStateScope`.
-- `StreamBuilder` para reaccionar a cambios en Drift.
-- `setState` para estados locales de formulario, tabs y diálogos.
-
-### Criterio de diseño
-
-- Estado global mínimo.
-- Datos persistidos en local como fuente operativa principal.
-- Sincronización remota asíncrona y tolerante a fallos.
-
-## Gestión De Errores
-
-El proyecto maneja errores con:
-
-- excepciones `StateError` para reglas de negocio incumplidas,
-- `ArgumentError` para parámetros inválidos,
-- `SnackBar` para retroalimentación al usuario,
-- capturas `try/catch` en operaciones de sincronización,
-- mensajes legibles en formularios y diálogos.
-
-## Convenciones De Desarrollo
-
-- Nombres de capas por feature.
-- Modelos compartidos para interoperabilidad entre local y remoto.
-- Normalización de roles y estados en la capa de modelo.
-- Validaciones de negocio separadas de la UI.
-- Uso de `pendingSync` para distinguir datos locales pendientes.
-- Manejo de fechas con `DateTime` y serialización explícita a Firestore.
-
-## Estrategia De Testing
-
-Cobertura actual observada:
-
-- Unit testing: validadores, políticas y lógica de repositorio.
-- Widget testing: pantallas principales y componentes compartidos.
-
-
-## Compilación iOS
-
+5. Ejecutar:
 ```bash
-flutter build ios --release
+flutter run
 ```
 
-### Consideraciones
+## Archivo de reglas de Firestore
+- `firestore.rules`
 
-- Requiere macOS con Xcode.
-- Requiere firma válida y provisioning profiles.
-- Verificar `GoogleService-Info.plist` y el bundle id del target.
+## Documentación técnica por rol (extra)
+- `docs/student_role_technical.md`
+- `docs/coordinator_role_technical.md`
+- `docs/admin_role_technical.md`
 
-## Despliegue
-
-No se observa pipeline de CI/CD definido para build, test y despliegue. El despliegue debe definirse según plataforma:
-
-- iOS: generar archive, validar firma y distribuir por TestFlight/App Store.
-- Firestore: revisar reglas antes de liberar.
-
-## Licencia
-
-Pendiente de validación en el código fuente.
