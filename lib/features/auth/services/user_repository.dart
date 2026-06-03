@@ -1,7 +1,8 @@
 import 'auth_service.dart';
 
 class UserRepository {
-  UserRepository({required AuthService authService}) : _authService = authService;
+  UserRepository({required AuthService authService})
+    : _authService = authService;
 
   final AuthService _authService;
 
@@ -24,10 +25,7 @@ class UserRepository {
     );
   }
 
-  Future<bool> loginLocal({
-    required String email,
-    required String password,
-  }) {
+  Future<bool> loginLocal({required String email, required String password}) {
     return _authService.login(email: email, password: password);
   }
 
