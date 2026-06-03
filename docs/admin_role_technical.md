@@ -2,7 +2,7 @@
 
 ## Alcance funcional
 
-El administrador ingresa al portal AdminDashboardPage, ve la gestión de usuarios con el total local, puede crear usuarios, consultar usuarios, editar nombre, apellido, email y rol, activar o desactivar cuentas, consultar historial de cambios y sincronizar datos pendientes. La creación exige nombre, apellido, email válido, contraseña mínima y rol; los cambios de estado y rol quedan auditados, mientras la edición general de usuario no registra historial.
+El administrador ingresa al portal `AdminDashboardPage`, ve la gestión de usuarios con el total local, puede crear usuarios, consultar usuarios, editar nombre, apellido, email y rol, activar o desactivar cuentas, consultar historial de cambios y sincronizar datos pendientes. La creación exige nombre, apellido, email válido, contraseña mínima y rol; los cambios de estado y rol quedan auditados, mientras la edición general de usuario no registra historial. El acceso depende de un usuario autenticado con rol `administrador` y estado `activo`.
 
 ## Mapa tecnico
 
@@ -36,11 +36,11 @@ El flujo administra `UsuarioData` e `HistorialEstadoData` de Drift, y normaliza 
 
 ### Firebase Authentication
 
-`RootView` dirige a `AdminDashboardPage` cuando `currentUser.rol == 'administrador'`, `AdminRepository.crearUsuario` crea la cuenta con Identity Toolkit y `editarUsuario` intenta `verifyBeforeUpdateEmail` si el usuario actual edita su propio email.
+`RootView` dirige a `AdminDashboardPage` cuando `currentUser.rol == 'administrador'`, `AdminRepository.crearUsuario` crea la cuenta con Identity Toolkit y `editarUsuario` intenta `verifyBeforeUpdateEmail` si el usuario actual edita su propio email. El alta desde la pantalla de autenticación crea cuentas con estado `inactivo`, pero la creación administrativa deja el usuario local en estado `activo` y luego intenta sincronizarlo con Firestore.
 
 ### Cloud Firestore
 
-`AdminFirestoreService` escribe usuarios en `FirestoreCollections.users` e historial en `FirestoreCollections.userHistory`, y consulta usuarios filtrados por `createdBy`.
+`AdminFirestoreService` escribe usuarios en `FirestoreCollections.users` e historial en `FirestoreCollections.userHistory`. `traerTodosLosUsuarios` descarga todos los documentos de la colección `usuarios` y normaliza roles y estados al formato local.
 
 ### Persistencia local
 
@@ -48,7 +48,7 @@ El flujo administra `UsuarioData` e `HistorialEstadoData` de Drift, y normaliza 
 
 ### Sincronizacion local/remota
 
-`syncUsuario` sube usuarios, `syncPending` sube usuarios e historiales pendientes, y `sincronizarDesdeFirestore` limpia usuarios locales excepto el admin actual antes de insertar usuarios remotos creados por ese admin.
+`syncUsuario` sube usuarios, `syncPending` sube usuarios e historiales pendientes, y `sincronizarDesdeFirestore` limpia usuarios locales excepto el admin actual antes de insertar todos los usuarios remotos devueltos por Firestore.
 
 ### Offline-first
 
@@ -73,6 +73,7 @@ La pantalla muestra carga inicial, indicador de sincronización, SnackBars de é
 - Si Firebase responde `EMAIL_EXISTS` durante la creación, se lanza una excepción con el mensaje `El email ya está registrado`.
 - Todo usuario creado por el administrador se guarda localmente con `estado == 'activo'` y `pendingSync == true`.
 - Al crear usuario, se registra historial con `estadoAnterior == ''`, `estadoNuevo == 'activo'`, comentario `Usuario creado` y `registradoPor == createdBy`.
+- El usuario creado por el administrador queda localmente en estado `activo` y con `pendingSync == true` hasta completar la sincronización remota.
 - Al editar usuario, si el usuario no existe en la base local, se lanza `StateError`.
 - Al editar usuario, se actualizan nombre, apellido, email normalizado y rol, y el usuario queda con `pendingSync == true` hasta sincronizar.
 - La edición general de usuario no registra historial de cambios.
@@ -80,7 +81,7 @@ La pantalla muestra carga inicial, indicador de sincronización, SnackBars de é
 - Al cambiar estado, se conserva `estadoAnterior`, se guarda `estadoNuevo`, se registra comentario y se crea historial con `registradoPor`.
 - Al asignar rol, si el usuario no existe en la base local, se lanza `StateError`.
 - Al asignar rol, el historial usa `estadoAnterior == 'rol_${rolAnterior}'`, `estadoNuevo == 'rol_$nuevoRol'` y comentario `Rol asignado: $nuevoRol`.
-- `sincronizarDesdeFirestore` elimina usuarios locales excepto el administrador actual antes de insertar usuarios remotos retornados por `traerUsuariosDeAdmin`.
+- `sincronizarDesdeFirestore` elimina usuarios locales excepto el administrador actual antes de insertar usuarios remotos retornados por Firestore.
 - `syncPending` sincroniza usuarios con `pendingSync == true` e historiales pendientes, y marca cada registro como sincronizado cuando la subida remota termina correctamente.
 
 ## Comandos utiles

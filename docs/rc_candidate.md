@@ -9,7 +9,7 @@ Documento de referencia para candidato de liberación.
 | Versión | `1.0.0+1` |
 | Fecha | `2026-06-03` |
 | Responsable | Pendiente de validación en el código fuente |
-| Branch origen | Pendiente de validación en el código fuente |
+
 
 ## Cambios Incluidos
 
@@ -22,19 +22,8 @@ Documento de referencia para candidato de liberación.
 - Gestión administrativa de usuarios.
 - Persistencia local con Drift.
 - Sincronización con Firestore en modo offline-first.
+- Registro de autenticación con estado `inactivo` para altas desde login, y activación posterior condicionada por el flujo remoto.
 
-### Correcciones
-
-- Persistencia local estructurada por entidades.
-- Validadores de formulario para correo, teléfono, semestre y promedio.
-- Bloqueo de solicitudes cuando pasan a estado final.
-
-### Mejoras
-
-- Estado reactivo con `StreamBuilder`.
-- Separación por feature.
-- Normalización de modelos entre local y remoto.
-- Historial de cambios de estado.
 
 ## Validaciones Realizadas
 

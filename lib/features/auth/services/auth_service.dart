@@ -144,12 +144,10 @@ class AuthService extends ChangeNotifier {
       return true;
     } on FirebaseAuthException catch (error) {
       _error = _friendlyAuthError(error);
-      print(' FirebaseAuthException: ${error.code} - ${error.message}');
+      //print(' FirebaseAuthException: ${error.code} - ${error.message}');
       return false;
     } catch (stackTrace, e) {
       _error = 'Correo o contrasena incorrectos.';
-      print('Error inesperado: $e');
-      print(' StackTrace: $stackTrace');
       _error = 'Correo o contrasena incorrectos.';
       return false;
     } finally {

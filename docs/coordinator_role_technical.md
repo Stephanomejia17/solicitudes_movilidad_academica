@@ -2,7 +2,7 @@
 
 ## Alcance funcional
 
-El coordinador ingresa al portal CoordinatorDashboardPage, ve un resumen operativo de solicitudes con pestañas para todas, en revisión, aprobadas y rechazadas, puede abrir el detalle de cada solicitud, leer la información académica y de contacto, consultar aprobaciones registradas y aprobar o rechazar solicitudes. Las acciones de aprobación y rechazo solo están disponibles para solicitudes en estado enviada; al aprobar se permite comentario opcional y al rechazar se exige motivo obligatorio.
+El coordinador ingresa al portal `CoordinatorDashboardPage`, ve un resumen operativo de solicitudes con pestañas para todas, en revisión, aprobadas y rechazadas, puede abrir el detalle de cada solicitud, leer la información académica y de contacto, consultar aprobaciones registradas y aprobar o rechazar solicitudes. Las acciones de aprobación y rechazo solo están disponibles para solicitudes en estado `enviada`; al aprobar se permite comentario opcional y al rechazar se exige motivo obligatorio. El acceso depende de un usuario autenticado con rol `coordinador` y estado `activo`.
 
 ## Mapa tecnico
 
@@ -36,7 +36,7 @@ El flujo usa `SolicitudMobilidadData`, `AprobacionData` y `UsuarioData` de Drift
 
 ### Firebase Authentication
 
-`RootView` dirige a `CoordinatorDashboardPage` cuando `currentUser.rol == 'coordinador'`, y el cierre de sesión se ejecuta con `AuthService.logout`.
+`RootView` dirige a `CoordinatorDashboardPage` cuando `currentUser.rol == 'coordinador'`, y el cierre de sesión se ejecuta con `AuthService.logout`. El alta desde el módulo de autenticación crea cuentas con estado `inactivo`, por lo que el coordinador debe estar activado para poder operar.
 
 ### Cloud Firestore
 
@@ -48,7 +48,7 @@ El flujo usa `SolicitudMobilidadData`, `AprobacionData` y `UsuarioData` de Drift
 
 ### Sincronizacion local/remota
 
-`syncSolicitud` sube la solicitud y sus aprobaciones con `upsertSolicitudBundle`, marca registros como sincronizados y descarga la versión remota de la solicitud.
+`syncSolicitud` sube la solicitud y sus aprobaciones con `upsertSolicitudBundle`, marca registros como sincronizados y descarga la versión remota de la solicitud. `syncPending` consolida solicitudes y aprobaciones con `pendingSync == true`, y `syncDown` hace una descarga best-effort de Firestore hacia la base local.
 
 ### Offline-first
 
@@ -79,6 +79,7 @@ El dashboard muestra carga, error, estados vacíos por pestaña, conteos por est
 - Al rechazar, la solicitud cambia a `estado == 'rechazada'`, queda `bloqueada == true`, actualiza `fechaActualizacion` y queda con `pendingSync == true`.
 - `syncPending` sincroniza cada solicitud con `pendingSync == true` y cada aprobación pendiente asociada a una solicitud.
 - La descarga remota no sobrescribe una solicitud local ni una aprobación local cuando el registro local tiene `pendingSync == true`.
+- `CoordinatorDashboardPage` dispara una sincronización pendiente al entrar a la pantalla y ofrece una acción manual de sincronización.
 
 ## Comandos utiles
 

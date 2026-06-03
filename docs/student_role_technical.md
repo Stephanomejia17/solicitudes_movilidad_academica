@@ -4,7 +4,7 @@ Esta guia describe el flujo del rol Estudiante en la aplicacion de solicitudes d
 
 ## Alcance funcional
 
-El estudiante puede iniciar sesion, consultar su portal, crear borradores de solicitud, editarlos mientras sigan en estado `borrador`, cargar documentos requeridos, enviar la solicitud y consultar el historial del proceso. Una vez enviada, la solicitud queda bloqueada para edicion.
+El estudiante puede iniciar sesion, consultar su portal, crear borradores de solicitud, editarlos mientras sigan en estado `borrador`, cargar documentos requeridos, enviar la solicitud y consultar el historial del proceso. Una vez enviada, la solicitud queda bloqueada para edicion. El registro desde la pantalla de autenticacion crea la cuenta, pero la deja en estado `inactivo`, por lo que el acceso funcional depende de su activacion posterior.
 
 ## Mapa tecnico
 
@@ -19,6 +19,7 @@ El estudiante puede iniciar sesion, consultar su portal, crear borradores de sol
 - Cloud Firestore: `StudentFirestoreService` sube solicitudes y documentos a `mobilityRequests`, consulta solicitudes del estudiante por id/correos y descarga documentos remotos.
 - Persistencia local: Drift guarda solicitudes, documentos, universidades e historial en SQLite local.
 - Sincronizacion local/remota: `StudentApplicationRepository` coordina subida de pendientes, descarga remota y limpieza de documentos ausentes.
+- Sincronizacion automatica/manual: `StudentDashboardPage` dispara una sincronizacion inicial al abrirse, reintenta cada 30 segundos y expone una accion manual de sincronizacion.
 - Offline-first: las operaciones del estudiante escriben primero en Drift, marcan `pendingSync` y reintentan sincronizacion cuando Firestore falla.
 - Estados de UI: se muestran estados vacios, cargando, etiquetas de estado (`borrador`, `enviada`, `aprobada`, etc.) e indicador `Pendiente de sincronizar`.
 - Unit tests: `test/student_application_validators_test.dart` cubre validadores y `test/student_application_flow_test.dart` cubre reglas locales del flujo Estudiante.
@@ -31,6 +32,7 @@ El estudiante puede iniciar sesion, consultar su portal, crear borradores de sol
 - Para enviar se requiere universidad destino, programa academico, semestre mayor a cero, carta de motivacion y documento de identidad.
 - Al enviar, la solicitud cambia de `borrador` a `enviada`, queda `bloqueada` y se registra historial.
 - Los documentos requeridos no se pueden duplicar dentro de la misma solicitud.
+- La carga de documentos actualmente registra el tipo y el nombre del archivo; no se observa gestion binaria del archivo en el codigo fuente.
 - Los cambios locales quedan con `pendingSync = true` hasta completar sincronizacion remota.
 
 ## Comandos utiles

@@ -10,7 +10,7 @@ El sistema implementa un flujo de trabajo para tres roles principales:
 - `coordinador`
 - `administrador`
 
-La aplicación arranca con autenticación, resuelve el rol del usuario desde la base local y dirige al panel correspondiente. El diseño funcional actual está orientado a un modelo offline-first: la información se guarda en local primero y luego se sincroniza con Firestore cuando hay conectividad.
+La aplicación arranca con autenticación, resuelve el rol del usuario desde la base local y dirige al panel correspondiente. El diseño funcional actual está orientado a un modelo offline-first: la información se guarda en local primero y luego se sincroniza con Firestore cuando hay conectividad. El alta desde la pantalla de autenticación crea la cuenta, pero el estado inicial del usuario registrado queda `inactivo`, por lo que su acceso efectivo depende de una activación posterior.
 
 ## Objetivo De Negocio
 
@@ -66,6 +66,7 @@ Declaradas en `pubspec.yaml`:
 - `firebase_core`
 - `firebase_auth`
 - `cloud_firestore`
+- `http`
 - `drift`
 - `drift_flutter`
 - `sqlite3_flutter_libs`
@@ -210,7 +211,6 @@ El proyecto maneja errores con:
 - capturas `try/catch` en operaciones de sincronización,
 - mensajes legibles en formularios y diálogos.
 
-
 ## Convenciones De Desarrollo
 
 - Nombres de capas por feature.
@@ -227,6 +227,7 @@ Cobertura actual observada:
 - Unit testing: validadores, políticas y lógica de repositorio.
 - Widget testing: pantallas principales y componentes compartidos.
 
+
 ## Compilación iOS
 
 ```bash
@@ -241,8 +242,11 @@ flutter build ios --release
 
 ## Despliegue
 
-No se observa pipeline de CI/CD en el repositorio. El despliegue debe definirse según plataforma:
+No se observa pipeline de CI/CD definido para build, test y despliegue. El despliegue debe definirse según plataforma:
 
-- Android: generar `AAB` o `APK` release y publicar en Play Console.
 - iOS: generar archive, validar firma y distribuir por TestFlight/App Store.
 - Firestore: revisar reglas antes de liberar.
+
+## Licencia
+
+Pendiente de validación en el código fuente.
