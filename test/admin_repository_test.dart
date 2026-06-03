@@ -23,7 +23,7 @@ class FakeAdminFirestoreService implements AdminFirestoreServiceBase {
   }
 
   @override
-  Future<List<UsuarioData>> traerUsuariosDeAdmin(String adminId) async {
+  Future<List<UsuarioData>> traerTodosLosUsuarios() async {
     return remoteUsers;
   }
 }
@@ -137,7 +137,7 @@ void main() {
     expect(historial.first.estadoNuevo, 'rol_coordinador');
   });
 
-  test('sincroniza los usuarios remotos desde Firestore manteniendo al admin', () async {
+  test('sincroniza todos los usuarios remotos desde Firestore manteniendo al admin', () async {
     await _createUser(
       db,
       id: 'admin-1',
@@ -170,6 +170,17 @@ void main() {
         updatedAt: DateTime(2026, 1, 1),
         pendingSync: false,
       ),
+      UsuarioData(
+        id: 'user-other-admin',
+        nombre: 'Valentina',
+        apellido: 'Mejia',
+        email: 'valentina.mejia@udem.edu.co',
+        rol: 'coordinador',
+        estado: 'activo',
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+        pendingSync: false,
+      ),
     ]);
     repository = AdminRepository(database: db, remote: remote, auth: MockFirebaseAuth());
 
@@ -178,6 +189,7 @@ void main() {
     final usuarios = await db.getAllUsuarios();
     expect(usuarios.map((u) => u.id), contains('admin-1'));
     expect(usuarios.map((u) => u.id), contains('user-remote'));
+    expect(usuarios.map((u) => u.id), contains('user-other-admin'));
     expect(usuarios.map((u) => u.id), isNot(contains('user-4')));
   });
 

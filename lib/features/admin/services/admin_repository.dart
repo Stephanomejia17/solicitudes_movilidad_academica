@@ -223,7 +223,7 @@ class AdminRepository {
     try {
       await database.limpiarUsuariosExcepto(adminId);
 
-      final usuariosRemoto = await _remote.traerUsuariosDeAdmin(adminId);
+      final usuariosRemoto = await _remote.traerTodosLosUsuarios();
 
       for (final usuario in usuariosRemoto) {
         await database.upsertUsuarioLocal(

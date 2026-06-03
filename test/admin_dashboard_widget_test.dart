@@ -48,7 +48,7 @@ class FakeAdminFirestoreService implements AdminFirestoreServiceBase {
   Future<void> upsertHistorialUsuario(HistorialEstadoData historial) async {}
 
   @override
-  Future<List<UsuarioData>> traerUsuariosDeAdmin(String adminId) async {
+  Future<List<UsuarioData>> traerTodosLosUsuarios() async {
     return remoteUsers;
   }
 }
