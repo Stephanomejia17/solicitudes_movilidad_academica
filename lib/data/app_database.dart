@@ -18,7 +18,7 @@ class Usuarios extends Table {
   TextColumn get apellido => text()();
   TextColumn get email => text().unique()();
   TextColumn get rol => text()();
-  TextColumn get estado => text().withDefault(const Constant('activo'))();
+  TextColumn get estado => text().withDefault(const Constant('inactivo'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   BoolColumn get pendingSync => boolean().withDefault(const Constant(true))();
