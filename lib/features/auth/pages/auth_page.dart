@@ -200,11 +200,15 @@ class _RegisterFormState extends State<_RegisterForm> {
           TextFormField(
             controller: _nombre,
             decoration: const InputDecoration(labelText: 'Nombre'),
+            validator: (value) =>
+                value == null || value.trim().isEmpty ? 'Requerido' : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _apellido,
             decoration: const InputDecoration(labelText: 'Apellido'),
+            validator: (value) =>
+                value == null || value.trim().isEmpty ? 'Requerido' : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
