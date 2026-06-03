@@ -27,7 +27,7 @@ La navegación se decide con el rol y estado actual del usuario en `RootView` (`
 
 Todas las cuentas tienen como contraseña: `123456789`
 
-Lo que sí está documentado/implementado como comportamiento:
+Lo que está documentado/implementado como comportamiento:
 - Un usuario registrado desde autenticación se crea con `estado = inactivo` y no puede operar hasta ser activado.
 - El login bloquea usuarios cuyo estado remoto no sea `activo`.
 
@@ -53,6 +53,7 @@ Colecciones en `lib/shared/services/firestore_collections.dart`:
 - `documentos`
 
 ## Explicación del modelo en Firestore
+
 El repositorio remoto utiliza `FirestoreCollections` para mapear entidades:
 
 - **Usuarios**: se escriben/actualizan desde `UserFirestoreService` (`lib/features/auth/services/user_firestore_service.dart`).
@@ -75,16 +76,16 @@ El repositorio remoto utiliza `FirestoreCollections` para mapear entidades:
 ### Regla de envío de solicitud (Student → `canSubmit`)
 Definidas en `RequestWorkflowService.canSubmit()` (`lib/shared/services/request_workflow_service.dart`):
 1. Actor debe ser `rol == 'estudiante'` y `estado == 'activo'`.
-2. La solicitud debe estar en `estado == 'borrador'` y `bloqueada == false`.
+2. Solicitud en `estado == 'borrador'` y `bloqueada == false`.
 3. Debe existir `universidadDestinoId`, `programaAcademico` y `semestre > 0`.
 4. Documentos requeridos:
-   - debe existir `carta_motivacion`
-   - debe existir `documento_identidad`
+   - `carta_motivacion`
+   - `documento_identidad`
 
 ### Regla de revisión por coordinador (`canReview`)
 En `RequestWorkflowService.canReview()`:
 - Actor debe ser `rol == 'coordinador'` y `estado == 'activo'`.
-- La solicitud debe estar en `estado == 'enviada'` o `estado == 'en_revision'`.
+- Solicitud en `estado == 'enviada'` o `estado == 'en_revision'`.
 
 ### Aprobación (`approve`)
 En `RequestWorkflowService.approve()`:
@@ -100,10 +101,10 @@ En `RequestWorkflowService.reject()`:
 - `bloqueada = true`
 - `pendingSync = true`
 
-### Reglas adicionales por rol
-- **Estudiante**: enviar solo si está en `borrador` y no está bloqueada; al enviar pasa a `enviada` y queda bloqueada.
-- **Coordinador**: puede aprobar/rechazar solicitudes revisables; crea `AprobacionData` y actualiza el estado de la solicitud.
-- **Administrador**: gestiona usuarios (rol/estado) y auditabilidad con `HistorialEstadoData`.
+### Reglas adicionales por rol (documentación por módulo)
+- **Estudiante**: enviar solo en `borrador` sin bloqueo.
+- **Coordinador**: aprobar/rechazar solicitudes revisables; rechazo con motivo.
+- **Administrador**: gestiona usuarios y auditoría con `HistorialEstadoData`.
 
 ## Estados de negocio
 
@@ -111,15 +112,15 @@ En `RequestWorkflowService.reject()`:
 - `inactivo`
 - `activo`
 
-`RootView` dirige a `PendingApprovalPage` cuando `user.estado == 'inactivo'`.
+`RootView` dirige a `PendingApprovalPage` cuando `user.estado == 'inactivo'` (`lib/main.dart`).
 
 ### Estados de solicitud
-- `borrador` → (enviar) → `enviada` → (approve/reject) → `aprobada` / `rechazada`
-- `cancelada` (contemplado en `cancelarSolicitud()`)
+- `borrador` → `enviada` → `aprobada` / `rechazada`
+- `cancelada` (contemplado en `cancelarSolicitud()` en `lib/data/app_database.dart`)
 
 Auxiliares:
 - `bloqueada`: evita edición cuando corresponde.
-- `pendingSync`: usado para offline-first.
+- `pendingSync`: offline-first.
 
 ### Decisiones del coordinador
 - `decision == 'aprobada'`
@@ -129,48 +130,47 @@ Auxiliares:
 
 ### 1) Autenticación y ruteo por rol
 1. `main()` inicializa Firebase (cuando aplica) y crea `AppDatabase`.
-2. `AuthService.initialize()` escucha `authStateChanges()` y cachea usuario en local.
+2. `AuthService.initialize()` escucha `authStateChanges()` y cachea usuario.
 3. `RootView` decide pantalla:
    - `user == null` → `AuthPage`
    - `user.estado == 'inactivo'` → `PendingApprovalPage`
-   - `rol == administrador` → `AdminDashboardPage`
-   - `rol == coordinador` → `CoordinatorDashboardPage`
+   - `rol == 'administrador'` → `AdminDashboardPage`
+   - `rol == 'coordinador'` → `CoordinatorDashboardPage`
    - en otro caso → `StudentDashboardPage`
 
 ### 2) Estudiante
-- Crea/edita solicitud en `borrador`.
+- Crea/edita en `borrador`.
 - Carga documentos requeridos.
 - Envía (valida con `canSubmit`), pasa a `enviada` y queda `bloqueada`.
 
 ### 3) Coordinador
-- Revisa solicitudes (solo si `canReview`).
-- Aprueba o rechaza.
-- Se registra `Aprobacion` y se actualiza estado/bloqueo.
+- Revisa solicitudes (valida `canReview`).
+- Aprueba/rechaza; genera `Aprobacion` y actualiza estado/bloqueo.
 
 ### 4) Administrador
-- Gestiona usuarios (crear/editar/rol/estado).
-- Los cambios quedan auditados en historial.
+- Gestiona usuarios (rol/estado).
+- Auditoría en historial.
 
 ## Explicación de autenticación
 Implementada en `lib/features/auth/services/auth_service.dart`:
-- **Register**: crea usuario con Firebase Auth, lo deja `estado: 'inactivo'`, hace `upsertUser()` en Firestore y cachea local.
-- **Login**: autentica con Firebase Auth, busca el perfil en Firestore, y si `remoteUser.estado != 'activo'` bloquea el acceso.
-- **Sincronización de perfil**: cachea el usuario autenticado en el local.
+- **Register**: crea usuario, lo deja `estado: 'inactivo'`, hace `upsertUser()` y cachea local.
+- **Login**: autentica, busca perfil en Firestore y bloquea si `remoteUser.estado != 'activo'`.
+- Cache local del usuario autenticado.
 
 UI de entrada: `AuthPage`.
 
 ## Explicación de roles y permisos
-- `AccessPolicy` da habilitaciones base.
-- La navegación final y el acceso operativo se determinan en `RootView` y en validaciones de dominio con `RequestWorkflowService`.
+- `AccessPolicy` define habilitaciones base por `rol`.
+- El acceso operativo se determina con `RootView` y las reglas de dominio en `RequestWorkflowService`.
 
 ## Explicación de persistencia local
-- Se usa `AppDatabase` (Drift/SQLite).
-- La app escribe primero en local y marca entidades con `pendingSync`.
-- Auditoría en `HistorialEstado` (solicitudes y usuarios).
+- `AppDatabase` (Drift/SQLite) guarda la operación principal.
+- `pendingSync` marca entidades pendientes para sincronización.
+- Auditoría en `HistorialEstado`.
 
 ## Explicación de sincronización con Firebase
 - Sincronización **best-effort**.
-- Si falla la subida/bajada, se preserva local y se reintenta usando `pendingSync`.
+- Si falla, se preserva local y se reintenta con `pendingSync`.
 
 ## Instrucciones para ejecutar el proyecto
 
@@ -189,7 +189,7 @@ flutter pub get
 dart analyze
 ```
 
-4. Tests:
+4. Tests (evidencia requerida):
 ```bash
 flutter test
 ```
@@ -199,10 +199,29 @@ flutter test
 flutter run
 ```
 
+
+## Qué pruebas validan qué
+
+### Lógica de negocio (permisos/estado/transiciones)
+- `test/student_application_flow_test.dart`: envío desde `borrador`, reglas de estudiante activo, validación de documentos, bloqueo y historial.
+- `test/coordinator_repository_test.dart`: política de revisión, aprobación/rechazo, actualización de estado/bloqueo y validación de motivo.
+- `test/admin_repository_test.dart`: normalización/edición, cambios de estado/rol, auditoría e intercambio de pendientes con remoto falso.
+
+### Validaciones de formularios / dominio
+- `test/student_application_validators_test.dart`: campos obligatorios, formato de correos, teléfono, semestre y promedio.
+
+### Componentes visuales (UI) y estados
+- `test/student_dashboard_widgets_test.dart`: render de banner/resumen y estado offline (“Pendiente de sincronizar”).
+- `test/admin_dashboard_widget_test.dart`: render y acción de sincronización en admin.
+- `test/coordinator_widget_test.dart`: tabs vacías, navegación a detalle, diálogo de aprobación/rechazo y validación de motivo.
+- `test/student_widget_test.dart`: flujo de autenticación al iniciar.
+
+> No se exigen integration tests; las pruebas incluidas cubren unit y widget tests.
+
 ## Archivo de reglas de Firestore
 - `firestore.rules`
 
-## Documentación técnica por rol (extra)
+## Documentación técnica por rol
 - `docs/student_role_technical.md`
 - `docs/coordinator_role_technical.md`
 - `docs/admin_role_technical.md`
