@@ -1,18 +1,19 @@
-# solicitudes_movilidad_academica
+# Solicitudes de Movilidad Academica
 
-A new Flutter project.
+Aplicacion Flutter para gestionar solicitudes de movilidad academica con autenticacion Firebase, persistencia local en Drift/SQLite y sincronizacion con Cloud Firestore.
 
-## Getting Started
+## Rol Estudiante
 
-This project is a starting point for a Flutter application.
+La documentacion tecnica especifica del rol Estudiante esta en:
 
-A few resources to get you started if this is your first Flutter project:
+- [docs/student_role_technical.md](docs/student_role_technical.md)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Ese documento cubre formularios, navegacion, estado local, sincronizacion offline-first, Firestore, pruebas y generacion de APK para el flujo del estudiante.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# solicitudes_movilidad_academica
+## Comandos
+
+```sh
+dart analyze
+flutter test
+flutter build apk --release
+```

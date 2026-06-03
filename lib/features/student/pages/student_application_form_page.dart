@@ -411,6 +411,11 @@ class _StudentApplicationFormPageState
   }
 
   Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) {
+      _showMessage('Revisa los campos obligatorios.');
+      return;
+    }
+
     if (_travelDate != null &&
         _returnDate != null &&
         _returnDate!.isBefore(_travelDate!)) {
@@ -544,6 +549,7 @@ class _UniversityField extends StatelessWidget {
       builder: (context, snapshot) {
         final universities = snapshot.data ?? const <UniversidadDestinoData>[];
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: universities.any((item) => item.id == selectedId)
               ? selectedId
               : null,
@@ -552,7 +558,10 @@ class _UniversityField extends StatelessWidget {
               .map(
                 (university) => DropdownMenuItem(
                   value: university.id,
-                  child: Text('${university.nombre} - ${university.pais}'),
+                  child: Text(
+                    '${university.nombre} - ${university.pais}',
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               )
               .toList(),

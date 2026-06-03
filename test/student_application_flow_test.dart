@@ -2,6 +2,9 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:solicitudes_movilidad_academica/data/app_database.dart';
+import 'package:solicitudes_movilidad_academica/features/student/services/student_application_repository.dart';
+import 'package:solicitudes_movilidad_academica/features/student/services/student_firestore_service.dart';
+import 'package:solicitudes_movilidad_academica/shared/models/models.dart';
 
 void main() {
   late AppDatabase db;
@@ -32,6 +35,56 @@ void main() {
     expect(history, isEmpty);
   });
 
+  test('solo un estudiante activo puede enviar la solicitud', () async {
+    final solicitudId = await _createDraft(db, student);
+    await _addRequiredDocuments(db, solicitudId);
+    final coordinator = await _createUser(
+      db,
+      id: 'coordinator-1',
+      rol: 'coordinador',
+    );
+
+    await expectLater(
+      db.enviarSolicitud(
+        solicitudId,
+        coordinator,
+        await db.getDocumentosDeSolicitud(solicitudId),
+      ),
+      throwsA(isA<StateError>()),
+    );
+
+    final solicitud = await db.getSolicitudById(solicitudId);
+    expect(solicitud?.estado, 'borrador');
+    expect(solicitud?.bloqueada, isFalse);
+  });
+
+  test('no permite documentos requeridos duplicados', () async {
+    final solicitudId = await _createDraft(db, student);
+    final repository = StudentApplicationRepository(
+      database: db,
+      remote: _NoopStudentFirestoreService(),
+    );
+
+    await repository.addDocument(
+      solicitudId: solicitudId,
+      tipoDocumento: 'carta_motivacion',
+      nombreArchivo: ' carta_motivacion.pdf ',
+    );
+
+    await expectLater(
+      repository.addDocument(
+        solicitudId: solicitudId,
+        tipoDocumento: 'carta_motivacion',
+        nombreArchivo: 'otra_carta.pdf',
+      ),
+      throwsA(isA<StateError>()),
+    );
+
+    final documentos = await db.getDocumentosDeSolicitud(solicitudId);
+    expect(documentos, hasLength(1));
+    expect(documentos.single.nombreArchivo, 'carta_motivacion.pdf');
+  });
+
   test('envia, bloquea e historiza una solicitud con soportes', () async {
     final solicitudId = await _createDraft(db, student);
     await _addRequiredDocuments(db, solicitudId);
@@ -60,24 +113,70 @@ void main() {
       ),
       throwsA(isA<StateError>()),
     );
+
+    await expectLater(
+      db.eliminarSolicitud(solicitudId),
+      throwsA(isA<StateError>()),
+    );
   });
 }
 
+class _NoopStudentFirestoreService implements StudentFirestoreService {
+  @override
+  Future<void> upsertSolicitud(SolicitudMobilidadData solicitud) async {}
+
+  @override
+  Future<void> upsertSolicitudBundle({
+    required SolicitudMobilidadData solicitud,
+    required List<DocumentoData> documentos,
+  }) async {}
+
+  @override
+  Future<void> deleteDocumentosAusentes({
+    required String solicitudId,
+    required Set<String> localDocumentoIds,
+  }) async {}
+
+  @override
+  Future<void> deleteSolicitud(String id) async {}
+
+  @override
+  Future<List<SolicitudMovilidadModel>> fetchSolicitudesDeEstudiante(
+    String estudianteId,
+    String email,
+  ) async {
+    return const [];
+  }
+
+  @override
+  Future<List<DocumentoModel>> fetchDocumentos(String solicitudId) async {
+    return const [];
+  }
+}
+
 Future<UsuarioData> _createStudent(AppDatabase db) async {
+  return _createUser(db, id: 'student-1', rol: 'estudiante');
+}
+
+Future<UsuarioData> _createUser(
+  AppDatabase db, {
+  required String id,
+  required String rol,
+}) async {
   final now = DateTime(2026, 1, 1);
   await db.upsertUsuarioLocal(
-    id: 'student-1',
+    id: id,
     nombre: 'Laura',
     apellido: 'Gomez',
-    email: 'laura.gomez@udem.edu.co',
-    rol: 'estudiante',
+    email: '$id@udem.edu.co',
+    rol: rol,
     estado: 'activo',
     createdAt: now,
     updatedAt: now,
     pendingSync: false,
   );
 
-  return (await db.getUsuarioById('student-1'))!;
+  return (await db.getUsuarioById(id))!;
 }
 
 Future<String> _createDraft(AppDatabase db, UsuarioData student) {
