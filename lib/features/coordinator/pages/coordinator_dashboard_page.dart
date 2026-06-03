@@ -32,7 +32,7 @@ class _CoordinatorDashboardPageState extends State<CoordinatorDashboardPage> {
     if (_initialized) return;
     _initialized = true;
     _repository = widget.repository ?? CoordinatorRepository(database: AppStateScope.of(context));
-    // Local data is rendered immediately; remote sync is attempted in the background.
+    
     unawaited(_repository.syncPending());
   }
 
@@ -68,7 +68,11 @@ class _CoordinatorDashboardPageState extends State<CoordinatorDashboardPage> {
           }
 
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: Text(
+                'No hay solicitudes para mostrar',
+              ),
+            );
           }
 
           final solicitudes = snapshot.data!;
