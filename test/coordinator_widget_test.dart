@@ -28,7 +28,7 @@ void main() {
   });
 
   group('CoordinatorDashboardPage', () {
-    testWidgets('muestra CircularProgressIndicator mientras el stream no tiene datos', (tester) async {
+    testWidgets('muestra estado el stream no tiene datos', (tester) async {
       final controller = StreamController<List<SolicitudMobilidadData>>();
       when(() => repository.watchSolicitudes()).thenAnswer((_) => controller.stream);
 
@@ -41,7 +41,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text( 'No hay solicitudes para mostrar'), findsOneWidget);
 
       await controller.close();
     });
