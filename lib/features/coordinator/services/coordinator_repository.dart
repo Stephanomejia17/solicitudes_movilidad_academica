@@ -3,7 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../data/app_database.dart';
 import '../../../shared/models/models.dart';
-import '../domain/coordinator_review_policy.dart';
+import '../domain/coordinator_validators.dart';
 import 'coordinator_firestore_service.dart';
 
 class CoordinatorRepository {

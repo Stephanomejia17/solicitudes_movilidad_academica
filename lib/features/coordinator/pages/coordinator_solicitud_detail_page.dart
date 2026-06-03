@@ -4,9 +4,16 @@ import '../../../data/app_database.dart';
 import '../services/coordinator_repository.dart';
 
 class CoordinatorSolicitudDetailPage extends StatefulWidget {
-  const CoordinatorSolicitudDetailPage({super.key, required this.solicitudId});
+  const CoordinatorSolicitudDetailPage({
+    super.key,
+    required this.solicitudId,
+    this.repository,
+    this.coordinator,
+  });
 
   final String solicitudId;
+  final CoordinatorRepository? repository;
+  final UsuarioData? coordinator;
 
   @override
   State<CoordinatorSolicitudDetailPage> createState() =>
@@ -17,9 +24,10 @@ class _CoordinatorSolicitudDetailPageState
     extends State<CoordinatorSolicitudDetailPage> {
   @override
   Widget build(BuildContext context) {
-    final db = AppStateScope.of(context);
-    final repository = CoordinatorRepository(database: db);
-    final coordinator = db.currentUser;
+    final needsDb = widget.repository == null || widget.coordinator == null;
+    final db = needsDb ? AppStateScope.of(context) : null;
+    final repository = widget.repository ?? CoordinatorRepository(database: db!);
+    final coordinator = widget.coordinator ?? db!.currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +36,8 @@ class _CoordinatorSolicitudDetailPageState
       body: StreamBuilder<SolicitudMobilidadData?>(
         stream: repository.watchSolicitud(widget.solicitudId),
         builder: (context, solicitudSnapshot) {
-          if (!solicitudSnapshot.hasData) {
+
+          if (solicitudSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -161,7 +170,7 @@ class _CoordinatorSolicitudDetailPageState
                                         approve: true,
                                       ),
                               icon: const Icon(Icons.check),
-                              label: const Text('Aprobar'),
+                              label: Text(' Aprobar'),
                             ),
                             FilledButton.tonalIcon(
                               onPressed: coordinator == null
@@ -174,7 +183,7 @@ class _CoordinatorSolicitudDetailPageState
                                         approve: false,
                                       ),
                               icon: const Icon(Icons.close),
-                              label: const Text('Rechazar'),
+                              label: Text(' Rechazar'),
                             ),
                           ],
                         )
@@ -224,10 +233,10 @@ class _CoordinatorSolicitudDetailPageState
     String solicitudId, {
     required bool approve,
   }) async {
-    final result = await showDialog<String>(
+      final result = await showDialog<String>(
       context: context,
       builder: (_) {
-        return _ReviewDialog(approve: approve);
+        return ReviewDialog(approve: approve);
       },
     );
 
@@ -371,16 +380,16 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-class _ReviewDialog extends StatefulWidget {
-  const _ReviewDialog({required this.approve});
+class ReviewDialog extends StatefulWidget {
+  const ReviewDialog({super.key, required this.approve});
 
   final bool approve;
 
   @override
-  State<_ReviewDialog> createState() => _ReviewDialogState();
+  State<ReviewDialog> createState() => _ReviewDialogState();
 }
 
-class _ReviewDialogState extends State<_ReviewDialog> {
+class _ReviewDialogState extends State<ReviewDialog> {
   final _controller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 

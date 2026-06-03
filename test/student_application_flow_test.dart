@@ -89,7 +89,7 @@ Future<String> _createDraft(AppDatabase db, UsuarioData student) {
       nombres: const Value('Laura'),
       apellidos: const Value('Gomez'),
       tipoDocumento: const Value('CC'),
-      numeroDocumento: const Value('123456789'),
+      numeroDocumento: const Value('123456789'), 
       fechaNacimiento: DateTime(2002, 5, 10),
       emailInstitucional: 'laura.gomez@udem.edu.co',
       emailPersonal: 'laura.personal@example.com',

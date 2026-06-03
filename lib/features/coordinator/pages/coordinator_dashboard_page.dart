@@ -8,7 +8,14 @@ import '../services/coordinator_repository.dart';
 import 'coordinator_solicitud_detail_page.dart';
 
 class CoordinatorDashboardPage extends StatefulWidget {
-  const CoordinatorDashboardPage({super.key});
+  const CoordinatorDashboardPage({
+    super.key,
+    this.repository,
+    this.authService,
+  });
+
+  final CoordinatorRepository? repository;
+  final AuthService? authService;
 
   @override
   State<CoordinatorDashboardPage> createState() =>
@@ -24,14 +31,14 @@ class _CoordinatorDashboardPageState extends State<CoordinatorDashboardPage> {
     super.didChangeDependencies();
     if (_initialized) return;
     _initialized = true;
-    _repository = CoordinatorRepository(database: AppStateScope.of(context));
+    _repository = widget.repository ?? CoordinatorRepository(database: AppStateScope.of(context));
     // Local data is rendered immediately; remote sync is attempted in the background.
     unawaited(_repository.syncPending());
   }
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthServiceScope.of(context);
+    final authService = widget.authService ?? AuthServiceScope.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -52,6 +59,14 @@ class _CoordinatorDashboardPageState extends State<CoordinatorDashboardPage> {
       body: StreamBuilder<List<SolicitudMobilidadData>>(
         stream: _repository.watchSolicitudes(),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error al cargar solicitudes',
+              ),
+            );
+          }
+
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -110,10 +125,10 @@ class _CoordinatorDashboardPageState extends State<CoordinatorDashboardPage> {
                 const TabBar(
                   isScrollable: true,
                   tabs: [
-                    Tab(text: 'Todas'),
-                    Tab(text: 'En revision'),
-                    Tab(text: 'Aprobadas'),
-                    Tab(text: 'Rechazadas'),
+                    Tab(text: ' Todas'),
+                    Tab(text: ' En revision'),
+                    Tab(text: ' Aprobadas'),
+                    Tab(text: ' Rechazadas'),
                   ],
                 ),
                 Expanded(
@@ -158,7 +173,10 @@ class _CoordinatorDashboardPageState extends State<CoordinatorDashboardPage> {
   Future<void> _openDetail(BuildContext context, String solicitudId) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => CoordinatorSolicitudDetailPage(solicitudId: solicitudId),
+        builder: (_) => CoordinatorSolicitudDetailPage(
+          solicitudId: solicitudId,
+          repository: _repository,
+        ),
       ),
     );
   }
