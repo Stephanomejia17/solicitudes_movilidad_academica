@@ -9,13 +9,13 @@ import 'admin_firestore_service.dart';
 class AdminRepository {
   AdminRepository({
     required this.database,
-    AdminFirestoreService? remote,
+    AdminFirestoreServiceBase? remote,
     FirebaseAuth? auth,
   })  : _remote = remote ?? AdminFirestoreService(),
         _auth = auth ?? FirebaseAuth.instance;
 
   final AppDatabase database;
-  final AdminFirestoreService _remote;
+  final AdminFirestoreServiceBase _remote;
   final FirebaseAuth _auth;
 
   Stream<List<UsuarioData>> watchUsuarios() {

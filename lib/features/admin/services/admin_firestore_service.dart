@@ -3,7 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../data/app_database.dart';
 import '../../../shared/services/firestore_collections.dart';
 
-class AdminFirestoreService {
+abstract class AdminFirestoreServiceBase {
+  Future<void> upsertUsuario(UsuarioData usuario, {String? createdBy});
+  Future<void> upsertHistorialUsuario(HistorialEstadoData historial);
+  Future<List<UsuarioData>> traerUsuariosDeAdmin(String adminId);
+}
+
+class AdminFirestoreService implements AdminFirestoreServiceBase {
   AdminFirestoreService({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
 

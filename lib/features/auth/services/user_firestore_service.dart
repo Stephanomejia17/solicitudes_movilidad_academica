@@ -3,7 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../shared/models/usuario_model.dart';
 import '../../../shared/services/firestore_collections.dart';
 
-class UserFirestoreService {
+abstract class UserFirestoreServiceBase {
+  Future<void> upsertUser(UsuarioModel user);
+  Future<UsuarioModel?> findByUid(String uid);
+  Future<UsuarioModel?> findByEmail(String email);
+}
+
+class UserFirestoreService implements UserFirestoreServiceBase {
   UserFirestoreService({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
 

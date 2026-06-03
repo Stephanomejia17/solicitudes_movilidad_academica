@@ -12,14 +12,14 @@ class AuthService extends ChangeNotifier {
   AuthService({
     required AppDatabase database,
     FirebaseAuth? firebaseAuth,
-    UserFirestoreService? remote,
+    UserFirestoreServiceBase? remote,
   })  : _database = database,
         _auth = firebaseAuth ?? FirebaseAuth.instance,
         _remote = remote ?? UserFirestoreService();
 
   final AppDatabase _database;
   final FirebaseAuth _auth;
-  final UserFirestoreService _remote;
+  final UserFirestoreServiceBase _remote;
 
   StreamSubscription<User?>? _subscription;
   bool _initialized = false;

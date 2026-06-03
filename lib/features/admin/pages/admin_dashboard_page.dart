@@ -7,7 +7,9 @@ import '../widgets/user_card.dart';
 import '../widgets/user_form_dialog.dart';
 
 class AdminDashboardPage extends StatefulWidget {
-  const AdminDashboardPage({super.key});
+  const AdminDashboardPage({super.key, this.repository});
+
+  final AdminRepository? repository;
 
   @override
   State<AdminDashboardPage> createState() => _AdminDashboardPageState();
@@ -25,10 +27,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     });
   }
 
+  AdminRepository _repository(BuildContext context) {
+    return widget.repository ?? AdminRepository(database: AppStateScope.of(context));
+  }
+
   Future<void> _initializeData() async {
-    final db = AppStateScope.of(context);
-    final repository = AdminRepository(database: db);
-    final currentUser = db.currentUser;
+    final repository = _repository(context);
+    final currentUser = AppStateScope.of(context).currentUser;
     if (currentUser != null) {
       await repository.sincronizarDesdeFirestore(currentUser.id);
     }
@@ -39,7 +44,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final db = AppStateScope.of(context);
     final authService = AuthServiceScope.of(context);
     final currentUser = db.currentUser!;
-    final repository = AdminRepository(database: db);
+    final repository = _repository(context);
 
     return Scaffold(
       appBar: AppBar(
