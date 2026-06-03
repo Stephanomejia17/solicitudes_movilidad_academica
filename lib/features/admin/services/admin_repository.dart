@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../../firebase_options.dart';
 
 import '../../../data/app_database.dart';
 import 'admin_firestore_service.dart';
@@ -41,7 +42,7 @@ class AdminRepository {
     final now = DateTime.now();
     final normalizedEmail = email.trim().toLowerCase();
 
-    const apiKey = 'AIzaSyAQfPHlkC_LSNt70oELypNpp4gyfGe4L48';
+    final apiKey = DefaultFirebaseOptions.currentPlatform.apiKey;
     final uri = Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$apiKey');
     final resp = await http.post(
       uri,
