@@ -98,7 +98,7 @@ class AuthService extends ChangeNotifier {
         apellido: apellido.trim(),
         email: normalizedEmail,
         rol: rol.trim(),
-        estado: 'activo',
+        estado: 'inactivo',
         createdAt: now,
         updatedAt: now,
         pendingSync: false,

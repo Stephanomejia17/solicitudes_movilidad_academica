@@ -1,9 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-
 import 'data/app_database.dart';
 import 'features/admin/pages/admin_dashboard_page.dart';
 import 'features/auth/pages/auth_page.dart';
@@ -11,6 +9,7 @@ import 'features/auth/services/auth_service.dart';
 import 'features/coordinator/pages/coordinator_dashboard_page.dart';
 import 'features/student/pages/student_dashboard_page.dart';
 import 'firebase_options.dart';
+import 'shared/pages/pending_approval_page.dart';
 import 'shared/services/app_theme.dart';
 
 Future<void> main() async {
@@ -84,6 +83,11 @@ class RootView extends StatelessWidget {
 
     if (user == null) {
       return const AuthPage();
+    }
+
+    // Usuario registrado pero aún no aprobado por un administrador
+    if (user.estado == 'inactivo') {
+      return const PendingApprovalPage();
     }
 
     switch (user.rol) {

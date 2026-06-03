@@ -127,7 +127,9 @@ class _LoginFormState extends State<_LoginForm> {
           const SizedBox(height: 16),
           FilledButton(
             onPressed: widget.repository.isBusy ? null : _submit,
-            child: Text(widget.repository.isBusy ? 'Ingresando...' : 'Ingresar'),
+            child: Text(
+              widget.repository.isBusy ? 'Ingresando...' : 'Ingresar',
+            ),
           ),
         ],
       ),
@@ -184,9 +186,8 @@ class _RegisterFormState extends State<_RegisterForm> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Usuario creado')),
-    );
+    // Registro exitoso. RootView detecta estado 'inactivo' y muestra
+    // PendingApprovalPage automáticamente — no se necesita navegar aquí.
   }
 
   @override
@@ -222,7 +223,7 @@ class _RegisterFormState extends State<_RegisterForm> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            initialValue: _rol,
+            value: _rol,
             items: const [
               DropdownMenuItem(value: 'estudiante', child: Text('Estudiante')),
               DropdownMenuItem(
